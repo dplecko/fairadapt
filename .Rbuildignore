@@ -1,0 +1,15 @@
+^README\.Rmd$
+^probability_plot\.png$
+^.*\.Rproj$
+^\.Rproj\.user$
+^UCIAdult
+^Data_Gen
+^.Rhistory
+^Example_Scripts
+^resolving_interpolation
+^Adult_OH
+^simple_sim
+^TV_est
+^adult_ada
+^cran-comments
+^tests
