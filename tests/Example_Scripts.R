@@ -47,18 +47,7 @@ DemParityGenerator <- function(n) {
   return(df)
 }
 
-ResolvingLevelGen <- function(n) {
-  A <- rbinom(n, size = 1, prob = 0.5)
-  X1 <-  -A/4 + 1/8 + rnorm(n, sd = 2)
-  X2 <- -A/4 + 1/8 + rnorm(n, sd = 2)
-  X3 <- -A/4 + 1/8 + rnorm(n, sd = 2)
-  X4 <-  -A/4 + 1/8 + rnorm(n, sd = 2)
-  X5 <-  -A/4 + 1/8 + rnorm(n, sd = 2)
-  Y <- rbinom(n, size = 1, prob = expit((X1+X2+X3+X4+X5)))
-  df <- data.frame(cbind(Y,A,X1,X2,X3,X4,X5))
-  colnames(df) <- c("Y","A","X1","X2","X3","X4","X5")
-  return(df)
-}
+
 
 RecodeLevels <- function(data) {
   Y.new <- rep("", nrow(data))

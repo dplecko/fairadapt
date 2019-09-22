@@ -30,6 +30,21 @@ The procedure takes the training and testing data as an input, together with the
 Most of the running time is due to the quantile regression step using the ranger package. There should soon be a C++ code patch to enhance performance of quantile regression in ranger, directly improving the performance of fairadapt.
 }
 \examples{
+
+library(fairadapt)
+n1 <- n2 <- 100
+n <- n1 + n2
+A <- rbinom(n, size = 1, prob = 0.5)
+X1 <- rnorm(n) + (A-1)
+X2 <- rnorm(n) + (2*A-1)
+Y <- rbinom(n, size = 1, prob = exp(X1+X2)/(1+exp(X1+X2)))
+data <- data.frame(cbind(A, X1, X2, Y))
+adjacency.matrix <- array(0, dim = c(4,4))
+colnames(adjacency.matrix) <- rownames(adjacency.matrix) <- c("A", "X1", "X2", "Y")
+adjacency.matrix["A", c("X1", "X2")] <- 1
+adjacency.matrix[c("X1", "X2"), "Y"] <- 1
+L <- FairAdapt(Y ~ ., train.data = data[1:n1, ], test.data = data[-(1:n1), ],
+               protect.A = "A", adj.mat = adjacency.matrix, res.vars = "X1")
 \donttest{
 library(fairadapt)
 
@@ -40,7 +55,6 @@ L <- FairAdapt(income ~ ., train.data = adult.train,
 adjusted.train.data <- L[[1]]
 adjusted.test.data <- L[[2]]
 }
-
 }
 \references{
 Plecko, D. & Meinshausen, N. (2019). Fair Adaptation Procedures \cr

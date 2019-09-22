@@ -5,10 +5,11 @@ Version: 0.1.0
 Author: Drago Plecko
 Maintainer: Drago Plecko <drago.plecko@stat.math.ethz.ch>
 Description: An implementation of the Fair Adaptation Procedures described in
-    [reference]. The adaptation procedure uses the specified causal graph to
-    pre-process the given training and testing data in such a way to remove the
-    bias caused by the protected attribute. The procedure uses tree ensembles
-    for quantile regression.
+    Plecko & Meinshausen (2019) <arXiv:https://arxiv.org/pdf/1902.01659.pdf> . 
+    The adaptation procedure uses the specified causal graph to pre-process the 
+    given training and testing data in such a way to remove the bias caused by 
+    the protected attribute. The procedure uses tree ensembles for quantile 
+    regression.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
