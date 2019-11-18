@@ -1,23 +1,32 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
-fairadapt
-=========
 
-fairadapt is a package intended to remove bias from machine learning algorithms. In particular, it implements the pre-processing procedure described in [Plecko & Meinshausen, 2019](https://arxiv.org/abs/1911.06685). The main idea is to adapt the training and testing data in a way which prevents any further training procedure from learning an undesired bias. The package currently offers the pre-processing step, after which the user can use the adapted data to train any classifier. However, some caution on the training step is still advised, so for more involved applications with resolving variables, the user should refer to the original paper.
+# fairadapt
 
-Installation
-------------
+fairadapt is a package intended to remove bias from machine learning
+algorithms. In particular, it implements the pre-processing procedure
+described in [Plecko &
+Meinshausen, 2019](https://arxiv.org/abs/1911.06685). The main idea is
+to adapt the training and testing data in a way which prevents any
+further training procedure from learning an undesired bias. The package
+currently offers the pre-processing step, after which the user can use
+the adapted data to train any classifier. However, some caution on the
+training step is still advised, so for more involved applications with
+resolving variables, the user should refer to the original paper.
 
-You can install the released version of fairadapt from [CRAN](https://CRAN.R-project.org) with:
+## Installation
+
+You can install the released version of fairadapt from
+[CRAN](https://CRAN.R-project.org) with:
 
 ``` r
 install.packages("fairadapt")
 ```
 
-Example
--------
+## Example
 
-An example of how fairadapt can be used is demonstrated below on the UCI Adult dataset.
+An example of how fairadapt can be used is demonstrated below on the UCI
+Adult dataset.
 
 ``` r
 ## loading the package

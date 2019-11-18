@@ -5,7 +5,7 @@ Version: 0.1.0
 Author: Drago Plecko
 Maintainer: Drago Plecko <drago.plecko@stat.math.ethz.ch>
 Description: An implementation of the Fair Adaptation Procedures described in
-    Plecko & Meinshausen (2019) <arXiv:https://arxiv.org/pdf/1902.01659.pdf> . 
+    Plecko & Meinshausen (2019) <arXiv:1911.06685>. 
     The adaptation procedure uses the specified causal graph to pre-process the 
     given training and testing data in such a way to remove the bias caused by 
     the protected attribute. The procedure uses tree ensembles for quantile 
@@ -15,4 +15,4 @@ Encoding: UTF-8
 LazyData: true
 Imports: 
     ranger
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.0

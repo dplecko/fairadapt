@@ -13,6 +13,27 @@
 ##' @return A \code{list} of length two. The two elements of the list are of class \code{data.frame} and contain the adapted training and testing data respectively.
 ##' @examples
 ##'
+##' \dontshow{
+##' adjacency.matrix <- array(0, dim = c(3,3))
+##' colnames(adjacency.matrix) <- c("A","Y","X")
+##' rownames(adjacency.matrix) <- colnames(adjacency.matrix)
+##' adjacency.matrix["A", "X"] <- 1
+##' adjacency.matrix["X", "Y"] <- 1
+##' DataGen <- function(n) {
+##'  expit <- function(x) return(exp(x)/(1+exp(x)))
+##'  A <- rbinom(n, size = 1, prob = 0.5)
+##'  coeff <- 1 / 4
+##'  dev <- 1
+##'  X <-  -A*coeff + coeff/2 + rnorm(n, sd = dev)
+##'  Y <- rbinom(n, size = 1, prob = expit((X)))
+##'  df <- data.frame(cbind(Y,A,X))
+##'  colnames(df) <- c("Y","A","X")
+##'  return(df)
+##' }
+##' fairadapt(Y ~ ., train.data = DataGen(100), test.data = DataGen(100),
+##'           adj.mat = adjacency.matrix, protect.A = "A")
+##' }
+##'
 ##' library(fairadapt)
 ##' n1 <- n2 <- 100
 ##' n <- n1 + n2
