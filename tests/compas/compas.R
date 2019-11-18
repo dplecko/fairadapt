@@ -60,7 +60,7 @@ Probability_Predictions <- function(train.data, test.data, method) {
     adjacency.matrix["c_charge_degree", "two_year_recid"] <- 1
 
     # do fairadapt on the compas stuff
-    L <- fairadapt::FairAdapt(two_year_recid ~ ., train.data = train.data,
+    L <- fairadapt::fairadapt(two_year_recid ~ ., train.data = train.data,
       test.data = test.data, protect.A = "race",
       adj.mat = adjacency.matrix)
     adapted.train.data <- L[[1]]
@@ -107,7 +107,7 @@ Acc_and_Gap <- function(train.data, test.data, method) {
     adjacency.matrix["c_charge_degree", "two_year_recid"] <- 1
 
     # do fairadapt on the compas stuff
-    L <- fairadapt::FairAdapt(two_year_recid ~ ., train.data = train.data,
+    L <- fairadapt::fairadapt(two_year_recid ~ ., train.data = train.data,
       test.data = test.data, protect.A = "race",
       adj.mat = adjacency.matrix)
     adapted.train.data <- L[[1]]
@@ -190,33 +190,90 @@ df1 <- cbind(df, shape = factor(c(1L,2L,3L,4L,5L,6L, 7L)), Method = rbind("Norma
 override.shape <- c(4,8,15,16,17,18,21)
 shape <- 15:21
 
-ggplot(data = df1, aes(x = x, y = y)) +
+root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
+load(file.path(root, "tests", "compas", "compas.RData"))
+# plotting the method comparison
+{
+  ggplot(data = df1, aes(x = x, y = y)) +
   geom_point(aes(shape = Method, color = Method), size = 5) +
   scale_shape_manual(values=c(15:20, 25)) +
  # scale_fill_discrete(labels = list( TeX('drek'), TeX('drek'), TeX('drek'), TeX('drek'), TeX('drek'), TeX('drek'), TeX('drek')))+
   geom_linerange(aes(ymin = ymin,ymax = ymax, color = Method)) +
   geom_errorbarh(aes(xmin = xmin,xmax = xmax, color = Method), height = 0) +
   xlab("parity gap") + ylab("accuracy") + ggtitle("COMPAS - comparison of method performances", subtitle = waiver()) +
-  theme(legend.position = c(0.8,0.2), legend.text = element_text(size = 20),
-        legend.title = element_text(size = 24, face = "bold"), axis.text=element_text(size=16),
-        axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
+  theme_bw() +
+    theme(legend.position = c(0.8,0.4),
+      legend.box.background = element_rect(colour = "black"),
+      legend.title = element_text(size = 16),
+      legend.text = element_text(size = 12),
+      axis.text = element_text(size = 12),
+      axis.title = element_text(size = 14),
+      plot.title = element_text(size = 16))
+  ggsave(paste0(file.path(root, "..", "Article", "compas_plot"), ".png"),
+    device = "png", width = 7.25, height = 5)
 }
 
 # plotting the change in positive outcome probability
 {
-  library(gridExtra)
+  library(cowplot)
   library(ggplot2)
   p1 <- ggplot(probs.NRF, aes(prob, fill = race)) +
     geom_density(alpha = 0.5) +
     xlab("outcome probability") + ylab("density") + ggtitle(TeX('COMPAS - density of $\\mathit{P}(\\widehat{Y} = 1 | A = a)$ for $a \\in $ (Non-White,White) for normal RF'), subtitle = waiver()) +
-    theme(legend.position = c(0.8,0.8), legend.text = element_text(size = 20),
-      legend.title = element_text(size = 24, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
+    theme_bw() + theme(legend.position = c(0.8,0.65),
+      legend.box.background = element_rect(colour = "black"),
+      plot.title = element_text(size = 9))
   p2 <- ggplot(probs.ARF, aes(prob, fill = race)) +
     geom_density(alpha = 0.5) +
-    xlab("outcome probability") + ylab("density") + ggtitle(TeX('COMPAS - density of $\\mathit{P}(\\widehat{Y} = 1 | A = a)$ for $a \\in $ (Non-White,White) for fairadapt + RF'), subtitle = waiver()) +
-    theme(legend.position = c(0.8,0.8), legend.text = element_text(size = 20),
-      legend.title = element_text(size = 24, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
-  grid.arrange(p1, p2, ncol = 1)
+    xlab("outcome probability") + ylab("density") + ggtitle(TeX('COMPAS - density of $\\mathit{P}(\\widehat{Y} = 1 | A = a)$ for $a \\in $ (Non-White,White) \n for fairadapt + RF'), subtitle = waiver()) +
+    theme_bw() + theme(legend.position = c(0.8,0.65),
+      legend.box.background = element_rect(colour = "black"),
+      plot.title = element_text(size = 9))
+
+  plot_grid(p1, p2, ncol = 1L)
+
+  ggsave(paste0(file.path(root, "..", "Article", "compas_density"), ".png"),
+    device = "png", width = 5, height = 5)
+}
+
+# individual exploration for COMPAS
+{
+  lookup <- which(compas$sex == "Male" &
+                  compas$age == 30 &
+                  compas$race == "Non-White")
+  lookup <- c(241, 646, 807, 1425, 1470)
+
+  # set-up the adjacency matrix
+  adjacency.matrix <- array(0, dim = c(9, 9))
+  colnames(adjacency.matrix) <- c("age", "sex", "juv_fel_count",
+    "juv_misd_count", "juv_other_count", "priors_count",
+    "c_charge_degree", "race", "two_year_recid")
+  rownames(adjacency.matrix) <- colnames(adjacency.matrix)
+
+  # adding the edges to the matrix
+  adjacency.matrix[c("race", "sex", "age"), c("juv_fel_count", "juv_misd_count",
+    "juv_other_count", "priors_count",
+    "c_charge_degree", "two_year_recid")] <- 1
+  adjacency.matrix[c("juv_fel_count", "juv_misd_count", "juv_other_count"),
+    c("priors_count", "c_charge_degree", "two_year_recid")] <- 1
+  adjacency.matrix["priors_count", c("c_charge_degree", "two_year_recid")] <- 1
+  adjacency.matrix["c_charge_degree", "two_year_recid"] <- 1
+
+  # do fairadapt on the compas stuff
+  candid <- fairadapt::fairadapt(two_year_recid ~ ., train.data = train.data,
+    test.data = test.data, protect.A = "race",
+    adj.mat = adjacency.matrix)
+
+  # rbind back the data
+  optim <- rbind(candid[[1]], cbind(two_year_recid = 0, candid[[2]]))
+  optim <- optim[order(c(train, setdiff(1:nrow(compas), train))), ]
+  # chuck away columns
+  keep <- c("juv_fel_count", "juv_misd_count", "juv_other_count", "priors_count")
+  optim <- optim[lookup, keep]
+
+  # unflip optim
+
+  cps <- compas[lookup, keep]
+
+  cbind(optim, cps)
 }

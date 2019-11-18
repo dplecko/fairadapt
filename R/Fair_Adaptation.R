@@ -1,10 +1,10 @@
-##' Implementation of fair adaptation procedures (Plecko & Meinshausen 2019).
+##' Implementation of fair data adaptation with quantile preservation (Plecko & Meinshausen 2019).
 ##' Uses only plain \code{R}.
 ##'
 ##' The procedure takes the training and testing data as an input, together with the causal graph given by an adjacency matrix and the list of resolving variables, which should be kept fixed during the adaptation procedure. The procedure then calculates a fair representation of the data, after which any classification method can be used. There are, however, several valid training options yielding fair predictions, and the best of them can be chosen with cross-validation. For more details we refer the user to the original paper.
-##' Most of the running time is due to the quantile regression step using the ranger package. There should soon be a C++ code patch to enhance performance of quantile regression in ranger, directly improving the performance of fairadapt.
+##' Most of the running time is due to the quantile regression step using the ranger package.
 ##'
-##' @title FairAdapt
+##' @title fairadapt
 ##' @param formula Object of class \code{formula} describing the response and the covariates.
 ##' @param train.data,test.data Training data & testing data, both of class \code{data.frame}.
 ##' @param adj.mat Matrix of class \code{matrix} encoding the relationships in the causal graph. \code{M[i,j] == 1} implies the existence of an edge from node i to node j. Must include all the
@@ -25,13 +25,13 @@
 ##' colnames(adjacency.matrix) <- rownames(adjacency.matrix) <- c("A", "X1", "X2", "Y")
 ##' adjacency.matrix["A", c("X1", "X2")] <- 1
 ##' adjacency.matrix[c("X1", "X2"), "Y"] <- 1
-##' L <- FairAdapt(Y ~ ., train.data = data[1:n1, ], test.data = data[-(1:n1), ],
+##' L <- fairadapt(Y ~ ., train.data = data[1:n1, ], test.data = data[-(1:n1), ],
 ##'                protect.A = "A", adj.mat = adjacency.matrix, res.vars = "X1")
 ##' \donttest{
 ##' library(fairadapt)
 ##'
 ##' # UCI Adult example
-##' L <- FairAdapt(income ~ ., train.data = adult.train,
+##' L <- fairadapt(income ~ ., train.data = adult.train,
 ##'                test.data = adult.test, protect.A = "sex",
 ##'                adj.mat = adjacency.matrix)
 ##' adjusted.train.data <- L[[1]]
@@ -39,10 +39,10 @@
 ##' }
 ##' @author Drago Plecko
 ##' @references
-##' Plecko, D. & Meinshausen, N. (2019). Fair Adaptation Procedures \cr
+##' Plecko, D. & Meinshausen, N. (2019). Fair Data Adaptation with Quantile Preservation \cr
 ##' @import stats
 ##' @export
-FairAdapt <- function(formula, train.data, test.data, adj.mat,
+fairadapt <- function(formula, train.data, test.data, adj.mat,
                       protect.A, res.vars = NULL) {
   # verify correctness of input
   CorrectInput(formula, train.data, test.data, adj.mat,

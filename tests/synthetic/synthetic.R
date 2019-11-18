@@ -1,6 +1,5 @@
 #devtools::install(pkg = "..")
-#devtools:install(pkg = "../dWit")
-
+root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 # plotting function
 getplots <- function(info, ResSet, label){
   library(ggplot2)
@@ -12,19 +11,18 @@ getplots <- function(info, ResSet, label){
   names(frame) <- as.vector(sapply(vars, function(x) paste0(x, 0:2)))
   override.shape <- c(4,8,15,16,17,18,21, 22)
   shape <- 15:22
-  g <- guide_legend("Resolving set")
+  g <- guide_legend("Resolving set / Method", ncol = 2L)
+  browse()
   p1 <- ggplot(data = frame, aes(x = tv0, y = auc0)) +
     geom_point(aes(shape = ResSet, color = ResSet), size = 5) +
     scale_shape_manual(values=c(15:20, 25, 24)) +
-    #scale_colour_discrete(labels = unname(TeX(paste0("R", 1:7))), guide = g )+
     guides(colour = g, shape = g) +
     geom_linerange(aes(ymin = auc1,ymax = auc2, color = ResSet)) +
     geom_errorbarh(aes(xmin = tv1,xmax = tv2, color = ResSet), height = 0) +
     xlab("Parity gap at 0.5 threshold") + ylab("Area under ROC") +
     ggtitle(paste0("Synthetic ", label, " - discrimination removal with resolvers"), subtitle = waiver()) +
-    theme(legend.position = c(0.85,0.3), legend.text = element_text(size = 14),
-      legend.title = element_text(size = 18, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
+    theme_bw() +
+    theme(legend.position = c(0.8,0.275), legend.box.background = element_rect(color = "black"))
 
   p2 <- ggplot(data = frame, aes(x = tv0, y = cs0)) +
     geom_point(aes(shape = ResSet, color = ResSet), size = 5) +
@@ -35,9 +33,8 @@ getplots <- function(info, ResSet, label){
     geom_errorbarh(aes(xmin = tv1,xmax = tv2, color = ResSet), height = 0)+
     xlab("Parity gap at 0.5 threshold") + ylab("Calibration score") +
     ggtitle(paste0("Synthetic ", label, " - discrimination removal with resolvers"), subtitle = waiver()) +
-    theme(legend.position = c(0.8,0.7), legend.text = element_text(size = 14),
-      legend.title = element_text(size = 18, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
+    theme_bw() +
+    theme(legend.position = c(0.8,0.7),legend.box.background = element_rect(color = "black"))
   return(list(p1,p2))
 }
 
@@ -50,23 +47,19 @@ CalibrationScore <- function(probs, labels, attr.label, k) {
                                     })
   return(sum(abs(c.diff)))
 }
-
-DistanceTV <- function(data, attr.label) {
-  #attr.label <- as.factor(attr.label)
-  train.data <- cbind(data[1:(nrow(data)/2), ], outcome = attr.label[1:(nrow(data)/2)])
-  test.data <- data[-(1:(nrow(data)/2)), ]
-  predictor <- MASS::lda(outcome ~ . - A, data = train.data)#,
-                       #classification = TRUE, probability = TRUE, num.trees = 500)
-  S.hat <- predict(predictor, data = test.data)$posterior[, 2]
-  #S.hat <- sapply(1:nrow(test.data), function(x) mean(Y.hat[x, ]) - 1)
-  dist <- dWit::dWit(t = attr.label[-(1:(nrow(data)/2))], rho = S.hat, s = 0.5, estimator.type = "tv-search")$tvhat
-  browser()
-  return(dist)
+Measures <- function(S.hat, labels, attr.label, k) {
+  auroc <- PRROC::roc.curve(scores.class0 = S.hat, weights.class0 = labels)$auc
+  gap <- 100*abs(sum(S.hat[attr.label == 0] > 0.5) / sum(attr.label == 0) -
+      sum(S.hat[attr.label == 1] > 0.5) / sum(attr.label == 1))
+  cs <- CalibrationScore(probs = S.hat, labels = labels,
+    attr.label = attr.label, k = 10)
+  return(c(auroc, gap, cs))
 }
-
-TVAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
-                   n.train = 2500, n.test = 2500) {
+GAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
+                   n.train = 2000, n.test = 2000) {
   res <- replicate(length(res.list), NULL)
+  dat.train <- NULL
+  dat.test <- NULL
   set.seed(12345)
   for(i in 1:nrep){
     train.data <- GenMech(n.train)
@@ -74,7 +67,7 @@ TVAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
     test.base.ind <- test.data$A
     test.labels <- test.data$Y
     for(j in 1:length(res.list)){
-      L <- fairadapt::FairAdapt(Y ~ ., train.data = train.data,
+      L <- fairadapt::fairadapt(Y ~ ., train.data = train.data,
         test.data = test.data, protect.A = prot.attr,
         res.vars = res.list[[j]], adj.mat = adjacency.matrix)
       adapted.train.data <- L[[1]]
@@ -83,20 +76,16 @@ TVAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
                            classification = T)
       Y.hat <- predict(RF, data = adapted.test.data, predict.all = TRUE)$predictions
       S.hat <- sapply(1:nrow(Y.hat), function(i) mean(Y.hat[i, ]))
-
-      auroc <- PRROC::roc.curve(scores.class0 = S.hat, weights.class0 = test.labels)$auc
-      tv <- 100*abs(sum(S.hat[test.base.ind == 0] > 0.5) / sum(test.base.ind == 0) -
-                    sum(S.hat[test.base.ind == 1] > 0.5) / sum(test.base.ind == 1))
-      cs <- CalibrationScore(probs = S.hat, labels = test.labels,
-                             attr.label = test.base.ind, k = 10)
-
-      res[[j]] <- cbind(res[[j]], c(auroc, tv, cs))
+      res[[j]] <- cbind(res[[j]], Measures(S.hat = S.hat, labels = test.labels,
+                                           attr.label = test.base.ind, k = k))
       print(sprintf("(replication = %d, resolving.case = %d) done", i, j))
     }
+    dat.train[[i]] <- train.data
+    dat.test[[i]] <- test.data
   }
-  return(res)
+  return(list(res, dat.train, dat.test))
 }
-
+nrep <- 10
 # Synthetic example 1
 {
   adjacency.matrix <- array(0, dim = c(7,7))
@@ -105,7 +94,7 @@ TVAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
   rownames(adjacency.matrix) <- colnames(adjacency.matrix)
   adjacency.matrix["A", c("X1", "X2", "X3", "X4", "X5")] <- 1
   adjacency.matrix[c("X1", "X2", "X3", "X4", "X5"), "Y"] <- 1
-  ResolvingLevelGen <- function(n) {
+  ResolvingLevelGenA <- function(n) {
     expit <- function(x) return(exp(x)/(1+exp(x)))
     A <- rbinom(n, size = 1, prob = 0.5)
     coeff <- 1 / 4
@@ -123,7 +112,11 @@ TVAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
   resolvers <- c(list(NULL), lapply(1:5, function(i) paste0("X",1:i)))
   ResSetA <- factor(c("null", "(X1)", "(X1, X2)", "(X1, X2, X3)",
                       "(X1, X2, X3, X4)", "(X1, X2, X3, X4, X5)"))
-  infoA <- TVAUCS(adj.mat = adjacency.matrix, res.list = resolvers, GenMech = ResolvingLevelGen)
+  result.A <- GAUCS(adj.mat = adjacency.matrix, res.list = resolvers,
+                     GenMech = ResolvingLevelGenA, nrep = nrep)
+  infoA <- result.A[[1]]
+  train.A <- result.A[[2]]
+  test.A <- result.A[[3]]
 }
 
 # Synthetic example 2
@@ -152,20 +145,62 @@ TVAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
                     r8 = c("X1", "X2", "X3"))
   ResSetB <- as.factor(c("null", "(X1)", "(X2)", "(X3)", "(X2, X3)", "(X1, X2)",
                          "(X1, X3)", "(X1, X2, X3)"))
-
-  infoB <- TVAUCS(adj.mat = adjacency.matrix, res.list = resolvers, GenMech = ResolvingLevelGenB)
+  result.B <- GAUCS(adj.mat = adjacency.matrix, res.list = resolvers,
+                     GenMech = ResolvingLevelGenB, nrep = nrep)
+  infoB <- result.B[[1]]
+  train.B <- result.B[[2]]
+  test.B <- result.B[[3]]
 }
 
-save.image(file = "synthetic_sim_backup.RData")
+save.image(file = "synthetic.RData")
 quit()
 
-load("synthetic_sim_backup.RData")
+load(file.path(root, "tests", "synthetic", "synthetic.RData"))
+# python comparisons run locally
+{
+reticulate::use_python("/anaconda3/bin/python3.7")
+library(reticulate)
+py_run_string("from importlib import reload")
+source_python(file.path(root, "tests", "synthetic", "reweighing_synthetic.py"))
+source_python(file.path(root, "tests", "synthetic", "reductions_synthetic.py"))
+
+addA <- addB <- lapply(1:2, function(i) NULL)
+# compute the performance of reweighing and reductions
+for(i in 1:nrep){
+  print(i)
+  py_run_string("moments = reload(moments)")
+  py_run_string("red = reload(red)")
+  # case A
+  print("A")
+  S.hat <- reweigh_and_predict(r_to_py(train.A[[i]]), r_to_py(test.A[[i]]))
+  addA[[1]] <- cbind(addA[[1]], Measures(S.hat, test.A[[i]]$Y, test.A[[i]]$A, k = 10))
+  S.hat <- reduce_and_predict(r_to_py(train.A[[i]]), r_to_py(test.A[[i]]), 0.1)
+  addA[[2]] <- cbind(addA[[2]], Measures(S.hat, test.A[[i]]$Y, test.A[[i]]$A, k = 10))
+
+  py_run_string("moments = reload(moments)")
+  py_run_string("red = reload(red)")
+  # case B
+  print("B")
+  S.hat <- reweigh_and_predict(r_to_py(train.B[[i]]), r_to_py(test.B[[i]]))
+  addB[[1]] <- cbind(addB[[1]], Measures(S.hat, test.B[[i]]$Y, test.B[[i]]$A, k = 10))
+  S.hat <- reduce_and_predict(r_to_py(train.B[[i]]), r_to_py(test.B[[i]]), 0.1)
+  addB[[2]] <- cbind(addB[[2]], Measures(S.hat, test.B[[i]]$Y, test.B[[i]]$A, k = 10))
+}
+
+# assign the results to infoA, infoB
+infoA <- c(infoA, addA)
+infoB <- c(infoB, addB)
+}
 
 # plotting offline
 {
+  ResSetA <-
   x <- getplots(infoA, ResSetA, "A")
-  gridExtra::grid.arrange(x[[1]], x[[2]], nrow = 2)
-
+  cowplot::plot_grid(x[[1]], x[[2]], nrow = 2L)
+  ggsave(paste0(file.path(root, "..", "Article", "syntheticA"), ".png"),
+    device = "png", width = 7, height = 7)
   x <- getplots(infoB, ResSetB, "B")
-  gridExtra::grid.arrange(x[[1]], x[[2]], nrow = 2)
+  cowplot::plot_grid(x[[1]], x[[2]], nrow = 2L)
+  ggsave(paste0(file.path(root, "..", "Article", "syntheticB"), ".png"),
+    device = "png", width = 7, height = 7)
 }

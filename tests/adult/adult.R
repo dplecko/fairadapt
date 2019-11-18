@@ -1,6 +1,7 @@
 devtools::install(pkg = "..")
+root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 
-data <- read.csv("UCIAdult.csv")
+data <- read.csv(file.path(root, "tests", "adult", "UCIAdult.csv"))
 data <- data[, -1]
 data[, "sex"] <- factor(data[, "sex"], levels = c("Male","Female"))
 
@@ -37,7 +38,7 @@ Probability_Predictions <- function(train.data, test.data, method) {
     adjacency.matrix[c("workclass", "hours_per_week", "occupation"), "income"] <- 1
 
     # do fairadapt on the compas stuff
-    L <- fairadapt::FairAdapt(income ~ ., train.data = train.data,
+    L <- fairadapt::fairadapt(income ~ ., train.data = train.data,
       test.data = test.data, protect.A = "sex",
       adj.mat = adjacency.matrix)
     adapted.train.data <- L[[1]]
@@ -87,7 +88,7 @@ Acc_and_Gap <- function(train.data, test.data, method) {
     adjacency.matrix[c("workclass", "hours_per_week", "occupation"), "income"] <- 1
 
     # do fairadapt on the compas stuff
-    L <- fairadapt::FairAdapt(income ~ ., train.data = train.data,
+    L <- fairadapt::fairadapt(income ~ ., train.data = train.data,
       test.data = test.data, protect.A = "sex",
       adj.mat = adjacency.matrix)
     adapted.train.data <- L[[1]]
@@ -157,8 +158,8 @@ save.image(file = "adult.RData")
 quit()
 
 # python methods to be run locally
-
-load("adult.RData")
+root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
+load(file.path(root, "tests", "adult", "adult.RData"))
 reticulate::use_python("/anaconda3/bin/python3.7")
 library(reticulate)
 py_run_string("from importlib import reload")
@@ -198,7 +199,7 @@ res[[3]] <- URF
     mean(x[2, ]) + sd(x[2, ])))
   df <- data.frame(t(df.matrix))
   names(df) <- c("y", "ymin", "ymax", "x", "xmin", "xmax")
-  df1 <- cbind(df, shape = factor(c(1L,2L,3L,4L,5L,6L, 7L)), Method = rbind("Normal RF", "fairadapt + RF", "Unaware RF", "Reweighing",
+  df1 <- cbind(df, shape = factor(c(1L,2L,3L,4L,5L,6L, 7L)), Method = rbind("Normal RF", "fairadapt + RF", "Unaware RF (drop A)", "Reweighing",
     "Reductions (eps 0.001)",
     "Reductions (eps 0.01)",
     "Reductions (eps 0.1)"))
@@ -210,28 +211,39 @@ res[[3]] <- URF
     geom_linerange(aes(ymin = ymin,ymax = ymax, color = Method)) +
     geom_errorbarh(aes(xmin = xmin,xmax = xmax, color = Method), height = 0) +
     xlab("parity gap") + ylab("accuracy") + ggtitle("Adult - comparison of method performances", subtitle = waiver()) +
-    theme(legend.position = c(0.8,0.2), legend.text = element_text(size = 20),
-      legend.title = element_text(size = 24, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
-
-
+    theme_bw() +
+    theme(legend.position = c(0.8,0.4),
+      legend.box.background = element_rect(colour = "black"),
+      legend.title = element_text(size = 16),
+      legend.text = element_text(size = 12),
+      axis.text = element_text(size = 12),
+      axis.title = element_text(size = 14),
+      plot.title = element_text(size = 16))
+  ggsave(paste0(file.path(root, "..", "Article", "adult_plot"), ".png"),
+    device = "png", width = 7.25, height = 5)
 }
 
 # plotting the change in positive outcome probability
 {
-  library(gridExtra)
+  library(cowplot)
   library(ggplot2)
+  library(latex2exp)
   p1 <- ggplot(probs.NRF, aes(prob, fill = gender)) +
     geom_density(alpha = 0.5) +
     xlab("outcome probability") + ylab("density") + ggtitle(TeX('Adult - density of $\\mathit{P}(\\widehat{Y} = 1 | A = a)$ for $a \\in $ (Male, Female) for normal RF'), subtitle = waiver()) +
-    theme(legend.position = c(0.8,0.8), legend.text = element_text(size = 20),
-      legend.title = element_text(size = 24, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
+    theme_bw() + theme(legend.position = c(0.8, 0.65),
+      legend.box.background = element_rect(colour = "black"),
+      plot.title = element_text(size = 9))
+
   p2 <- ggplot(probs.ARF, aes(prob, fill = gender)) +
     geom_density(alpha = 0.5) +
     xlab("outcome probability") + ylab("density") + ggtitle(TeX('Adult - density of $\\mathit{P}(\\widehat{Y} = 1 | A = a)$ for $a \\in $ (Male, Female) for fairadapt + RF'), subtitle = waiver()) +
-    theme(legend.position = c(0.8,0.8), legend.text = element_text(size = 20),
-      legend.title = element_text(size = 24, face = "bold"), axis.text=element_text(size=16),
-      axis.title=element_text(size=20,face="bold"), plot.title=element_text(size=20, face = "bold"))
-  grid.arrange(p1, p2, ncol = 1)
+    theme_bw() + theme(legend.position = c(0.8,0.65),
+      legend.box.background = element_rect(colour = "black"),
+      plot.title = element_text(size = 9))
+
+  plot_grid(p1, p2, ncol = 1L)
+
+  ggsave(paste0(file.path(root, "..", "Article", "adult_density"), ".png"),
+    device = "png", width = 5, height = 5)
 }

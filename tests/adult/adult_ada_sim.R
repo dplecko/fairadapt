@@ -35,7 +35,7 @@ Acc_and_Gap <- function(train.data, test.data, method) {
     adjacency.matrix[c("workclass", "hours_per_week", "occupation"), "income"] <- 1
 
     # do fairadapt on the compas stuff
-    L <- fairadapt::FairAdapt(income ~ ., train.data = train.data,
+    L <- fairadapt::fairadapt(income ~ ., train.data = train.data,
       test.data = test.data, protect.A = "sex",
       adj.mat = adjacency.matrix)
     adapted.train.data <- L[[1]]
