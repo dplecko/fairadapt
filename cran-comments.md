@@ -20,3 +20,5 @@ This is a resubmission. In this version I have:
 * Added the important references that were missing from the description.
 
 * Added some very basic examples that are included in the testing.
+
+* Changed the capitalization of non-names.
