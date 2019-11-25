@@ -1,6 +1,6 @@
 Package: fairadapt
 Type: Package
-Title: A Fair Pre-Processing Procedure - Fair Adaptation
+Title: Fair Data Adaptation with Quantile Preservation
 Version: 0.1.0
 Author: Drago Plecko
 Maintainer: Drago Plecko <drago.plecko@stat.math.ethz.ch>
