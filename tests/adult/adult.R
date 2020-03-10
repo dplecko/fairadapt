@@ -1,4 +1,4 @@
-devtools::install(pkg = "..")
+library(fairadapt)
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 
 data <- read.csv(file.path(root, "tests", "adult", "UCIAdult.csv"))
