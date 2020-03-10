@@ -105,7 +105,3 @@ for(i in sort(unique(adult$age))){
 
 adult <- adult[subset, ]
 write.csv(adult, file = file.path(root, "tests", "adult", "UCIAdult.csv"))
-
-
-
-

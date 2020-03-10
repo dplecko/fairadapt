@@ -1,21 +1,22 @@
-#devtools::install(pkg = "..")
+library(fairadapt)
+library(ggplot2)
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 # plotting function
 getplots <- function(info, ResSet, label){
-  library(ggplot2)
   vars <- c("auc", "tv", "cs")
   geom <- sapply(info, function(x) as.vector(sapply(1:3, function(i) c(mean(x[i, ]),
     mean(x[i, ]) - sd(x[i, ]),
     mean(x[i, ]) + sd(x[i, ])))))
   frame <- data.frame(t(geom))
   names(frame) <- as.vector(sapply(vars, function(x) paste0(x, 0:2)))
-  override.shape <- c(4,8,15,16,17,18,21, 22)
-  shape <- 15:22
+  override.shape <- c(4,8,15,16,17,18,21, 22)[1:nrow(frame)]
+  vals <- c(15:20, 25, 24, 23)[1:nrow(frame)]
+  shape <- (15:22)[1:nrow(frame)]
   g <- guide_legend("Resolving set / Method", ncol = 2L)
-  browse()
+  ResSet <- c(as.character(ResSet), "reweighing", "reductions")
   p1 <- ggplot(data = frame, aes(x = tv0, y = auc0)) +
     geom_point(aes(shape = ResSet, color = ResSet), size = 5) +
-    scale_shape_manual(values=c(15:20, 25, 24)) +
+    scale_shape_manual(values=vals) +
     guides(colour = g, shape = g) +
     geom_linerange(aes(ymin = auc1,ymax = auc2, color = ResSet)) +
     geom_errorbarh(aes(xmin = tv1,xmax = tv2, color = ResSet), height = 0) +
@@ -26,8 +27,7 @@ getplots <- function(info, ResSet, label){
 
   p2 <- ggplot(data = frame, aes(x = tv0, y = cs0)) +
     geom_point(aes(shape = ResSet, color = ResSet), size = 5) +
-    scale_shape_manual(values=c(15:20, 24, 25)) +
-    #scale_colour_discrete(labels = unname(TeX(paste0("R", 1:7))), guide = g )+
+    scale_shape_manual(values=vals) +
     guides(colour = g, shape = g) +
     geom_linerange(aes(ymin = cs1,ymax = cs2, color = ResSet)) +
     geom_errorbarh(aes(xmin = tv1,xmax = tv2, color = ResSet), height = 0)+
@@ -85,16 +85,18 @@ GAUCS <- function(adj.mat, res.list, GenMech, prot.attr = "A", nrep = 5,
   }
   return(list(res, dat.train, dat.test))
 }
-nrep <- 10
-# Synthetic example 1
-{
+
+experiment <- "A"
+
+if (experiment == "A") {
+  # Synthetic example 1
   adjacency.matrix <- array(0, dim = c(7,7))
   colnames(adjacency.matrix) <- c("A","Y","X1","X2","X3","X4","X5")
   resolve <- c("X1","X2","X3","X4","X5")
   rownames(adjacency.matrix) <- colnames(adjacency.matrix)
   adjacency.matrix["A", c("X1", "X2", "X3", "X4", "X5")] <- 1
   adjacency.matrix[c("X1", "X2", "X3", "X4", "X5"), "Y"] <- 1
-  ResolvingLevelGenA <- function(n) {
+  ResolvingLevelGen <- function(n) {
     expit <- function(x) return(exp(x)/(1+exp(x)))
     A <- rbinom(n, size = 1, prob = 0.5)
     coeff <- 1 / 4
@@ -110,23 +112,16 @@ nrep <- 10
     return(df)
   }
   resolvers <- c(list(NULL), lapply(1:5, function(i) paste0("X",1:i)))
-  ResSetA <- factor(c("null", "(X1)", "(X1, X2)", "(X1, X2, X3)",
+  ResSet <- factor(c("null", "(X1)", "(X1, X2)", "(X1, X2, X3)",
                       "(X1, X2, X3, X4)", "(X1, X2, X3, X4, X5)"))
-  result.A <- GAUCS(adj.mat = adjacency.matrix, res.list = resolvers,
-                     GenMech = ResolvingLevelGenA, nrep = nrep)
-  infoA <- result.A[[1]]
-  train.A <- result.A[[2]]
-  test.A <- result.A[[3]]
-}
-
-# Synthetic example 2
-{
+} else if (experiment == "B") {
+  # Synthetic example 2
   adjacency.matrix <- array(0, dim = c(5,5))
   colnames(adjacency.matrix) <- c("A","Y","X1","X2","X3")
   rownames(adjacency.matrix) <- colnames(adjacency.matrix)
   adjacency.matrix["A", c("X1", "X2")] <- 1
   adjacency.matrix[c("X1", "X2", "X3"), "Y"] <- 1
-  adjacency.matrix["X1", "X3"] <- 1
+  adjacency.matrix["X2", "X3"] <- 1
   ResolvingLevelGenB <- function(n) {
     expit <- function(x) return(exp(x)/(1+exp(x)))
     A <- rbinom(n, size = 1, prob = 0.5)
@@ -143,20 +138,17 @@ nrep <- 10
   resolvers <- list(r1 = NULL, r2 = "X1", r3 = "X2", r4 = "X3", r5 = c("X2", "X3"),
                     r6 = c("X1", "X2"), r7 = c("X1", "X3"),
                     r8 = c("X1", "X2", "X3"))
-  ResSetB <- as.factor(c("null", "(X1)", "(X2)", "(X3)", "(X2, X3)", "(X1, X2)",
+  ResSet <- as.factor(c("null", "(X1)", "(X2)", "(X3)", "(X2, X3)", "(X1, X2)",
                          "(X1, X3)", "(X1, X2, X3)"))
-  result.B <- GAUCS(adj.mat = adjacency.matrix, res.list = resolvers,
-                     GenMech = ResolvingLevelGenB, nrep = nrep)
-  infoB <- result.B[[1]]
-  train.B <- result.B[[2]]
-  test.B <- result.B[[3]]
 }
+nrep <- 5
+result <- GAUCS(adj.mat = adjacency.matrix, res.list = resolvers,
+                   GenMech = ResolvingLevelGen, nrep = nrep)
+info <- result[[1]]
+train <- result[[2]]
+test <- result[[3]]
 
-save.image(file = "synthetic.RData")
-quit()
-
-load(file.path(root, "tests", "synthetic", "synthetic.RData"))
-# python comparisons run locally
+# AIF360 comparisons
 {
 reticulate::use_python("/anaconda3/bin/python3.7")
 library(reticulate)
@@ -164,43 +156,27 @@ py_run_string("from importlib import reload")
 source_python(file.path(root, "tests", "synthetic", "reweighing_synthetic.py"))
 source_python(file.path(root, "tests", "synthetic", "reductions_synthetic.py"))
 
-addA <- addB <- lapply(1:2, function(i) NULL)
+add.comparisons <- list(NULL, NULL)
 # compute the performance of reweighing and reductions
 for(i in 1:nrep){
   print(i)
   py_run_string("moments = reload(moments)")
   py_run_string("red = reload(red)")
-  # case A
-  print("A")
-  S.hat <- reweigh_and_predict(r_to_py(train.A[[i]]), r_to_py(test.A[[i]]))
-  addA[[1]] <- cbind(addA[[1]], Measures(S.hat, test.A[[i]]$Y, test.A[[i]]$A, k = 10))
-  S.hat <- reduce_and_predict(r_to_py(train.A[[i]]), r_to_py(test.A[[i]]), 0.1)
-  addA[[2]] <- cbind(addA[[2]], Measures(S.hat, test.A[[i]]$Y, test.A[[i]]$A, k = 10))
 
-  py_run_string("moments = reload(moments)")
-  py_run_string("red = reload(red)")
-  # case B
-  print("B")
-  S.hat <- reweigh_and_predict(r_to_py(train.B[[i]]), r_to_py(test.B[[i]]))
-  addB[[1]] <- cbind(addB[[1]], Measures(S.hat, test.B[[i]]$Y, test.B[[i]]$A, k = 10))
-  S.hat <- reduce_and_predict(r_to_py(train.B[[i]]), r_to_py(test.B[[i]]), 0.1)
-  addB[[2]] <- cbind(addB[[2]], Measures(S.hat, test.B[[i]]$Y, test.B[[i]]$A, k = 10))
+  S.hat <- reweigh_and_predict(r_to_py(train[[i]]), r_to_py(test[[i]]))
+  add.comparisons[[1]] <- cbind(add.comparisons[[1]], Measures(S.hat, test[[i]]$Y, test[[i]]$A, k = 10))
+  S.hat <- reduce_and_predict(r_to_py(train[[i]]), r_to_py(test[[i]]), 0.1)
+  add.comparisons[[2]] <- cbind(add.comparisons[[2]], Measures(S.hat, test[[i]]$Y, test[[i]]$A, k = 10))
 }
 
 # assign the results to infoA, infoB
-infoA <- c(infoA, addA)
-infoB <- c(infoB, addB)
+info <- c(info, add.comparisons)
 }
 
 # plotting offline
 {
-  ResSetA <-
-  x <- getplots(infoA, ResSetA, "A")
+  x <- getplots(info, ResSet, experiment)
   cowplot::plot_grid(x[[1]], x[[2]], nrow = 2L)
-  ggsave(paste0(file.path(root, "..", "Article", "syntheticA"), ".png"),
-    device = "png", width = 7, height = 7)
-  x <- getplots(infoB, ResSetB, "B")
-  cowplot::plot_grid(x[[1]], x[[2]], nrow = 2L)
-  ggsave(paste0(file.path(root, "..", "Article", "syntheticB"), ".png"),
+  ggsave(paste0(file.path(root, "..", "Article", paste0("synthetic", experiment)), ".png"),
     device = "png", width = 7, height = 7)
 }

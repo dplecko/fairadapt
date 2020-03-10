@@ -1,6 +1,6 @@
 # load the COMPAS Pro-Publica data
 library(readr)
-compas <- read_csv("~/fairadapt/tests/compas-scores-two-years.csv")
+compas <- read_csv("~/fairadapt/tests/compas/compas-scores-two-years.csv")
 columns.keep <- which(names(compas)
                       %in% c("age", "sex", "juv_fel_count",
                              "juv_misd_count", "juv_other_count", "priors_count",
