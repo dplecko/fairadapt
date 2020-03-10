@@ -1,28 +1,34 @@
 # load the COMPAS Pro-Publica data
-library(readr)
-compas <- read_csv("~/fairadapt/tests/compas-scores-two-years.csv")
-columns.keep <- which(names(compas)
-                      %in% c("age", "sex", "juv_fel_count",
-                             "juv_misd_count", "juv_other_count", "priors_count",
-                             "c_charge_degree", "race", "two_year_recid")
-                )
-compas <- compas[, columns.keep]
+{
+  library(readr)
+  compas <- read_csv("~/fairadapt/tests/compas-scores-two-years.csv")
+  columns.keep <- which(names(compas)
+                        %in% c("age", "sex", "juv_fel_count",
+                               "juv_misd_count", "juv_other_count", "priors_count",
+                               "c_charge_degree", "race", "two_year_recid")
+                  )
+  compas <- compas[, columns.keep]
 
-# factorise nicely
-compas$race <- factor(compas$race)
-levels(compas$race) <- c("Non-White", "Non-White", "White", "Non-White", "Non-White", "Non-White")
-compas$sex <- factor(compas$sex)
-compas$race <- factor(compas$race)
-compas$c_charge_degree <- factor(compas$c_charge_degree)
-compas <- as.data.frame(compas)
-compas$race <- relevel(compas$race, "White")
+  # factorise nicely
+  compas$race <- factor(compas$race)
+  levels(compas$race) <- c("Non-White", "Non-White", "White", "Non-White", "Non-White", "Non-White")
+  compas$sex <- factor(compas$sex)
+  compas$race <- factor(compas$race)
+  compas$c_charge_degree <- factor(compas$c_charge_degree)
+  compas <- as.data.frame(compas)
+  compas$race <- relevel(compas$race, "White")
+}
+
 
 # explore whether C \ci A
-table(compas$sex, compas$race) # conclusion: minor discrepency (20% vs 30% female)
+{
+  table(compas$sex, compas$race) # conclusion: minor discrepency (20% vs 30% female)
 
-x <- table(compas$race, compas$age)
-plot(x[2,] / sum(x[2,]), type = "b", col = "black", pch = 19)
-points(x[1,] / sum(x[1,]), type = "b", col = "blue", pch = 19) # conclusion: it is roughly OK
+  x <- table(compas$race, compas$age)
+  plot(x[2,] / sum(x[2,]), type = "b", col = "black", pch = 19)
+  points(x[1,] / sum(x[1,]), type = "b", col = "blue", pch = 19) # conclusion: it is roughly OK
+}
+
 
 # train RF classifiers (20-fold)
 reticulate::use_python("/anaconda3/bin/python3.7")
