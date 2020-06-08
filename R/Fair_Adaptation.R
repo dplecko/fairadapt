@@ -7,9 +7,10 @@
 ##' @title fairadapt
 ##' @param formula Object of class \code{formula} describing the response and the covariates.
 ##' @param train.data,test.data Training data & testing data, both of class \code{data.frame}.
-##' @param adj.mat Matrix of class \code{matrix} encoding the relationships in the causal graph. \code{M[i,j] == 1} implies the existence of an edge from node i to node j. Must include all the
+##' @param adj.mat Matrix of class \code{matrix} encoding the relationships in the causal graph. \code{M[i,j] == 1} implies the existence of an edge from node i to node j. Must include all the variables appearing in the formula object.
 ##' @param protect.A A value of class \code{character} describing the binary protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.
 ##' @param res.vars A vector of class \code{character} listing all the resolving variables, which should not be changed by the adaption procedure. Default value is \code{NULL}, corresponding to no resolving variables. Resolving variables should be a subset of the descendants of the protected attribute.
+##' @param quant.method A vector of class \code{character} choosing the method used for quantile regression. Possible values are "forest", "forest2", "linear" and "nn".
 ##' @return A \code{list} of length two. The two elements of the list are of class \code{data.frame} and contain the adapted training and testing data respectively.
 ##' @examples
 ##'
@@ -64,10 +65,11 @@
 ##' @import stats
 ##' @export
 fairadapt <- function(formula, train.data, test.data, adj.mat,
-                      protect.A, res.vars = NULL) {
+                      protect.A, res.vars = NULL, quant.method = "forest") {
+
   # verify correctness of input
   CorrectInput(formula, train.data, test.data, adj.mat,
-               protect.A, res.vars)
+               protect.A, res.vars, quant.method)
 
   # reorder the adjacency matrix if necessary
   adj.mat <- adj.mat[colnames(adj.mat), ]
@@ -102,6 +104,7 @@ fairadapt <- function(formula, train.data, test.data, adj.mat,
     }
     discrete <- FALSE
     curr.parents <- GetParents(curr.var, adj.mat)
+    A.parent <- is.element(protect.A, curr.parents)
     curr.cat.parents <-
       curr.parents[sapply(1:length(curr.parents),
                           function(x) is.factor(train.data[, curr.parents[x]]))]
@@ -133,22 +136,29 @@ fairadapt <- function(formula, train.data, test.data, adj.mat,
       adapt.data[, curr.var] <- org.data[, curr.var]
     }
 
-    curr.adapt.data <- org.data[row.idx,
-                                c(curr.var,GetParents(curr.var, adj.mat))]
-    curr.cf.parents <- as.data.frame(adapt.data[!base.ind & row.idx,
-                                                GetParents(curr.var, adj.mat)])
-    est.quants <- Quantiles(curr.adapt.data, curr.cat.parents)
+     curr.adapt.data <-
+       org.data[row.idx, c(curr.var,GetParents(curr.var, adj.mat))]
+     curr.cf.parents <-
+       as.data.frame(adapt.data[!base.ind & row.idx, GetParents(curr.var, adj.mat)])
 
-    inv.quant.data <- cbind(curr.adapt.data, est.quants)
-    inv.quant.data <- inv.quant.data[base.ind & row.idx, ]
-    curr.cf.parents <- cbind(curr.cf.parents,
-                             est.quants[!base.ind & row.idx])
-    colnames(curr.cf.parents) <- colnames(inv.quant.data)[-1]
-    curr.cf.values <- ComputeCFVals(inv.quant.data,
-                                    curr.cf.parents,
-                                    protect.A)
+       if (quant.method == "forest2") {
+         est.quants <- Quantiles(curr.adapt.data, curr.cat.parents)
 
-    adapt.data[!base.ind & row.idx, curr.var] <- curr.cf.values
+         inv.quant.data <- cbind(curr.adapt.data, est.quants)
+         inv.quant.data <- inv.quant.data[base.ind & row.idx, ]
+         curr.cf.parents <- cbind(curr.cf.parents,
+                                  est.quants[!base.ind & row.idx])
+         colnames(curr.cf.parents) <- colnames(inv.quant.data)[-1]
+         curr.cf.values <- ComputeCFVals(inv.quant.data,
+                                         curr.cf.parents,
+                                         protect.A)
+         adapt.data[!base.ind & row.idx, curr.var] <-  curr.cf.values
+       } else {
+         adapt.data[!base.ind & row.idx, curr.var] <-
+              CtfAAP(data = curr.adapt.data, cf.parents = curr.cf.parents, ind = base.ind[row.idx],
+                A.parent = A.parent, quant.method = quant.method)
+       }
+
 
     # check if there exists a resolving ancestor
     ancestors <- GetAncestors(curr.var, adj.mat)

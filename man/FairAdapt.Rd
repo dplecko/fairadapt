@@ -4,19 +4,28 @@
 \alias{fairadapt}
 \title{fairadapt}
 \usage{
-fairadapt(formula, train.data, test.data, adj.mat, protect.A,
-  res.vars = NULL)
+fairadapt(
+  formula,
+  train.data,
+  test.data,
+  adj.mat,
+  protect.A,
+  res.vars = NULL,
+  quant.method = "forest"
+)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} describing the response and the covariates.}
 
 \item{train.data, test.data}{Training data & testing data, both of class \code{data.frame}.}
 
-\item{adj.mat}{Matrix of class \code{matrix} encoding the relationships in the causal graph. \code{M[i,j] == 1} implies the existence of an edge from node i to node j. Must include all the}
+\item{adj.mat}{Matrix of class \code{matrix} encoding the relationships in the causal graph. \code{M[i,j] == 1} implies the existence of an edge from node i to node j. Must include all the variables appearing in the formula object.}
 
 \item{protect.A}{A value of class \code{character} describing the binary protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.}
 
 \item{res.vars}{A vector of class \code{character} listing all the resolving variables, which should not be changed by the adaption procedure. Default value is \code{NULL}, corresponding to no resolving variables. Resolving variables should be a subset of the descendants of the protected attribute.}
+
+\item{quant.method}{A vector of class \code{character} choosing the method used for quantile regression. Possible values are "forest", "forest2", "linear" and "nn".}
 }
 \value{
 A \code{list} of length two. The two elements of the list are of class \code{data.frame} and contain the adapted training and testing data respectively.
