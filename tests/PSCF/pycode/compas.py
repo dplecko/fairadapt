@@ -220,7 +220,6 @@ for k in range(len(beta_seq)):
 
     ### sampling and predicting
     test_predictions = torch.Tensor()
-    pscf_data = torch.Tensor()
     with torch.no_grad():
         for data in testloader:
             _, inputs, labels = torch.split(data, (1, 6, 1), 1)
@@ -232,7 +231,6 @@ for k in range(len(beta_seq)):
                 outputs = cnet(inputs)
                 pred = F.softmax(outputs)[:, 1]
                 test_predictions = torch.cat((test_predictions, pred))
-                pscf_data = torch.cat((pscf_data, inputs))
             else: # if Female do counterfactual inference
                 inputs[0, 0] = 1 # swap the gender from Female to Male (if necessary)
 
@@ -282,7 +280,6 @@ for k in range(len(beta_seq)):
                 inputs_expand[:, 3] = J_CF.squeeze()
                 inputs_expand[:, 4] = P_CF.squeeze()
 
-                #pscf_data = torch.cat((pscf_data, inputs_expand[1, :].view(1, -1)))
             # make a prediction using cnet
                 pred = F.softmax(cnet(inputs_expand))[:, 1].mean()
                 test_predictions = torch.cat((test_predictions, pred.view(-1)))
@@ -292,5 +289,3 @@ for k in range(len(beta_seq)):
 
     pred_path = os.path.join("tests", "PSCF", "pred", "compas_pred" + str(beta) + ".csv")
     np.savetxt(pred_path, test_predictions.numpy(), delimiter=",")
-    transform_path = os.path.join("tests", "PSCF", "pred", "compas_transform" + str(beta) + ".csv")
-    np.savetxt(transform_path, pscf_data.numpy(), delimiter=",")
