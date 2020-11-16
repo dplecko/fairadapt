@@ -101,7 +101,7 @@ if (experiment == "A") {
 
 }
 
-quant.methods <- c("forest", "linear", "neural network")
+quant.methods <- c("forest", "linear", "nn")
 result <- replicate(length(quant.methods), NULL)
 nrep <- 10
 n.sample <- 5000
