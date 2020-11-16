@@ -9,29 +9,33 @@ library(latex2exp)
 
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 source(file.path(root, "tests", "PSCF", "pscf-helpers.R"))
+setwd(root) # needed for reticulate later
 
-UCIAdult <- read_csv("~/fairness/fairadapt/tests/real-data/adult/UCIAdult.csv")
-UCIAdult <- data.table(UCIAdult, stringsAsFactors = T)
+{
+  UCIAdult <- read_csv("~/fairness/fairadapt/tests/real-data/adult/UCIAdult.csv")
+  UCIAdult <- data.table(UCIAdult, stringsAsFactors = T)
 
-rm_cols <- c("X1", "marital_status_Not-Married", "workclass_Other/Unknown", "occupation_?",
-  "race_White", "sex_Female", "native_country_Not-United-States", "income_<=50K")
+  rm_cols <- c("X1", "marital_status_Not-Married", "workclass_Other/Unknown", "occupation_?",
+    "race_White", "sex_Female", "native_country_Not-United-States", "income_<=50K")
 
-UCIAdult <- one_hot(UCIAdult, cols = "auto")
-UCIAdult <- UCIAdult[, !(names(UCIAdult) %in% rm_cols), with = F]
+  UCIAdult <- one_hot(UCIAdult, cols = "auto")
+  UCIAdult <- UCIAdult[, !(names(UCIAdult) %in% rm_cols), with = F]
 
-order_col <- c("sex_Male", "age", "native_country_United-States",
-  "marital_status_Married", "educatoin_num")
-order_col <- c(order_col, setdiff(names(UCIAdult), order_col))
+  order_col <- c("sex_Male", "age", "native_country_United-States",
+    "marital_status_Married", "educatoin_num")
+  order_col <- c(order_col, setdiff(names(UCIAdult), order_col))
 
-UCIAdult <- UCIAdult[, order_col, with = FALSE]
+  UCIAdult <- UCIAdult[, order_col, with = FALSE]
 
-set.seed(2020)
-train <- sample(1:nrow(UCIAdult), round(0.75*nrow(UCIAdult)))
+  set.seed(2020)
+  train <- sample(1:nrow(UCIAdult), round(0.75*nrow(UCIAdult)))
 
-write.csv(UCIAdult[train], file = file.path(root, "tests", "PSCF", "data", "UCIAdult_train.csv"))
-write.csv(UCIAdult[-train], file = file.path(root, "tests", "PSCF", "data", "UCIAdult_test.csv"))
+  if(!dir.exists(file.path(root, "tests", "PSCF", "pred")))
+    dir.create(file.path(root, "tests", "PSCF", "pred"))
 
-root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
+  write.csv(UCIAdult[train], file = file.path(root, "tests", "PSCF", "data", "UCIAdult_train.csv"))
+  write.csv(UCIAdult[-train], file = file.path(root, "tests", "PSCF", "data", "UCIAdult_test.csv"))
+}
 
 # get fairadapt predictions on the test set
 {
@@ -97,6 +101,13 @@ L_prob <- list(
 
 beta <- as.integer(c(0, 10, 100, 1000))
 
+if(!dir.exists(file.path(root, "tests", "PSCF", "pred")))
+  dir.create(file.path(root, "tests", "PSCF", "pred"))
+
+reticulate::use_python("/anaconda3/bin/python3.7")
+library(reticulate)
+py_run_file(file.path(root, "tests", "PSCF", "pycode", "adult.py"))
+
 L_append <- lapply(beta, function(bet) {
   read.csv(file.path(root, "tests", "pscf", "pred", paste0("adult_pred", bet, ".csv")), header = F)[["V1"]]
 })
@@ -127,6 +138,6 @@ df1 <- p_df(L_prob, as.integer(test.data$sex == "Male"), as.integer(test.data$in
        axis.title = element_text(size = 14),
        plot.title = element_text(size = 16))
 
-  ggsave(file.path(root, "..", "..", "Article", "plots", paste0("fapscf_adult", ".png")),
-    device = "png", width = 7.5, height = 5)
+  #ggsave(file.path(root, "..", "..", "Article", "plots", paste0("fapscf_adult", ".png")),
+  #  device = "png", width = 7.5, height = 5)
 }

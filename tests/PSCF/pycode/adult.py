@@ -13,7 +13,7 @@ from torchvision import datasets, transforms
 from torchvision.utils import save_image
 from torch.utils.data import Dataset, DataLoader
 
-os.chdir("/Users/pleckod/fairness/fairadapt")
+py_folder = os.path.join(os.getcwd(), "tests", "PSCF", "pycode")
 
 parser = argparse.ArgumentParser(description='VAE MNIST Example')
 parser.add_argument('--batch-size', type=int, default=128, metavar='N',
@@ -33,17 +33,19 @@ torch.manual_seed(args.seed)
 
 device = torch.device("cuda" if args.cuda else "cpu")
 
-folder = "tests/PSCF/pycode/"
+exec(open(os.path.join(py_folder, "adult_helpers.py")).read())
+exec(open(os.path.join(py_folder, "adult_arch.py")).read())
 
-exec(open(folder + "adult_helpers.py").read())
-exec(open(folder + "adult_arch.py").read())
+train_dataset = UCIAdultDataset(
+    csv_file=os.path.join(py_folder, "..", "data", "UCIAdult_train.csv"),
+    root_dir=os.path.join(py_folder, "..", "data"), transform=None
+)
 
-train_dataset = UCIAdultDataset(csv_file='tests/PSCF/data/UCIAdult_train.csv',
-                                    root_dir='tests/PSCF/data/', transform=None)
 
-
-test_dataset = UCIAdultDataset(csv_file='tests/PSCF/data/UCIAdult_test.csv',
-                                    root_dir='tests/PSCF/data/', transform=None)
+test_dataset = UCIAdultDataset(
+    csv_file=os.path.join(py_folder, "..", "data", "UCIAdult_test.csv"),
+    root_dir=os.path.join(py_folder, "..", "data"), transform=None
+)
 
 trainloader = DataLoader(train_dataset, batch_size=128,
                         shuffle=True, num_workers=0)
@@ -123,9 +125,8 @@ def trainM(epoch):
         inputs = inputs.float()
 
         recon_batch, target, mu, logvar, z, a = modelM(inputs)
-        #pdb.set_trace()
-        l_ngll, kl, mmd = loss_functionM(recon_batch, target, mu, logvar, mu, a, beta)
 
+        l_ngll, kl, mmd = loss_functionM(recon_batch, target, mu, logvar, mu, a, beta)
         loss = l_ngll + kl + mmd
 
         loss.backward()
@@ -181,11 +182,7 @@ def trainL(epoch):
         train_mmd += mmd
 
         optimizerL.step()
-        # if batch_idx % args.log_interval == 0:
-        #     print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
-        #         epoch, batch_idx * len(data), len(trainloader.dataset),
-        #         100. * batch_idx / len(trainloader),
-        #         loss.item() / len(data)))
+
     print('Likelihood ({:.6f}, {:.6f}), KL {:.6f}, MMD {:.6f}'.format(
           train_ngll1/(batch_idx+1), train_ngll2/(batch_idx+1), train_kl/(batch_idx+1), train_mmd/(batch_idx+1)))
     print('====> Epoch: {} Average loss: {:.4f}'.format(
@@ -282,5 +279,5 @@ for k in range(len(beta_seq)):
     ### put predictions in numpy
     print("--- %s seconds ---" % (time.time() - start_time_train))
 
-    pred_path = os.path.join("tests", "PSCF", "pred", "adult_pred" + str(beta) + ".csv")
+    pred_path = os.path.join(py_folder, "..", "pred", "adult_pred" + str(beta) + ".csv")
     np.savetxt(pred_path, test_predictions.numpy(), delimiter=",")

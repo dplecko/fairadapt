@@ -13,7 +13,7 @@ from torchvision import datasets, transforms
 from torchvision.utils import save_image
 from torch.utils.data import Dataset, DataLoader
 
-os.chdir("/Users/pleckod/fairness/fairadapt")
+py_folder = os.path.join(os.getcwd(), "tests", "PSCF", "pycode")
 
 parser = argparse.ArgumentParser(description='VAE MNIST Example')
 parser.add_argument('--batch-size', type=int, default=128, metavar='N',
@@ -33,17 +33,18 @@ torch.manual_seed(args.seed)
 
 device = torch.device("cuda" if args.cuda else "cpu")
 
-folder = "tests/PSCF/pycode/"
+exec(open(os.path.join(py_folder, "compas_helpers.py")).read())
+exec(open(os.path.join(py_folder, "compas_arch.py")).read())
 
-exec(open(folder + "compas_helpers.py").read())
-exec(open(folder + "compas_arch.py").read())
+train_dataset = CompasDataset(
+    csv_file=os.path.join(py_folder, "..", "data", "compas_train.csv"),
+    root_dir=os.path.join(py_folder, "..", "PSCF", "data"), transform=None
+)
 
-train_dataset = CompasDataset(csv_file='tests/PSCF/data/compas_train.csv',
-                                    root_dir='tests/PSCF/data/', transform=None)
-
-
-test_dataset = CompasDataset(csv_file='tests/PSCF/data/compas_test.csv',
-                                    root_dir='tests/PSCF/data/', transform=None)
+test_dataset = CompasDataset(
+    csv_file=os.path.join(py_folder, "..", "data", "compas_test.csv"),
+    root_dir=os.path.join(py_folder, "..", "data"), transform=None
+)
 
 trainloader = DataLoader(train_dataset, batch_size=128,
                         shuffle=True, num_workers=0)
@@ -287,5 +288,5 @@ for k in range(len(beta_seq)):
     ### put predictions in numpy
     print("--- %s seconds ---" % (time.time() - start_time_train))
 
-    pred_path = os.path.join("tests", "PSCF", "pred", "compas_pred" + str(beta) + ".csv")
+    pred_path = os.path.join(py_folder, "..", "pred", "compas_pred" + str(beta) + ".csv")
     np.savetxt(pred_path, test_predictions.numpy(), delimiter=",")

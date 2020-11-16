@@ -3,7 +3,7 @@ library(ggplot2)
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 source(file.path(root, "tests", "synthetic", "synthetic-helpers.R"))
 
-experiment <- "A"
+experiment <- "A" # "A" for Figures 2 & 17, "B" for Figures 3 & 18
 
 if (experiment == "A") {
 
@@ -117,9 +117,15 @@ for(i in 1:nrep){
 info <- c(info, add.comparisons)
 }
 
-# plotting
+# Figure 2/3
 {
-  x <- getplots(info[-10], c(as.character(ResSet),"reweighing", "reductions")[-10], experiment)
+  x <- getplots(info[-8], c(as.character(ResSet),"reweighing", "reductions")[-8], experiment)
+  cowplot::plot_grid(x[[1]], x[[2]], nrow = 2L)
+}
+
+# Figure 17/18
+{
+  x <- getplots(info, c(as.character(ResSet),"reweighing", "reductions"), experiment)
   cowplot::plot_grid(x[[1]], x[[2]], nrow = 2L)
 }
 

@@ -8,6 +8,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
+
 def reduce_and_predict(df1, df2, epsilon):
   # concatenate the data and clean it
   df = pandas.concat([df1, df2])

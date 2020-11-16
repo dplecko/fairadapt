@@ -13,6 +13,7 @@ auc_gap <- function(S.hat, labels, attr.label) {
   return(c(auroc, gap))
 
 }
+
 imbalance_effect <- function(adj.mat, probz, GenMech, prot.attr = "A", nrep = 5,
                    n.train = 5000, n.test = 5000) {
 
@@ -86,7 +87,7 @@ imbalance_effect <- function(adj.mat, probz, GenMech, prot.attr = "A", nrep = 5,
 
 }
 
-experiment <- "B"
+experiment <- "B" # "A" for Figure 12, "B" for Figure 13
 
 if (experiment == "A") {
 
@@ -173,5 +174,7 @@ p2 <- ggplot(result[result$val == "gap", ], aes(prob, mean, color = option, fill
 cowplot::plot_grid(p1, p2, nrow = 2L)
 
 # save the plots
-ggsave(filename = file.path(root, "..", "..", "Article", paste0("trainingAB_", "synthetic", experiment, ".png")),
-  device = "png", width = 7, height = 7)
+# ggsave(
+#   filename = file.path(root, "..", "..", "Article", paste0("trainingAB_", "synthetic", experiment, ".png")),        device = "png", width = 7, height = 7
+# )
+

@@ -9,6 +9,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 
+import warnings
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 def reweigh_and_predict(df1, df2):
   # concatenate the data and clean it
@@ -49,7 +51,6 @@ def reweigh_and_predict(df1, df2):
   lmod.fit(X_train, y_train,
         sample_weight=dataset_transf_train.instance_weights)
   y_train_pred = lmod.predict(X_train)
-  print(y_train_pred)
 
   dataset_transf_test_pred = test_data
   X_test = scale_transf.fit_transform(dataset_transf_test_pred.features)

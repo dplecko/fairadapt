@@ -96,7 +96,7 @@ Acc_and_Gap <- function(train.data, test.data, method,
         )
 }
 
-dataset <- "compas"
+dataset <- "compas" # "adult" for Figures 6 & 8, "compas" for Figures 7 & 9
 
 if (dataset == "adult") {
 

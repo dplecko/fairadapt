@@ -9,6 +9,7 @@ library(latex2exp)
 
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 source(file.path(root, "tests", "PSCF", "pscf-helpers.R"))
+setwd(root) # needed for reticulate later
 
 # load COMPAS data & write one-hot encoded
 {
@@ -54,32 +55,34 @@ source(file.path(root, "tests", "PSCF", "pscf-helpers.R"))
   attr <- test.data[[attribute]] == lvls[1]
   compas <- one_hot(data.table::data.table(data))
 
-  order_col <- c("race_White", "sex_Male", "age", "juv_count", "priors_count", "c_charge_degree_F", "two_year_recid")
+  order_col <- c("race_White", "sex_Male", "age", "juv_count",
+    "priors_count", "c_charge_degree_F", "two_year_recid")
   compas <- compas[, order_col, with = FALSE]
+
+  if(!dir.exists(file.path(root, "tests", "PSCF", "data")))
+    dir.create(file.path(root, "tests", "PSCF", "data"))
 
   write.csv(compas[train], file = file.path(root, "tests", "PSCF", "data", "compas_train.csv"))
   write.csv(compas[-train], file = file.path(root, "tests", "PSCF", "data", "compas_test.csv"))
 
-
 }
-
-# get PSCF predictions
-#system('python tests/PSCF/pycode/compas.py')
-#system2('python3', 'tests/PSCF/pycode/compas.py')
 
 # get fairadapt predictions
 system.time({
+
   L <- fairadapt::fairadapt(two_year_recid ~ ., train.data = train.data,
     test.data = test.data, protect.A = attribute,
     res.vars = c("c_charge_degree"),
     adj.mat = adjacency.matrix)
   adapted.train.data <- L[[1]]
   adapted.test.data <- L[[2]]
+
   # RF training step
   RF <- ranger::ranger(two_year_recid ~ ., data = adapted.train.data, num.trees = 500,
     classification = T)
   Y.hat <- predict(RF, data = adapted.test.data, predict.all = TRUE)$predictions
   FA.hat <- sapply(1:nrow(Y.hat), function(i) mean(Y.hat[i, ]))
+
 })
 
 # get unconstrained predictions
@@ -97,8 +100,17 @@ L_prob <- list(
 
 beta <- as.integer(c(0, 10, 100, 1000))
 
+if(!dir.exists(file.path(root, "tests", "PSCF", "pred")))
+  dir.create(file.path(root, "tests", "PSCF", "pred"))
+
+# get PSCF predictions
+reticulate::use_python("/anaconda3/bin/python3.7")
+library(reticulate)
+py_run_file(file.path(root, "tests", "PSCF", "pycode", "compas.py"))
+
 L_append <- lapply(beta, function(bet) {
-  read.csv(file.path(root, "tests", "PSCF", "pred", paste0("compas_pred", bet, ".csv")), header = F)[["V1"]]
+  read.csv(file.path(root, "tests", "PSCF", "pred", paste0("compas_pred", bet, ".csv")),
+    header = F)[["V1"]]
 })
 
 names(L_append) <- paste0("PSCF $\\beta =$ ", beta)
@@ -127,6 +139,6 @@ df1 <- p_df(L_prob, as.integer(attr), as.integer(test.data$two_year_recid == 1))
       axis.title = element_text(size = 14),
       plot.title = element_text(size = 16))
 
-  ggsave(file.path(root, "..", "..", "Article", "plots", paste0("fapscf_compas", ".png")),
-    device = "png", width = 7.5, height = 5)
+  #ggsave(file.path(root, "..", "..", "Article", "plots", paste0("fapscf_compas", ".png")),
+  #  device = "png", width = 7.5, height = 5)
 }

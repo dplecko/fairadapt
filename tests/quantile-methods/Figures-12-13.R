@@ -3,7 +3,7 @@ library(ggplot2)
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 source(file.path(root, "tests", "synthetic", "synthetic-helpers.R"))
 
-experiment <- "C"
+experiment <- "C" # "B" for Figure 12, "C" for Figure 13
 
 if (experiment == "A") {
 
@@ -124,8 +124,11 @@ ggplot(data = df, aes(x = x, y = y)) +
     geom_linerange(aes(ymin = ymin,ymax = ymax, color = quant.method)) +
     geom_errorbarh(aes(xmin = xmin,xmax = xmax, color = quant.method), height = 0) +
     xlab("Parity gap at 0.5 threshold") + ylab("AUC") +
-    ggtitle(paste0("Synthetic ", experiment, ": comparison of quantile methods"), subtitle = waiver()) +
-    theme_bw() + guides(color=guide_legend(title="Quantile method"), shape=guide_legend(title="Quantile method")) +
+    ggtitle(paste0("Synthetic ", experiment, ": comparison of quantile methods"),
+      subtitle = waiver()) +
+    theme_bw() +
+    guides(color=guide_legend(title="Quantile method"),
+      shape=guide_legend(title="Quantile method")) +
     theme(legend.position = c(0.75,0.25),
       legend.box.background = element_rect(colour = "black"),
       legend.title = element_text(size = 16),
@@ -135,5 +138,7 @@ ggplot(data = df, aes(x = x, y = y)) +
       plot.title = element_text(size = 16))
 
 # save the plot
-#ggsave(paste0(file.path(root, "..", "..", "Article", paste0("QMC_", experiment)), ".png"),
-#  device = "png", width = 7, height = 4)
+# ggsave(
+#   paste0(file.path(root, "..", "..", "Article", "plots", paste0("QMC_", experiment)), ".png"),
+#   device = "png", width = 7, height = 4
+# )
