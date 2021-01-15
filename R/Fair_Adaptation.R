@@ -64,238 +64,152 @@
 ##' Plecko, D. & Meinshausen, N. (2019). Fair Data Adaptation with Quantile Preservation \cr
 ##' @import stats
 ##' @export
-fairadapt <- function(formula, train.data, test.data, adj.mat,
-                      protect.A, res.vars = NULL, quant.method = "forest") {
+fairadapt <- function(formula, train.data, test.data, adj.mat = NULL, cfd.mat = NULL,
+                      top.ord = NULL, protect.A, res.vars = NULL, quant.method = "forest") {
 
   # verify correctness of input
-  CorrectInput(formula, train.data, test.data, adj.mat,
+  CorrectInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
                protect.A, res.vars, quant.method)
 
   # reorder the adjacency matrix if necessary
   adj.mat <- adj.mat[colnames(adj.mat), ]
 
-  # keep only the relevant columns
-  train.data[, protect.A] <- as.factor(train.data[, protect.A])
-  test.data[, protect.A] <- as.factor(test.data[, protect.A])
-  train.data <- model.frame(formula, train.data)
-  test.data <- test.data[, colnames(train.data)[-1]]
-  test.data <- cbind(NA, test.data)
-  colnames(test.data) <- colnames(train.data)
-  adj.mat <- adj.mat[colnames(train.data), colnames(train.data)]
-  org.data <- rbind(train.data,test.data)
-  train.length <- dim(train.data)[1]
-  full.length <- dim(org.data)[1]
+  # reorder columns and Factor-ize
+  list2env(ReorderCols(formula, train.data, test.data, protect.A), envir = environment())
+
+  # keep important parts of adjacency matrix
+  adj.mat <- adj.mat[colnames(org.data), colnames(org.data)]
+
+  if(is.null(cfd.mat) & !is.null(adj.mat)) {
+
+    cfd.mat <- adj.mat
+    cfd.mat[, ] <- 0
+
+  }
 
   # construct the initial version of adapted data
-  adapt.data <- org.data
-  baseline.level <- levels(train.data[, protect.A])[1]
-  base.ind <- org.data[, protect.A] == baseline.level
-  adapt.data[, protect.A] <- factor(baseline.level,
-                                    levels = levels(train.data[, protect.A]))
+  list2env(InitAdapt(org.data, protect.A), envir = environment())
+
   # obtain topological ordering and descendants of A
-  topological.order <- TopologicalOrdering(adj.mat)
-  A.descendants <- GetDescendants(protect.A, adj.mat)
+  if(is.null(top.ord)) { # Markovian / Semi-Markovian case
+
+    top.ord <- TopologicalOrdering(adj.mat)
+    A.des <- GetDescendants(protect.A, adj.mat)
+    A.root <- (length(GetParents(protect.A, adj.mat)) == 0L) &
+      (length(ConfoundedComponent(protect.A, cfd.mat)) == 1L)
+
+    # fail if NonID
+    if (NonID(c(protect.A, res.vars), adj.mat, cfd.mat))
+      stop("The desired intervention is non-identifiable")
+
+  } else { # Topological Ordering case
+
+    A.des <- GetDescendants(protect.A, adj.mat, top.ord)
+    A.root <- top.ord[1] == protect.A
+
+  }
+
+  A.root <- F
+  print(paste("A is root:", A.root))
 
   # main procedure part
-  for (curr.var in topological.order) {
-    if (is.element(curr.var, res.vars) |
-        !is.element(curr.var, A.descendants)) {
-      next
-    }
+  for (curr.var in top.ord[(which(top.ord == protect.A) + 1):length(top.ord)]) {
+
+    # check if this variable is skipped
+
+    # need to change this for the topological order approach  / also for when A is not root
+
+    changed.parents <- intersect(GetParents(curr.var, adj.mat, top.ord), union(A.des, protect.A))
+    if (sum(!is.element(changed.parents, res.vars)) == 0) res.vars <- c(res.vars, curr.var)
+    if (is.element(curr.var, res.vars) | !is.element(curr.var, A.des)) next
+
+
     discrete <- FALSE
-    curr.parents <- GetParents(curr.var, adj.mat)
-    A.parent <- is.element(protect.A, curr.parents)
+    curr.parents <- AdjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
     curr.cat.parents <-
       curr.parents[sapply(1:length(curr.parents),
                           function(x) is.factor(train.data[, curr.parents[x]]))]
-    changed.parents <- intersect(curr.parents, union(A.descendants, protect.A))
-    if (sum(!is.element(changed.parents, res.vars)) == 0) {
-      next
-    }
-    row.idx <- rep(TRUE,full.length)
-    if (curr.var == colnames(train.data)[1]) {
-      row.idx[-(1:train.length)] <- FALSE
-    }
 
+    print(
+      paste(
+        "Adjusting variable", curr.var,
+        "with adjustment set", paste0(curr.parents, collapse = ", ")
+      )
+    )
+
+    row.idx <- rep(TRUE, full.len)
+
+    if (curr.var == colnames(train.data)[1]) row.idx[-(1:train.len)] <- FALSE
+
+    # check if Discrete
     if (length(unique(org.data[, curr.var])) < 100 |
         is.factor(org.data[, curr.var])) {
-      discrete = TRUE
-      unique.values <- unique(org.data[, curr.var])  # need to encode all appearing discrete values
-      if (is.factor(org.data[, curr.var])) {
-        unique.values <- as.character(unique.values[!is.na(unique.values)])
-      }
 
-      cat.encoding <- CategoricalEncoding(org.data[row.idx, ], curr.var)
-      integer.encoding <- rep(NA, full.length)
-      for (i in 1:length(unique.values)) {
-        integer.encoding[(org.data[, curr.var] ==
-                         unique.values[i]) & row.idx] <- cat.encoding[i]
-      }
-      integer.encoding <- integer.encoding + runif(full.length,-0.5,0.5)
-      org.data[, curr.var] <- integer.encoding
-      adapt.data[, curr.var] <- org.data[, curr.var]
+      list2env(EncodeDiscrete(
+          org.data[row.idx, 1], org.data[row.idx, curr.var]
+        ), envir = environment()
+      )
+
+      org.data[, curr.var] <- adapt.data[, curr.var] <-
+        MakeLength(int.enc, train.len, full.len)
+
     }
 
-     curr.adapt.data <-
-       org.data[row.idx, c(curr.var,GetParents(curr.var, adj.mat))]
-     curr.cf.parents <-
-       as.data.frame(adapt.data[!base.ind & row.idx, GetParents(curr.var, adj.mat)])
+    ### perform the Adaptation
+    curr.adapt.data <-
+      org.data[row.idx, c(curr.var, curr.parents), drop = F]
+    curr.cf.parents <-
+      adapt.data[!base.ind & row.idx, curr.parents, drop = F]
 
-       if (quant.method == "forest2") {
-         est.quants <- Quantiles(curr.adapt.data, curr.cat.parents)
-
-         inv.quant.data <- cbind(curr.adapt.data, est.quants)
-         inv.quant.data <- inv.quant.data[base.ind & row.idx, ]
-         curr.cf.parents <- cbind(curr.cf.parents,
-                                  est.quants[!base.ind & row.idx])
-         colnames(curr.cf.parents) <- colnames(inv.quant.data)[-1]
-         curr.cf.values <- ComputeCFVals(inv.quant.data,
-                                         curr.cf.parents,
-                                         protect.A)
-         adapt.data[!base.ind & row.idx, curr.var] <-  curr.cf.values
-       } else {
-         adapt.data[!base.ind & row.idx, curr.var] <-
-              CtfAAP(data = curr.adapt.data, cf.parents = curr.cf.parents, ind = base.ind[row.idx],
-                A.parent = A.parent, quant.method = quant.method)
-       }
-
+    adapt.data[!base.ind & row.idx, curr.var] <-
+      InferCtf(data = curr.adapt.data, cf.parents = curr.cf.parents, ind = base.ind[row.idx],
+        A.root = A.root, cat.parents = curr.cat.parents, protect.A = protect.A,
+        quant.method = quant.method)
 
     # check if there exists a resolving ancestor
-    ancestors <- GetAncestors(curr.var, adj.mat)
-    resolving.ancestor <- (sum(is.element(ancestors, res.vars)) > 0)
-    if (discrete & !resolving.ancestor) {
-      # enforce marginal matching
-      adapt.data[, curr.var] <- MarginalMatching(adapt.data[, curr.var],
-                                                 base.ind, row.idx)
-      org.data[, curr.var] <- round(org.data[, curr.var])
-      # convert back to original values or factors
-      int.decode <- rep(NA, full.length)
-      int.decode.adapt <- rep(NA, full.length)
-      for (i in 1:length(unique.values)) {
-        int.decode[(org.data[, curr.var] ==
-                   cat.encoding[i]) & row.idx] <- unique.values[i]
-        int.decode.adapt[
-          (adapt.data[, curr.var] == cat.encoding[i]) &
-                 row.idx] <- unique.values[i]
-      }
-      org.data[, curr.var] <- int.decode
-      adapt.data[, curr.var] <- int.decode.adapt
-      if (is.factor(train.data[, curr.var])) {
-        org.data[, curr.var] <- as.factor(org.data[, curr.var])
-        adapt.data[, curr.var] <- as.factor(adapt.data[, curr.var])
-      }
-    }
-    else if (discrete & resolving.ancestor) {
-      adapt.data[, curr.var] <- round(adapt.data[, curr.var])
-      org.data[, curr.var] <- round(org.data[, curr.var])
+    ancestors <- GetAncestors(curr.var, adj.mat, top.ord)
+    res.anc <- (sum(is.element(ancestors, res.vars)) > 0)
 
-      int.decode <- rep(NA, full.length)
-      int.decode.adapt <- rep(NA, full.length)
-      for (i in 1:length(unique.values)) {
-        int.decode[(org.data[, curr.var] ==
-                    cat.encoding[i]) & row.idx] <- unique.values[i]
-        int.decode.adapt[(adapt.data[, curr.var] ==
-                          cat.encoding[i]) & row.idx] <- unique.values[i]
-      }
-      org.data[, curr.var] <- int.decode
-      adapt.data[, curr.var] <- int.decode.adapt
+    # enforce Marginal Matching if there is no resolving ancestor & discrete
+    if (discrete & !res.anc & A.root) {
+
+      adapt.data[row.idx, curr.var] <-
+        MarginalMatching(adapt.data[row.idx, curr.var], base.ind[row.idx])
+
+    }
+
+    # if discrete, recode back to discrete or factor
+    if (discrete) {
+
+      adapt.var <- MakeLength(
+        DecodeDiscrete(adapt.data[row.idx, curr.var], cat.enc, unique.values),
+        train.len, full.len
+      )
+
+      org.var <- MakeLength(
+        DecodeDiscrete(org.data[row.idx, curr.var], cat.enc, unique.values),
+        train.len, full.len
+      )
+
       if (is.factor(train.data[, curr.var])) {
-        org.data[, curr.var] <- as.factor(org.data[, curr.var])
-        adapt.data[, curr.var] <- as.factor(adapt.data[, curr.var])
-      }
-    }
-  }
-  return(list(adapt.data[1:train.length, ],
-         adapt.data[-(1:train.length),-1]))
-}
-MarginalMatching <- function(x, base.ind, row.idx) {
-  x.baseline <- round(x[base.ind & row.idx])
-  x.non.baseline <- x[!base.ind & row.idx]
-  fitted.value.counts <- (tabulate(x.baseline) / length(x.baseline)) *
-                          length(x.non.baseline)
-  fitted.x.baseline <- NULL
-  for (i in 1:length(fitted.value.counts)) {
-    fitted.x.baseline <- c(fitted.x.baseline,
-                           rep(i, round(fitted.value.counts[i])))
-  }
-  fitted.x.baseline <- c(fitted.x.baseline,
-                         rep(length(fitted.value.counts),
-                             max(0, length(x.non.baseline) - length(fitted.x.baseline))))
-  fitted.x.baseline <- fitted.x.baseline[1:length(x.non.baseline)]
-  x.non.baseline[order(x.non.baseline)] <- fitted.x.baseline
-  x[!base.ind & row.idx] <- x.non.baseline
-  x[base.ind & row.idx] <- x.baseline
-  x[!row.idx] <- NA
-  return(x)
-}
-CategoricalEncoding <- function(data, variable) {
-  appearing.values <- unique(data[, variable])
-  cond.expect = rep(0, length(appearing.values))
-  cat.encoding = rep(0, length(appearing.values))
-  if (!is.factor(data[, variable])) {
-    cat.encoding <- order(order(appearing.values))
-  }
-  else {
-    appearing.values <- as.character(appearing.values)
-    for (i in 1:length(appearing.values)) {
-      cond.expect[i] <- mean(as.integer(data[data[, variable] == appearing.values[i], 1]), na.rm = TRUE)
-      if (cond.expect[i] == 1) {
-        cond.expect[i] <- cond.expect[i] + rnorm(1, sd = 0.001)  # solving ties at random
-      }
-    }
-    for(i in 1:length(appearing.values)){
-      cat.encoding[i] <- sum(cond.expect <= cond.expect[i])
-    }
-  }
-  return(cat.encoding)
-}
-Quantiles <- function(data, cat.par) {
-  colnames(data)[1] <- "X1"
-  if ( length(cat.par) == 0 ) {
-    qrf <- ranger::ranger(formula(data), data, quantreg = TRUE,
-                          keep.inbag = T, min.node.size = 20)
-    return(sapply(1:nrow(data),
-           function(id) ecdf(qrf$random.node.values.oob[id,])(data$X1[id])))
-  }
-  else {
-    remaining.idx <- rep(FALSE,nrow(data))
-    quantiles <- rep(NA, nrow(data))
-    if (length(cat.par) == 1) {
-      cat.par.values <- as.matrix(levels(data[, cat.par]))
-    }
-    else {
-      cat.par.values <- expand.grid(lapply(data[, cat.par], levels))
-    }
-    for (i in 1:dim(cat.par.values)[1]) {
-      curr.idx = rep(TRUE, nrow(data))
-      for(j in 1:length(cat.par)){
-        curr.idx <- curr.idx & (data[, cat.par[j]] == cat.par.values[i,j])
+
+        adapt.var <- as.factor(adapt.var)
+        org.var <- as.factor(org.var)
+
       }
 
-      if (sum(curr.idx) < 100) {
-        remaining.idx[curr.idx] <- TRUE
-        next
-      }
-      curr.data <- data[curr.idx, ]
-      qrf <- ranger::ranger(formula(curr.data), curr.data, quantreg = TRUE,
-                            keep.inbag = T, min.node.size = 20)
-      quantiles[curr.idx] <- sapply(1:nrow(curr.data),
-                                    function(id) ecdf(qrf$random.node.values.oob[id,])(curr.data$X1[id]))
+      adapt.data[, curr.var] <- adapt.var
+      org.data[, curr.var] <- org.var
+
     }
-    if (sum(remaining.idx) > 0) {
-      curr.data <- data[remaining.idx, ]
-      qrf <- ranger::ranger(formula(curr.data), curr.data, quantreg = TRUE,
-                            keep.inbag = T, min.node.size = 20)
-      quantiles[remaining.idx] <- sapply(1:nrow(curr.data),
-                                         function(id) ecdf(qrf$random.node.values.oob[id,])(curr.data$X1[id]))
-    }
-    return(quantiles)
+
   }
-}
-ComputeCFVals <- function(data, cf.data, protect.A) {
-  mtry <- sum(colnames(data) != protect.A) - 1 # want large mtry for these steps
-  cf.forest <- ranger::ranger(formula = formula(data[, colnames(data) != protect.A]),
-                              data = data, mtry = mtry)  # use baseline data to learn the inverse quant. func
-  cf.values <- predict(cf.forest, data = cf.data)$predictions
-  return(cf.values)
+
+  return(
+    list(
+      adapt.data[1:train.len, ],
+      adapt.data[-(1:train.len),-1]
+    )
+  )
+
 }

@@ -1,97 +1,100 @@
-TopologicalOrdering <- function(adjacency.matrix) {
 
-  matrix.size <- dim(adjacency.matrix)
-  num.walks <- adjacency.matrix
+CategoricalEncoding <- function(outcome, var, u.val) {
 
-  for (i in 1:(matrix.size[1]+1)) {
+  cond.expect <- cat.enc <- rep(0, length(u.val))
 
-    num.walks <- adjacency.matrix + num.walks %*% adjacency.matrix
+  for (i in 1:length(u.val)) {
 
-  }
+    cond.expect[i] <- mean(as.integer(outcome[var == u.val[i]]), na.rm = TRUE)
 
-  comparison.matrix <- num.walks > 0
+    if (cond.expect[i] == 1) {
 
-  top.order <- colnames(adjacency.matrix)
+      cond.expect[i] <- cond.expect[i] + rnorm(1, sd = 0.001)  # solving ties at random
 
-  for (i in 1:(matrix.size[1]-1)) {
-
-    for (j in (i+1):matrix.size[1]) {
-
-      if (comparison.matrix[top.order[j], top.order[i]]) {
-
-        top.order <- Swap(top.order,i,j)
-
-      }
     }
 
   }
 
-  return(top.order)
+  for(i in 1:length(u.val)) {
 
-}
-
-Swap <- function(x, i, j) {
-
-  keep <- x[i]
-  x[i] <- x[j]
-  x[j] <- keep
-
-  return(x)
-
-}
-
-expit <- function(x) return(exp(x)/(1+exp(x)))
-
-GetDescendants <- function(variable, adjacency.matrix) {
-
-  matrix.size <- dim(adjacency.matrix)
-  num.walks <- adjacency.matrix
-
-  for (i in 1:matrix.size[1]) {
-
-    num.walks <- adjacency.matrix + num.walks %*% adjacency.matrix
+    cat.enc[i] <- sum(cond.expect <= cond.expect[i])
 
   }
 
-  descendant.indicators <- num.walks[variable, ] > 0
-  descendants <- colnames(adjacency.matrix)[descendant.indicators]
-
-  return(descendants)
+  cat.enc
 
 }
 
-GetAncestors <- function(variable, adjacency.matrix) {
+MarginalMatching <- function(x, base.ind) {
 
-  matrix.size <- dim(adjacency.matrix)
-  num.walks <- adjacency.matrix
+  x.baseline <- round(x[base.ind])
+  x.non.baseline <- x[!base.ind]
 
-  for (i in 1:matrix.size[1]) {
+  fitted.value.counts <- (tabulate(x.baseline) / length(x.baseline)) *
+                          length(x.non.baseline)
+  fitted.x.baseline <- NULL
 
-    num.walks <- adjacency.matrix + num.walks %*% adjacency.matrix
+  for (i in 1:length(fitted.value.counts)) {
+
+    fitted.x.baseline <- c(fitted.x.baseline,
+                           rep(i, round(fitted.value.counts[i])))
 
   }
 
-  ancestor.indicators <- num.walks[, variable] > 0
-  ancestors <- colnames(adjacency.matrix)[ancestor.indicators]
+  fitted.x.baseline <- c(fitted.x.baseline,
+                         rep(length(fitted.value.counts),
+                             max(0, length(x.non.baseline) - length(fitted.x.baseline))))
+  fitted.x.baseline <- fitted.x.baseline[1:length(x.non.baseline)]
 
-  return(ancestors)
+  x.non.baseline[order(x.non.baseline)] <- fitted.x.baseline
+  x[!base.ind] <- x.non.baseline
+  x[base.ind] <- x.baseline
 
-}
-
-GetParents <- function(variable, adjacency.matrix) {
-
-  parent.indicators <- adjacency.matrix[, variable] == 1
-  parents <- row.names(adjacency.matrix)[parent.indicators]
-
-  return(parents)
+  x
 
 }
 
-CtfAAP <- function(data, cf.parents, ind, A.parent, quant.method = "forest") {
+ReorderCols <- function(formula, train.data, test.data, protect.A) {
 
-  nosplit <- (!A.parent) | (quant.method == "nn")
+  train.data <- model.frame(formula, train.data)
+  test.data <- test.data[, colnames(train.data)[-1]]
 
-  if (ncol(data) != (ncol(cf.parents)+1)) stop("Mismatch in the number of columns")
+  train.data[, protect.A] <- as.factor(train.data[, protect.A])
+  test.data[, protect.A] <- as.factor(test.data[, protect.A])
+  test.data <- cbind(NA, test.data)
+
+  colnames(test.data) <- colnames(train.data)
+
+  list(
+    train.data = train.data,
+    test.data = test.data,
+    org.data = rbind(train.data, test.data),
+    train.len = nrow(train.data),
+    full.len = nrow(train.data) + nrow(test.data)
+  )
+
+}
+
+InitAdapt <- function(org.data, protect.A) {
+
+  adapt.data <- org.data
+  base.lvl <- levels(org.data[, protect.A])[1]
+  base.ind <- org.data[, protect.A] == base.lvl
+  adapt.data[, protect.A] <- factor(base.lvl,
+                                    levels = levels(org.data[, protect.A]))
+
+  list(
+    adapt.data = adapt.data,
+    base.ind = base.ind
+  )
+
+}
+
+CtfAAP <- function(data, cf.parents, ind, A.root, quant.method = "forest") {
+
+  nosplit <- (!A.root) | (quant.method == "nn")
+
+  assertthat::assert_that(ncol(data) == (ncol(cf.parents)+1))
 
   names(data) <- c("Y", paste0("X", 1:ncol(cf.parents)))
   names(cf.parents) <- paste0("X", 1:ncol(cf.parents))
@@ -110,7 +113,7 @@ CtfAAP <- function(data, cf.parents, ind, A.parent, quant.method = "forest") {
 
   }
 
-  return(ctf.values)
+  ctf.values
 
 }
 
@@ -151,10 +154,6 @@ GetQuants <- function(data, quant.method) {
 
     empirical <- predict(object, newdata = data[, -1, drop = FALSE])
 
-  } else {
-
-    stop("Unknown quant.method")
-
   }
 
   eval <- data[, 1]
@@ -169,6 +168,13 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
   if (quant.method == "forest") {
 
     object <- ranger::ranger(formula(data), data = data, quantreg = T, min.node.size = 20)
+
+    print(
+      paste(
+        "Average number of splits",
+        round(mean(unlist(lapply(object$forest$split.varIDs, length))))
+      )
+    )
 
     quantiles <- predict(object, data = newdata, type = "quantiles", what = function(x) x)$predictions
 
@@ -202,13 +208,159 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
     quantiles <- predict(object, newdata = newdata)
 
-  } else {
-
-    stop("Unknown quant.method")
-
   }
 
   if(!is.null(quantiles)) ctf.values <- sapply(1:nrow(newdata), function(x) quantile(quantiles[x, ], newU[x]))
 
-  return(ctf.values)
+  ctf.values
+
+}
+
+EncodeDiscrete <- function(outcome, var) {
+
+  assertthat::assert_that(length(var) == length(outcome))
+
+  if (is.factor(var)) {
+
+    u.val <- sort(unique(as.character(var)))
+    cat.enc <- CategoricalEncoding(outcome, var, u.val)
+
+  } else {
+
+    u.val <- sort(unique(var))
+    cat.enc <- order(order(u.val))
+
+  }
+
+  int.enc <- rep(NA, length(var))
+
+  for (i in 1:length(u.val)) {
+
+    int.enc[(var == u.val[i])] <- cat.enc[i]
+
+  }
+
+  int.enc <- int.enc + runif(length(var), -0.5, 0.5)
+
+  list(
+    discrete = TRUE,
+    cat.enc = cat.enc,
+    int.enc = int.enc,
+    unique.values = u.val
+  )
+
+}
+
+DecodeDiscrete <- function(var, cat.enc, u.val) {
+
+  var <- round(var)
+  int.decode <- rep(NA, length(var))
+
+  for (i in 1:length(u.val)) {
+
+      int.decode[(var == cat.enc[i])] <- u.val[i]
+
+  }
+
+  int.decode
+
+}
+
+Quantiles <- function(data, cat.par) {
+
+  colnames(data)[1] <- "X1"
+
+  if (length(cat.par) == 0) {
+
+    qrf <- ranger::ranger(formula(data), data, quantreg = TRUE,
+                          keep.inbag = T, min.node.size = 20)
+
+    return(sapply(1:nrow(data),
+           function(id) ecdf(qrf$random.node.values.oob[id,])(data$X1[id])))
+
+  } else {
+
+    remaining.idx <- rep(FALSE,nrow(data))
+    quantiles <- rep(NA, nrow(data))
+
+    if (length(cat.par) == 1) {
+      cat.par.values <- as.matrix(levels(data[, cat.par]))
+
+    } else {
+
+      cat.par.values <- expand.grid(lapply(data[, cat.par], levels))
+
+    }
+
+    for (i in 1:dim(cat.par.values)[1]) {
+
+      curr.idx = rep(TRUE, nrow(data))
+
+      for(j in 1:length(cat.par)) {
+
+        curr.idx <- curr.idx & (data[, cat.par[j]] == cat.par.values[i,j])
+
+      }
+
+      if (sum(curr.idx) < 100) {
+
+        remaining.idx[curr.idx] <- TRUE
+        next
+
+      }
+
+      curr.data <- data[curr.idx, ]
+      qrf <- ranger::ranger(formula(curr.data), curr.data, quantreg = TRUE,
+                            keep.inbag = T, min.node.size = 20)
+      quantiles[curr.idx] <- sapply(1:nrow(curr.data),
+                                    function(id) ecdf(qrf$random.node.values.oob[id,])(curr.data$X1[id]))
+    }
+
+    if (sum(remaining.idx) > 0) {
+
+      curr.data <- data[remaining.idx, ]
+      qrf <- ranger::ranger(formula(curr.data), curr.data, quantreg = TRUE,
+                            keep.inbag = T, min.node.size = 20)
+      quantiles[remaining.idx] <- sapply(1:nrow(curr.data),
+                                         function(id) ecdf(qrf$random.node.values.oob[id,])(curr.data$X1[id]))
+
+    }
+
+    return(quantiles)
+
+  }
+
+}
+
+ComputeCFVals <- function(data, cf.data, protect.A) {
+
+  mtry <- sum(colnames(data) != protect.A) - 1 # want large mtry for these steps
+
+  cf.forest <- ranger::ranger(formula = formula(data[, colnames(data) != protect.A]),
+                              data = data, mtry = mtry)  # use baseline data to learn the inverse quant. func
+  cf.values <- predict(cf.forest, data = cf.data)$predictions
+
+  return(cf.values)
+
+}
+
+InferCtf <- function(data, cf.parents, ind, A.root, cat.parents, protect.A,
+   quant.method = "forest") {
+
+  if (quant.method == "forest2") {
+
+    est.quants <- Quantiles(data, cat.parents)
+
+    inv.quant.data <- cbind(data, est.quants)
+    inv.quant.data <- inv.quant.data[ind, ]
+    cf.parents <- cbind(cf.parents, est.quants[!ind])
+
+    colnames(cf.parents) <- colnames(inv.quant.data)[-1]
+
+    return(ComputeCFVals(inv.quant.data, cf.parents, protect.A))
+
+  }
+
+  CtfAAP(data, cf.parents, ind, A.root, quant.method)
+
 }

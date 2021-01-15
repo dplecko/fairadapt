@@ -14,7 +14,10 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports: 
-    ranger
+    ranger,
+    assertthat,
+    quantreg,
+    qrnn
 RoxygenNote: 7.1.0
 Suggests: 
     testthat (>= 2.1.0)
