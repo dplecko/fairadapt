@@ -161,3 +161,24 @@ NonID <- function(iv, adj.mat, cfd.mat) {
   )
 
 }
+
+VisualizeGraph <- function(adj.mat, cfd.mat) {
+
+  g <- graph_from_adjacency_matrix(adj.mat)
+  E(g)$curved <- 0
+  E(g)$lty <- "solid"
+  diag(cfd.mat) <- 0
+
+  cfg <- graph_from_adjacency_matrix(cfd.mat)
+  e.list <- as_edgelist(cfg, names = F)
+  curved <- (e.list[, 1] < e.list[, 2]) - 0.5
+  lty <- ifelse((e.list[, 1] < e.list[, 2]), "dashed", "blank")
+  g <- add_edges(g, as.vector(t(e.list)), curved = curved, lty = lty)
+
+
+  E(g)$color <- "black"
+  E(g)$arrow.size <- 0.35
+  V(g)$color <- "white"
+  g
+
+}

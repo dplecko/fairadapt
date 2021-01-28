@@ -65,7 +65,8 @@
 ##' @import stats
 ##' @export
 fairadapt <- function(formula, train.data, test.data, adj.mat = NULL, cfd.mat = NULL,
-                      top.ord = NULL, protect.A, res.vars = NULL, quant.method = "forest") {
+                      top.ord = NULL, protect.A, res.vars = NULL, quant.method = "forest",
+                      visualize.graph = TRUE) {
 
   # verify correctness of input
   CorrectInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
@@ -98,6 +99,13 @@ fairadapt <- function(formula, train.data, test.data, adj.mat = NULL, cfd.mat = 
     A.root <- (length(GetParents(protect.A, adj.mat)) == 0L) &
       (length(ConfoundedComponent(protect.A, cfd.mat)) == 1L)
 
+    if (visualize.graph) {
+
+      ig <- VisualizeGraph(adj.mat, cfd.mat)
+      plot(ig)
+
+    }
+
     # fail if NonID
     if (NonID(c(protect.A, res.vars), adj.mat, cfd.mat))
       stop("The desired intervention is non-identifiable")
@@ -108,9 +116,6 @@ fairadapt <- function(formula, train.data, test.data, adj.mat = NULL, cfd.mat = 
     A.root <- top.ord[1] == protect.A
 
   }
-
-  A.root <- F
-  print(paste("A is root:", A.root))
 
   # main procedure part
   for (curr.var in top.ord[(which(top.ord == protect.A) + 1):length(top.ord)]) {
@@ -129,13 +134,6 @@ fairadapt <- function(formula, train.data, test.data, adj.mat = NULL, cfd.mat = 
     curr.cat.parents <-
       curr.parents[sapply(1:length(curr.parents),
                           function(x) is.factor(train.data[, curr.parents[x]]))]
-
-    print(
-      paste(
-        "Adjusting variable", curr.var,
-        "with adjustment set", paste0(curr.parents, collapse = ", ")
-      )
-    )
 
     row.idx <- rep(TRUE, full.len)
 

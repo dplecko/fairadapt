@@ -5,15 +5,16 @@ CategoricalEncoding <- function(outcome, var, u.val) {
 
   for (i in 1:length(u.val)) {
 
-    cond.expect[i] <- mean(as.integer(outcome[var == u.val[i]]), na.rm = TRUE)
+    cond.expect[i] <- mean(as.numeric(outcome[var == u.val[i]]), na.rm = TRUE)
 
-    if (cond.expect[i] == 1) {
-
-      cond.expect[i] <- cond.expect[i] + rnorm(1, sd = 0.001)  # solving ties at random
-
-    }
+    assertthat::assert_that(!is.na(cond.expect[i]),
+      msg = "New factor levels appearing in the test data, which is disallowed")
 
   }
+
+  if (length(cond.expect) != length(unique(cond.expect)))
+    cond.expect <- cond.expect +
+      rnorm(length(cond.expect), sd = sd(cond.expect)/10000)
 
   for(i in 1:length(u.val)) {
 
@@ -168,13 +169,6 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
   if (quant.method == "forest") {
 
     object <- ranger::ranger(formula(data), data = data, quantreg = T, min.node.size = 20)
-
-    print(
-      paste(
-        "Average number of splits",
-        round(mean(unlist(lapply(object$forest$split.varIDs, length))))
-      )
-    )
 
     quantiles <- predict(object, data = newdata, type = "quantiles", what = function(x) x)$predictions
 
