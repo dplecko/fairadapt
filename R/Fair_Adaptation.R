@@ -168,11 +168,8 @@ fairadapt <- function(formula, train.data, test.data,
       adapt.data[!base.ind & row.idx, curr.parents, drop = F]
 
     adapt.data[!base.ind & row.idx, curr.var] <-
-      InferCtf(data = curr.adapt.data, cf.parents = curr.cf.parents,
-        ind = base.ind[row.idx], A.root = A.root,
-        cat.parents = curr.cat.parents, protect.A = protect.A,
-        quant.method = quant.method)
-
+      CtfAAP(data = curr.adapt.data, cf.parents = curr.cf.parents,
+             ind = base.ind[row.idx], A.root = A.root, quant.method = quant.method)
     # check if there exists a resolving ancestor
     ancestors <- GetAncestors(curr.var, adj.mat, top.ord)
     res.anc <- (sum(is.element(ancestors, res.vars)) > 0)
