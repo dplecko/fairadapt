@@ -141,8 +141,9 @@ GetQuants <- function(data, quant.method) {
 
   } else if (quant.method == "linear") {
 
-    offending.cols <- 1 + which(sapply(2:ncol(data),
-                                  function(x) length(unique(data[, x]))) == 1)
+    offending.cols <- 1 + which(vapply(2:ncol(data),
+                                  function(x) length(unique(data[, x])),
+                                  1L) == 1)
     keep.cols <- which(!(1:ncol(data) %in% offending.cols))
 
     if (length(offending.cols) == (ncol(data)-1)) {
@@ -162,7 +163,8 @@ GetQuants <- function(data, quant.method) {
   }
 
   eval <- data[, 1]
-  U.hat <- sapply(1:nrow(data), function(x) ecdf(empirical[x, ]) (eval[x]))
+  U.hat <- vapply(1:nrow(data), function(x) ecdf(empirical[x, ]) (eval[x]),
+                  0.0)
 
   return(U.hat)
 
@@ -193,8 +195,9 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
   } else if (quant.method == "linear") {
 
-    offending.cols <- 1 + which(sapply(2:ncol(data),
-                                  function(x) length(unique(data[, x]))) == 1)
+    offending.cols <- 1 + which(vapply(2:ncol(data),
+                                  function(x) length(unique(data[, x])),
+                                  1L) == 1)
     keep.cols <- which(!(1:ncol(data) %in% offending.cols))
 
     if (length(offending.cols) == (ncol(data)-1)) {
@@ -213,8 +216,9 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
   }
 
-  if(!is.null(quantiles)) ctf.values <- sapply(1:nrow(newdata),
-    function(x) quantile(quantiles[x, ], newU[x]))
+  if(!is.null(quantiles)) ctf.values <-
+    vapply(1:nrow(newdata), function(x) quantile(quantiles[x, ], newU[x]),
+           0.0)
 
   ctf.values
 

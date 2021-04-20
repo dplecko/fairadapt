@@ -140,8 +140,9 @@ fairadapt <- function(formula, train.data, test.data,
     discrete <- FALSE
     curr.parents <- AdjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
     curr.cat.parents <-
-      curr.parents[sapply(1:length(curr.parents),
-                          function(x) is.factor(train.data[, curr.parents[x]]))]
+      curr.parents[vapply(1:length(curr.parents),
+                          function(x) is.factor(train.data[, curr.parents[x]]),
+                          TRUE)]
 
     row.idx <- rep(TRUE, full.len)
 
