@@ -70,7 +70,7 @@ GetParents <- function(var, adj.mat, top.ord = NULL) {
 
 GetChildren <- function(var, adj.mat, top.ord = NULL) {
 
-  if (is.null(adj.mat)) return(GetDescendants(var, ajd.mat, top.ord))
+  if (is.null(adj.mat)) return(GetDescendants(var, adj.mat, top.ord))
 
   if (length(var) > 1) return(Reduce(c, lapply(var, GetChildren, adj.mat)))
 
@@ -162,23 +162,59 @@ NonID <- function(iv, adj.mat, cfd.mat) {
 
 }
 
-VisualizeGraph <- function(adj.mat, cfd.mat) {
+#' Obtaining the graphical causal model (GCM)
+#'
+#'
+#' @param adj.mat Matrix of class \code{matrix} encoding the relationships in
+#' the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
+#' node i to node j.
+#' @param cfd.mat Symmetric matrix of class \code{matrix} encoding the
+#' bidirected edges in the causal graph. \code{M[i,j] == M[j, i] == 1L}
+#' implies the existence of a bidirected edge between nodes i and j.
+#' @param res.vars A vector of class \code{character} listing all the resolving
+#' variables, which should not be changed by the adaption procedure. Default
+#' value is \code{NULL}, corresponding to no resolving variables. Resolving
+#' variables should be a subset of \code{colnames(adj.mat)}. Resolving
+#' variables are marked with a different color in the output.
+#' @return An object of class \code{igraph}, containing the causal graphical,
+#' with directed and bidirected edges.
+#' @examples
+#' adj.mat <- cfd.mat <- array(0L, dim = c(3, 3))
+#' colnames(adj.mat) <- rownames(adj.mat) <-
+#'   colnames(cfd.mat) <- rownames(cfd.mat) <- c("A", "X", "Y")
+#'
+#' adj.mat["A", "X"] <- adj.mat["X", "Y"] <-
+#'   cfd.mat["X", "Y"] <- cfd.mat["Y", "X"] <- 1L
+#'
+#' gcm <- graphModel(adj.mat, cfd.mat, res.vars = "X")
+#'
+#' @export
+graphModel <- function(adj.mat, cfd.mat = NULL, res.vars = NULL) {
 
-  g <- graph_from_adjacency_matrix(adj.mat)
-  E(g)$curved <- 0
-  E(g)$lty <- "solid"
+  if(is.null(cfd.mat)) {
+    cfd.mat <- adj.mat
+    cfd.mat[, ] <- 0L
+  }
+
+  cfd.mat <- cfd.mat[colnames(adj.mat), colnames(adj.mat)]
+
+  g <- igraph::graph_from_adjacency_matrix(adj.mat)
+  igraph::E(g)$curved <- 0
+  igraph::E(g)$lty <- "solid"
   diag(cfd.mat) <- 0
 
-  cfg <- graph_from_adjacency_matrix(cfd.mat)
-  e.list <- as_edgelist(cfg, names = F)
+  cfg <- igraph::graph_from_adjacency_matrix(cfd.mat)
+  e.list <- igraph::as_edgelist(cfg, names = F)
   curved <- (e.list[, 1] < e.list[, 2]) - 0.5
   lty <- ifelse((e.list[, 1] < e.list[, 2]), "dashed", "blank")
-  g <- add_edges(g, as.vector(t(e.list)), curved = curved, lty = lty)
+  g <- igraph::add_edges(g, as.vector(t(e.list)), curved = curved, lty = lty)
 
 
-  E(g)$color <- "black"
-  E(g)$arrow.size <- 0.35
-  V(g)$color <- "white"
+  igraph::E(g)$color <- "black"
+  igraph::E(g)$arrow.size <- 0.35
+  igraph::V(g)$color <- "white"
+  igraph::V(g)$color[which(names(igraph::V(g)) %in% res.vars)] <- "red"
   g
 
 }
+

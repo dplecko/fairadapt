@@ -122,16 +122,18 @@ GetQuants <- function(data, quant.method) {
 
   if(quant.method == "forest") {
 
-    object <- ranger::ranger(formula(data), data = data, quantreg = T, keep.inbag = T, min.node.size = 20)
+    object <- ranger::ranger(formula(data), data = data, quantreg = T,
+                             keep.inbag = T, min.node.size = 20)
 
     empirical <- object$random.node.values.oob
 
   } else if (quant.method == "nn") {
 
     data.matrix <- matrix(as.numeric(unlist(data)), nrow=nrow(data))
-    object <- qrnn::mcqrnn.fit(x = data.matrix[, -1, drop = FALSE], y = matrix(data.matrix[, 1], ncol = 1),
-      tau = seq(0.005, 0.995, by = 0.01),
-      n.trials = 1, iter.max = 500, trace = FALSE)
+    object <- qrnn::mcqrnn.fit(x = data.matrix[, -1, drop = FALSE],
+                               y = matrix(data.matrix[, 1], ncol = 1),
+                               tau = seq(0.005, 0.995, by = 0.01),
+                               n.trials = 1, iter.max = 500, trace = FALSE)
 
     x <- matrix(as.numeric(unlist(data[, -1, drop = FALSE])), nrow=nrow(data))
 
@@ -139,17 +141,19 @@ GetQuants <- function(data, quant.method) {
 
   } else if (quant.method == "linear") {
 
-    offending.cols <- 1 + which(sapply(2:ncol(data), function(x) length(unique(data[, x]))) == 1)
+    offending.cols <- 1 + which(sapply(2:ncol(data),
+                                  function(x) length(unique(data[, x]))) == 1)
     keep.cols <- which(!(1:ncol(data) %in% offending.cols))
 
     if (length(offending.cols) == (ncol(data)-1)) {
 
-      object <- quantreg::rq(Y ~ 1, data = data, tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
+      object <- quantreg::rq(Y ~ 1, data = data,
+                             tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
 
     } else {
 
       object <- quantreg::rq(formula(data[, keep.cols]), data = data,
-        tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
+                             tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
 
     }
 
@@ -168,17 +172,20 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
   if (quant.method == "forest") {
 
-    object <- ranger::ranger(formula(data), data = data, quantreg = T, min.node.size = 20)
+    object <- ranger::ranger(formula(data), data = data, quantreg = T,
+                             min.node.size = 20)
 
-    quantiles <- predict(object, data = newdata, type = "quantiles", what = function(x) x)$predictions
+    quantiles <- predict(object, data = newdata, type = "quantiles",
+                         what = function(x) x)$predictions
 
   } else if (quant.method == "nn") {
 
     data.matrix <- matrix(as.numeric(unlist(data)), nrow=nrow(data))
 
-    object <- qrnn::mcqrnn.fit(x = data.matrix[, -1, drop = FALSE], y = matrix(data.matrix[, 1], ncol = 1),
-      tau = seq(0.005, 0.995, by = 0.01),
-      n.trials = 1, iter.max = 500, trace = FALSE)
+    object <- qrnn::mcqrnn.fit(x = data.matrix[, -1, drop = FALSE],
+                               y = matrix(data.matrix[, 1], ncol = 1),
+                               tau = seq(0.005, 0.995, by = 0.01),
+                               n.trials = 1, iter.max = 500, trace = FALSE)
 
     x <- matrix(as.numeric(unlist(newdata)), ncol = ncol(newdata))
 
@@ -186,12 +193,14 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
   } else if (quant.method == "linear") {
 
-    offending.cols <- 1 + which(sapply(2:ncol(data), function(x) length(unique(data[, x]))) == 1)
+    offending.cols <- 1 + which(sapply(2:ncol(data),
+                                  function(x) length(unique(data[, x]))) == 1)
     keep.cols <- which(!(1:ncol(data) %in% offending.cols))
 
     if (length(offending.cols) == (ncol(data)-1)) {
 
-      object <- quantreg::rq(Y ~ 1, data = data, tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
+      object <- quantreg::rq(Y ~ 1, data = data,
+                             tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
 
     } else {
 
@@ -204,7 +213,8 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
   }
 
-  if(!is.null(quantiles)) ctf.values <- sapply(1:nrow(newdata), function(x) quantile(quantiles[x, ], newU[x]))
+  if(!is.null(quantiles)) ctf.values <- sapply(1:nrow(newdata),
+    function(x) quantile(quantiles[x, ], newU[x]))
 
   ctf.values
 
