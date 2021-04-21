@@ -91,45 +91,6 @@ InitAdapt <- function(org.data, protect.A) {
 
 }
 
-CtfAAP <- function(data, cf.parents, ind, A.root, quant.method = "forest") {
-
-  nosplit <- (!A.root) | (quant.method == "nn")
-
-  assertthat::assert_that(ncol(data) == (ncol(cf.parents)+1))
-
-  names(data) <- c("Y", paste0("X", 1:ncol(cf.parents)))
-  names(cf.parents) <- paste0("X", 1:ncol(cf.parents))
-
-  if (nosplit) {
-
-    U <- GetQuants(data, quant.method)
-    ctf.values <- InvertQ(data, cf.parents, U, U[!ind], quant.method)
-
-  } else {
-
-    U <- rep(0, nrow(data))
-    U[ind] <- GetQuants(data[ind, ], quant.method)
-    U[!ind] <- GetQuants(data[!ind, ], quant.method)
-    ctf.values <- InvertQ(data[ind, ], cf.parents, U[ind], U[!ind], quant.method)
-
-  }
-
-  ctf.values
-
-}
-
-CtfAAP2 <- function(data, cf.parents, ind, A.root, quant.method) {
-
-  assertthat::assert_that(ncol(data) == (ncol(cf.parents)+1))
-  object <- quant.method(data, A.root, ind)
-
-  vals <- computeQuants(object, data, cf.parents, ind)
-
-  #browser()
-
-  vals
-}
-
 GetQuants <- function(data, quant.method) {
 
   if(quant.method == "forest") {

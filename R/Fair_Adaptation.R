@@ -69,8 +69,7 @@
 fairadapt <- function(formula, train.data, test.data,
   adj.mat = NULL, cfd.mat = NULL, top.ord = NULL,
   protect.A, res.vars = NULL,
-  quant.method = "forest", visualize.graph = FALSE,
-  AAP = 1L) {
+  quant.method = fairadapt:::rangerQuants, visualize.graph = FALSE) {
 
   # verify correctness of input
   CorrectInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
@@ -80,8 +79,25 @@ fairadapt <- function(formula, train.data, test.data,
   adj.mat <- adj.mat[colnames(adj.mat), ]
 
   # reorder columns and Factor-ize
-  list2env(ReorderCols(formula, train.data, test.data, protect.A),
-    envir = environment())
+  {
+
+    train.data <- model.frame(formula, train.data)
+    train.data[, protect.A] <- as.factor(train.data[, protect.A])
+    train.len <- nrow(train.data)
+
+    if (!is.null(test.data)) {
+
+      test.data <- test.data[, colnames(train.data)[-1]]
+      test.data[, protect.A] <- as.factor(test.data[, protect.A])
+      test.data <- cbind(NA, test.data)
+      colnames(test.data) <- colnames(train.data)
+
+    }
+
+    org.data <- rbind(train.data, test.data)
+    full.len <- nrow(org.data)
+
+  }
 
   # keep important parts of adjacency matrix
   adj.mat <- adj.mat[colnames(org.data), colnames(org.data)]
@@ -164,20 +180,15 @@ fairadapt <- function(formula, train.data, test.data,
     }
 
     ### perform the Adaptation
-    curr.adapt.data <-
-      org.data[row.idx, c(curr.var, curr.parents), drop = F]
-    curr.cf.parents <-
-      adapt.data[!base.ind & row.idx, curr.parents, drop = F]
+    qr.data <- org.data[row.idx, c(curr.var, curr.parents), drop = F]
+    cf.parents <- adapt.data[!base.ind & row.idx, curr.parents, drop = F]
 
-    if (AAP == 1L) {
-      adapt.data[!base.ind & row.idx, curr.var] <-
-        CtfAAP(data = curr.adapt.data, cf.parents = curr.cf.parents,
-               ind = base.ind[row.idx], A.root = A.root, quant.method = quant.method)
-    } else {
-      adapt.data[!base.ind & row.idx, curr.var] <-
-        CtfAAP2(data = curr.adapt.data, cf.parents = curr.cf.parents,
-               ind = base.ind[row.idx], A.root = A.root, quant.method = quant.method)
-    }
+    assertthat::assert_that(ncol(qr.data) == (ncol(cf.parents)+1))
+    object <- quant.method(qr.data, A.root, base.ind[row.idx])
+
+    adapt.data[!base.ind & row.idx, curr.var] <-
+      computeQuants(object, qr.data, cf.parents, base.ind[row.idx])
+
     # check if there exists a resolving ancestor
     ancestors <- GetAncestors(curr.var, adj.mat, top.ord)
     res.anc <- (sum(is.element(ancestors, res.vars)) > 0)
