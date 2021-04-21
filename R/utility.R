@@ -55,42 +55,6 @@ MarginalMatching <- function(x, base.ind) {
 
 }
 
-ReorderCols <- function(formula, train.data, test.data, protect.A) {
-
-  train.data <- model.frame(formula, train.data)
-  test.data <- test.data[, colnames(train.data)[-1]]
-
-  train.data[, protect.A] <- as.factor(train.data[, protect.A])
-  test.data[, protect.A] <- as.factor(test.data[, protect.A])
-  test.data <- cbind(NA, test.data)
-
-  colnames(test.data) <- colnames(train.data)
-
-  list(
-    train.data = train.data,
-    test.data = test.data,
-    org.data = rbind(train.data, test.data),
-    train.len = nrow(train.data),
-    full.len = nrow(train.data) + nrow(test.data)
-  )
-
-}
-
-InitAdapt <- function(org.data, protect.A) {
-
-  adapt.data <- org.data
-  base.lvl <- levels(org.data[, protect.A])[1]
-  base.ind <- org.data[, protect.A] == base.lvl
-  adapt.data[, protect.A] <- factor(base.lvl,
-                                    levels = levels(org.data[, protect.A]))
-
-  list(
-    adapt.data = adapt.data,
-    base.ind = base.ind
-  )
-
-}
-
 GetQuants <- function(data, quant.method) {
 
   if(quant.method == "forest") {

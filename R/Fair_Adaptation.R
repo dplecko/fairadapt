@@ -110,7 +110,13 @@ fairadapt <- function(formula, train.data, test.data,
   }
 
   # construct the initial version of adapted data
-  list2env(InitAdapt(org.data, protect.A), envir = environment())
+  {
+    adapt.data <- org.data
+    base.lvl <- levels(org.data[, protect.A])[1]
+    base.ind <- org.data[, protect.A] == base.lvl
+    adapt.data[, protect.A] <- factor(base.lvl,
+                                      levels = levels(org.data[, protect.A]))
+  }
 
   # obtain topological ordering and descendants of A
   if(is.null(top.ord)) { # Markovian / Semi-Markovian case
