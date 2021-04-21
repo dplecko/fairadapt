@@ -118,6 +118,18 @@ CtfAAP <- function(data, cf.parents, ind, A.root, quant.method = "forest") {
 
 }
 
+CtfAAP2 <- function(data, cf.parents, ind, A.root, quant.method) {
+
+  assertthat::assert_that(ncol(data) == (ncol(cf.parents)+1))
+  object <- quant.method(data, A.root, ind)
+
+  vals <- computeQuants(object, data, cf.parents, ind)
+
+  #browser()
+
+  vals
+}
+
 GetQuants <- function(data, quant.method) {
 
   if(quant.method == "forest") {
@@ -154,7 +166,7 @@ GetQuants <- function(data, quant.method) {
     } else {
 
       object <- quantreg::rq(formula(data[, keep.cols]), data = data,
-                             tau = c(0.001,seq(0.005, 0.995, by = 0.01), 0.999))
+                             tau = c(0.001, seq(0.005, 0.995, by = 0.01), 0.999))
 
     }
 
@@ -164,7 +176,7 @@ GetQuants <- function(data, quant.method) {
 
   eval <- data[, 1]
   U.hat <- vapply(1:nrow(data), function(x) ecdf(empirical[x, ]) (eval[x]),
-                  0.0)
+                  numeric(1L))
 
   return(U.hat)
 
@@ -218,7 +230,7 @@ InvertQ <- function(data, newdata, U, newU, quant.method) {
 
   if(!is.null(quantiles)) ctf.values <-
     vapply(1:nrow(newdata), function(x) quantile(quantiles[x, ], newU[x]),
-           0.0)
+           numeric(1L))
 
   ctf.values
 

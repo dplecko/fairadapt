@@ -69,7 +69,8 @@
 fairadapt <- function(formula, train.data, test.data,
   adj.mat = NULL, cfd.mat = NULL, top.ord = NULL,
   protect.A, res.vars = NULL,
-  quant.method = "forest", visualize.graph = FALSE) {
+  quant.method = "forest", visualize.graph = FALSE,
+  AAP = 1L) {
 
   # verify correctness of input
   CorrectInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
@@ -140,9 +141,9 @@ fairadapt <- function(formula, train.data, test.data,
     discrete <- FALSE
     curr.parents <- AdjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
     curr.cat.parents <-
-      curr.parents[vapply(1:length(curr.parents),
+      curr.parents[vapply(seq_along(curr.parents),
                           function(x) is.factor(train.data[, curr.parents[x]]),
-                          TRUE)]
+                          logical(1L))]
 
     row.idx <- rep(TRUE, full.len)
 
@@ -168,9 +169,15 @@ fairadapt <- function(formula, train.data, test.data,
     curr.cf.parents <-
       adapt.data[!base.ind & row.idx, curr.parents, drop = F]
 
-    adapt.data[!base.ind & row.idx, curr.var] <-
-      CtfAAP(data = curr.adapt.data, cf.parents = curr.cf.parents,
-             ind = base.ind[row.idx], A.root = A.root, quant.method = quant.method)
+    if (AAP == 1L) {
+      adapt.data[!base.ind & row.idx, curr.var] <-
+        CtfAAP(data = curr.adapt.data, cf.parents = curr.cf.parents,
+               ind = base.ind[row.idx], A.root = A.root, quant.method = quant.method)
+    } else {
+      adapt.data[!base.ind & row.idx, curr.var] <-
+        CtfAAP2(data = curr.adapt.data, cf.parents = curr.cf.parents,
+               ind = base.ind[row.idx], A.root = A.root, quant.method = quant.method)
+    }
     # check if there exists a resolving ancestor
     ancestors <- GetAncestors(curr.var, adj.mat, top.ord)
     res.anc <- (sum(is.element(ancestors, res.vars)) > 0)

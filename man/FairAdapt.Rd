@@ -14,7 +14,8 @@ fairadapt(
   protect.A,
   res.vars = NULL,
   quant.method = "forest",
-  visualize.graph = FALSE
+  visualize.graph = FALSE,
+  AAP = 1L
 )
 }
 \arguments{
