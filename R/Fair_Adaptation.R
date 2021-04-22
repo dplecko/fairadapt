@@ -172,13 +172,27 @@ fairadapt <- function(formula, train.data, test.data,
     if (curr.var == colnames(train.data)[1]) row.idx[-(1:train.len)] <- FALSE
 
     # check if Discrete
-    if (length(unique(org.data[, curr.var])) < 100 |
+    if (length(unique(org.data[, curr.var])) < 10 |
         is.factor(org.data[, curr.var])) {
 
-      list2env(EncodeDiscrete(
-          org.data[row.idx, 1], org.data[row.idx, curr.var]
-        ), envir = environment()
-      )
+      discrete <- TRUE
+      if (is.factor(org.data[, curr.var])) {
+
+        org.data[, curr.var] <-
+          factor(org.data[, curr.var],
+                 levels = CatOrder(org.data[row.idx, 1],
+                                   org.data[row.idx, curr.var]))
+
+      } else org.data[, curr.var] <- factor(org.data[, curr.var])
+
+      unique.values <- levels(org.data[, curr.var])
+
+      int.enc <- as.integer(org.data[row.idx, curr.var]) +
+                 runif(length(org.data[row.idx, curr.var]), -0.5, 0.5)
+
+      ### fct <- EncodeDiscrete2()
+      ### EncodeDiscrete2 uses the CatOrder function to make var into a factor
+      ### int.enc <- as.integer(fct) + runif(length(fct), -0.5, 0.5)
 
       org.data[, curr.var] <- adapt.data[, curr.var] <-
         MakeLength(int.enc, train.len, full.len)
@@ -211,21 +225,16 @@ fairadapt <- function(formula, train.data, test.data,
     if (discrete) {
 
       adapt.var <- MakeLength(
-        DecodeDiscrete(adapt.data[row.idx, curr.var], cat.enc, unique.values),
+        DecodeDiscrete(adapt.data[row.idx, curr.var], unique.values,
+                       class(adapt.data[row.idx, curr.var])),
         train.len, full.len
       )
 
       org.var <- MakeLength(
-        DecodeDiscrete(org.data[row.idx, curr.var], cat.enc, unique.values),
+        DecodeDiscrete(org.data[row.idx, curr.var], unique.values,
+          class(org.data[row.idx, curr.var])),
         train.len, full.len
       )
-
-      if (is.factor(train.data[, curr.var])) {
-
-        adapt.var <- as.factor(adapt.var)
-        org.var <- as.factor(org.var)
-
-      }
 
       adapt.data[, curr.var] <- adapt.var
       org.data[, curr.var] <- org.var
