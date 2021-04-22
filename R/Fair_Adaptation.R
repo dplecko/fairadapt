@@ -145,6 +145,8 @@ fairadapt <- function(formula, train.data, test.data,
 
   }
 
+  q.Engine <- list()
+
   # main procedure part
   # seq.int()
   for (curr.var in top.ord[(which(top.ord == protect.A) + 1):length(top.ord)]) {
@@ -159,13 +161,12 @@ fairadapt <- function(formula, train.data, test.data,
       res.vars <- c(res.vars, curr.var)
     if (is.element(curr.var, res.vars) | !is.element(curr.var, A.des)) next
 
+    q.Engine[[curr.var]][["type"]] <- class(org.data[, curr.var])
 
-    discrete <- FALSE
+
+    q.Engine[[curr.var]][["discrete"]] <- discrete <- FALSE
     curr.parents <- AdjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
-    curr.cat.parents <-
-      curr.parents[vapply(seq_along(curr.parents),
-                          function(x) is.factor(train.data[, curr.parents[x]]),
-                          logical(1L))]
+    q.Engine[[curr.var]][["parents"]] <- class(org.data[, curr.var])
 
     row.idx <- rep(TRUE, full.len)
 
@@ -175,7 +176,7 @@ fairadapt <- function(formula, train.data, test.data,
     if (length(unique(org.data[, curr.var])) < 10 |
         is.factor(org.data[, curr.var])) {
 
-      discrete <- TRUE
+      q.Engine[[curr.var]][["discrete"]] <- discrete <- TRUE
       if (is.factor(org.data[, curr.var])) {
 
         org.data[, curr.var] <-
@@ -185,7 +186,8 @@ fairadapt <- function(formula, train.data, test.data,
 
       } else org.data[, curr.var] <- factor(org.data[, curr.var])
 
-      unique.values <- levels(org.data[, curr.var])
+      q.Engine[[curr.var]][["unique.values"]] <- unique.values <-
+        levels(org.data[, curr.var])
 
       int.enc <- as.integer(org.data[row.idx, curr.var]) +
                  runif(length(org.data[row.idx, curr.var]), -0.5, 0.5)
@@ -200,11 +202,12 @@ fairadapt <- function(formula, train.data, test.data,
     }
 
     ### perform the Adaptation
-    qr.data <- org.data[row.idx, c(curr.var, curr.parents), drop = F]
-    cf.parents <- adapt.data[!base.ind & row.idx, curr.parents, drop = F]
+    qr.data <- org.data[row.idx, c(curr.var, curr.parents), drop = FALSE]
+    cf.parents <- adapt.data[!base.ind & row.idx, curr.parents, drop = FALSE]
 
     assertthat::assert_that(ncol(qr.data) == (ncol(cf.parents)+1))
-    object <- quant.method(qr.data, A.root, base.ind[row.idx])
+    q.Engine[[curr.var]][["object"]] <- object <-
+      quant.method(qr.data, A.root, base.ind[row.idx])
 
     adapt.data[!base.ind & row.idx, curr.var] <-
       computeQuants(object, qr.data, cf.parents, base.ind[row.idx])
@@ -248,11 +251,13 @@ fairadapt <- function(formula, train.data, test.data,
     adapt.test = adapt.data[-(1:train.len),-1],
     train = train.data,
     test = test.data,
+    base.lvl = base.lvl,
     base.ind = base.ind,
     formula = formula,
     res.vars = res.vars,
     protect.A = protect.A,
-    graph = ig
+    graph = ig,
+    q.Engine = q.Engine
   ), class = "fairadapt")
 
 }

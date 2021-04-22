@@ -32,11 +32,14 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
 
       plt[[tgt]] <- ggplot(df, aes(x = protected, fill = factor(vals))) +
         geom_bar(position = "fill") + theme_minimal() +
-        xlab(x$protect.A) + ggtitle(paste("Outcome proportions", whn, "adaptation")) +
+        xlab(x$protect.A) + ggtitle(paste("Outcome proportions", whn,
+                                          "adaptation")) +
         scale_y_continuous(labels = scales::percent) +
         scale_fill_discrete(name = names(FA.basic$train)[1L]) +
         geom_text(aes( y= get_pos(..count..),
-          label= scales::percent(round(..count../tapply(..count.., ..x.. ,sum)[..x..], 4))),
+          label = scales::percent(
+            round(..count../tapply(..count.., ..x.. ,sum)[..x..], 4))
+          ),
           stat="count", vjust=0)
 
     }
@@ -58,18 +61,22 @@ print.fairadapt <- function(x, ...) {
   cat("Fairadapt result\n\n")
   cat("Call:\n", deparse(x$formula), "\n\n")
   cat("Protected attribute:                 ", x$protect.A, "\n")
-  cat("Protected attribute levels:          ", paste(sort(unique(x$train[[x$protect.A]])), collapse = ", "), "\n")
-  if(!is.null(x$res.vars)) cat("Resolving variables:                 ", paste(x$res.vars, collapse = ", "), "\n")
+  cat("Protected attribute levels:          ",
+      paste(sort(unique(x$train[[x$protect.A]])), collapse = ", "), "\n")
+  if(!is.null(x$res.vars)) cat("Resolving variables:                 ",
+                               paste(x$res.vars, collapse = ", "), "\n")
   cat("Number of training samples:          ", nrow(x$adapt.train), "\n")
   cat("Number of test samples:              ", nrow(x$adapt.test), "\n")
   cat("Number of independent variables:     ", ncol(x$adapt.train) - 1L,
     "\n")
 
   cat("Total variation (before adaptation): ",
-    mean(x$train[[1L]][x$base.ind[1:nrow(x$train)]]) - mean(x$train[[1L]][!x$base.ind[1:nrow(x$train)]]),
+    mean(x$train[[1L]][x$base.ind[1:nrow(x$train)]]) -
+      mean(x$train[[1L]][!x$base.ind[1:nrow(x$train)]]),
     "\n")
   cat("Total variation (after adaptation):  ",
-    mean(x$adapt.train[[1L]][x$base.ind[1:nrow(x$train)]]) - mean(x$adapt.train[[1L]][!x$base.ind[1:nrow(x$train)]]),
+    mean(x$adapt.train[[1L]][x$base.ind[1:nrow(x$train)]]) -
+      mean(x$adapt.train[[1L]][!x$base.ind[1:nrow(x$train)]]),
     "\n")
 
 }
@@ -102,8 +109,10 @@ plot.fairadapt <- function(x, graph = F, when = "after", ...) {
       base.dens <- density(base.val)
       nonbase.dens <- density(nonbase.val)
       plot(base.dens,
-        main = paste("Densities", ifelse(tgt == "train", "before", "after"), "adaptation"),
-        col = "blue", ylim = c(0, max(max(base.dens$y), max(nonbase.dens$y))), xlab = names(x$train)[1L])
+        main = paste("Densities", ifelse(tgt == "train", "before", "after"),
+                     "adaptation"),
+        col = "blue", ylim = c(0, max(max(base.dens$y), max(nonbase.dens$y))),
+        xlab = names(x$train)[1L])
       lines(nonbase.dens, col = "red")
       polygon(base.dens, col = "steelblue", density = 50)
       polygon(nonbase.dens, col = "red", density = 50)
@@ -182,16 +191,59 @@ fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
 #' @export
 predict.fairadapt <- function(x, newdata) {
 
-  for (var in top.ord) {
+  assertthat::assert_that(all(names(newdata) %in% names(x$adapt.test)),
+                          msg = "Columns missing in the data")
+
+  engine <- x$q.Engine
+  adapt <- newdata
+  base.ind <- newdata[, x$protect.A] == x$base.lvl
+
+  for (var in names(engine)) {
+
+
+    assertthat::assert_that(class(newdata[, var]) == engine[[var]][["type"]],
+                            msg = "Mismatch in column type with training data")
 
     # i) encode the variable if needed
+    if (engine[[var]][["discrete"]]) {
+
+      newdata[, var] <- factor(newdata[, var],
+                               levels = engine[[var]][["unique.values"]])
+
+      int.enc <- as.integer(newdata[, var]) +
+                 runif(length(newdata[, var]), -0.5, 0.5)
+
+      newdata[, var] <- adapt[, var] <- int.enc
+
+    }
 
     # ii) computeQuants()
+    adapt[, var] <-
+      computeQuants(
+        engine[[var]][["object"]],
+        newdata[, c(var, engine[[var]][["parents"]]), drop = FALSE],
+        adapt[, engine[[var]][["parents"]], drop = FALSE],
+        base.ind
+      )
 
     # iii) decode discrete
+    if (engine[[var]][["discrete"]]) {
+
+      adapt.var <-
+        DecodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
+                       engine[[var]][["type"]])
+
+      newdata.var <-
+        DecodeDiscrete(newdata[, var], engine[[var]][["unique.values"]],
+                       engine[[var]][["type"]])
+
+      newdata[, var] <- newdata.var
+      adapt[, var] <- adapt.var
+
+    }
 
   }
 
-  return(pred)
+  return(adapt)
 
 }
