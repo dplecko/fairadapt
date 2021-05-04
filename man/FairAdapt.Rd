@@ -7,15 +7,14 @@
 fairadapt(
   formula,
   train.data,
-  test.data,
+  test.data = NULL,
   adj.mat = NULL,
   cfd.mat = NULL,
   top.ord = NULL,
   protect.A,
   res.vars = NULL,
-  quant.method = "forest",
-  visualize.graph = FALSE,
-  AAP = 1L
+  quant.method = fairadapt:::rangerQuants,
+  visualize.graph = FALSE
 )
 }
 \arguments{
@@ -23,7 +22,7 @@ fairadapt(
 the covariates.}
 
 \item{train.data, test.data}{Training data & testing data, both of class
-\code{data.frame}.}
+\code{data.frame}. Test data is by default \code{NULL}.}
 
 \item{adj.mat}{Matrix of class \code{matrix} encoding the relationships in
 the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from

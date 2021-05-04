@@ -14,3 +14,11 @@
 ^cran-comments
 ^tests
 ^CRAN-RELEASE$
+[.]xlsx$
+[.]tex$
+[.]cls$
+[.]bst$
+[.]fdb_latexmk$
+[.]fls$
+[.]log$
+[.]pdf$

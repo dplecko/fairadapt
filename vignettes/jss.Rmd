@@ -11,6 +11,13 @@ author:
       Rämistrasse 101
       CH-8092 Zurich
     email: \email{drago.plecko@stat.math.ethz.ch}
+  - name: Nicolas Bennett
+    affiliation: ETH Zürich
+    address: >
+      Seminar for Statistics
+      Rämistrasse 101
+      CH-8092 Zurich
+    email: \email{nicolas.bennett@stat.math.ethz.ch}
   - name: Nicolai Meinshausen
     affiliation: ETH Zürich
     address: >
@@ -23,8 +30,8 @@ abstract: >
   learn how to discriminate, based on gender, race or some other sensitive attribute. This
   realization gave rise to the field of fair machine learning, which aims to measure and
   mitigate such algorithmic bias. This manuscript describes the implementation of the
-  \pkg{fairadapt} R-package, a causal inference pre-processing method, which using the 
-  causal graphical model model answers hypothetical questions of the form "What would my
+  \pkg{fairadapt} R-package, a causal inference pre-processing method, which, using the 
+  causal graphical model, answers hypothetical questions of the form "What would my
   salary have been, had I been of a different gender/race?". Such counterfactual reasoning
   can help eliminate discrimination and help justify fair decisions.
 keywords:
@@ -88,7 +95,7 @@ This manuscript describes the details of the fair data adaptation method \citep{
 
 We note that as of the day of writing of the manuscript, there are only 4 CRAN packages related fair machine learning. The \pkg{fairml} package implements the non-convex method of \cite{komiyama2018nonconvex}. Packages \pkg{fairness} and \pkg{fairmodels} serve as diagnostic tools for measuring algorithmic bias, together with an implementation of several pre and post-processing methods for bias mitigation. However, the \pkg{fairadapt} package is the only causal method. Even though many papers on the topic have been published, the fairness domain is still lacking good quality implementations of the existing methods.
 
-The rest of the manuscript is organized as follows. In Section \ref{Method} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some of the important concepts of causal inference. In Section \ref{Implementation} we discuss the implementation details and guide the user as to how to use the package. In Section \ref{Illustration} we illustrate the usage of \pkg{fairadapt} by using a large, real-world dataset for a hypothetical fairness application.
+The rest of the manuscript is organized as follows. In Section \ref{Method} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some of the important concepts of causal inference. In Section \ref{Implementation} we discuss the implementation details and guide the user as to how to use the package. In Section \ref{Illustration} we illustrate the usage of \pkg{fairadapt} by using a large, real-world dataset for a hypothetical fairness application. In Section \ref{Extensions} we explain some important extensions, such as Semi-Markovian models and resolving variables.
 
 # Methodology
 \label{Method}
@@ -200,7 +207,7 @@ The $f_i$ assignment functions of the SCM are of course unknown, but are learned
 # Implementation
 \label{Implementation}
 
-The implementation is based on the main function `fairadapt()`. We list the most important function arguments and then show how these should be specified:
+The implementation is based on the main function `fairadapt()`, which returns an S3 object of class `"fairadapt"`. We list the most important arguments of the function and then show how these should be specified:
 
 * `formula`, argument of type `formula` specifies the dependent and explanatory variables
 * `adj.mat` argument of type `matrix` encodes the adjacency matrix
@@ -222,11 +229,11 @@ FA.basic <- fairadapt(score ~ .,
   train.data = uni_admission[1:nsamp, ], 
   test.data = uni_admission[(nsamp+1):(2*nsamp), ],
   adj.mat = uni.adj.mat, protect.A = "gender", res.vars = NULL,
-  visualize.graph = F, quant.method = "forest")
+  visualize.graph = F, quant.method = fairadapt:::rangerQuants)
 
 FA.basic
 ```
-The `FA.basic` is an `S3` object of class `"fairadapt"`. The `print(FA.basic)` shows some information about the object call, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as ($Y$ denoting the outcome variable) $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$ respectively. The total variation, in the case of binary $Y$, corresponds to the parity gap.
+The `"fairadapt"` `S3` class has several associated generics and methods. For instance, `print(FA.basic)` shows some information about the object call, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as ($Y$ denoting the outcome variable) $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$ respectively. The total variation, in the case of binary $Y$, corresponds to the parity gap.
 
 ## Specifying the graphical model
 
@@ -237,9 +244,11 @@ plot(toy.graph, vertex.size = 40, vertex.label.cex = 0.5,
   vertex.label.color = "black")
 ```
 
-## A joint training step
+## Quantile learning step
 
-We describe the training step using the `fairadapt()` function. The `fairadapt()` function works so that training and testing data are given at the same time. The data adaptation is applied to the combination of the two datasets, in order to learn the latent quantiles as precisely as possible (with the exception of label $Y$ which is unavailable on the test set). We note that `train.data` and `test.data` need to have column names which appear in the names of the adjacency matrix `colnames(adj.mat)`. The protected attribute $A$ is given as a character vector `protect.A` of length one.
+We describe the training step using the `fairadapt()` function. The `fairadapt()` function can be used in two slightly distinct ways. The first option is by specifying training and testing data at the same time. The data adaptation is then applied to the combination of train and test data, in order to learn the latent quantiles as precisely as possible (with the exception of label $Y$ which is unavailable on the test set). The second option is use only the `train.data` argument when calling `fairadapt()`, after which the `predict()` function can be used to adapt test data at a later stage.
+
+We note that `train.data` and `test.data` need to have column names which appear in the names of the adjacency matrix `colnames(adj.mat)`. The protected attribute $A$ is given as a character vector `protect.A` of length one.
 
 The quantile learning step in Algorithm \ref{algo:fairadapt} can be done using three different methods:
 \begin{itemize}
@@ -253,7 +262,7 @@ The summary of the various differences between the methods is given in Table \re
     \begin{tabular}{>{\centering\arraybackslash} m{3.5cm}| >{\centering\arraybackslash} m{3cm} >{\centering\arraybackslash}m{3cm} >{\centering\arraybackslash}m{3cm}}
   & Random Forests & Neural Networks & Linear Regression \\ \hline
   \texttt{R}-package & \pkg{ranger} & \pkg{mcqrnn} & \pkg{quantreg} \\ \hline
-  \texttt{quant.method} argument & \texttt{"forest"} & \texttt{"nn"} & \texttt{"linear"} \\ \hline
+  \texttt{quant.method} argument & `rangerQuants` & `mcqrnnQuants` & `linearQuants` \\ \hline
   complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ \hline
   default parameters & $ntrees = 500$ \newline $mtry = \sqrt{p}$ & 2-layer fully connected feed-forward network & . \\ \hline
   $T(200, 4)$ & $0.4$ sec & $89$ sec & $0.3$ sec \\ \hline
@@ -262,7 +271,9 @@ The summary of the various differences between the methods is given in Table \re
     \caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the NN. $T(n, 4)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and testing samples.}
     \label{tab:qmethods}
 \end{table}
-Using the linear quantile method is the fastest option. However, it cannot handle the non-parametric case. For a non-parametric approach and mixed data, the RF approach is well-suited. The neural network approach is, comparatively, substantially slower than the forest/linear case and does not scale well to large sample sizes. Generally, we recommend using the forest based approach, because of the non-parametric nature and computational speed. However, we note that for smaller sample sizes, the neural network approach might in fact be the best option.
+The choice of quantile learning method is done by specifying the `quant.method` argument, which is of class `function` and constructs the quantile regression object. For more details and an example, see `?rangerQuants`. Together with the `quant.method` constructor, `S3`-dispatch is used for inferring the quantiles. This allows the user to specify their own quantile learning methods easily. 
+
+We quickly discuss the quantile learning methods included in the package. Using the linear quantile method is the fastest option. However, it cannot handle the non-parametric case. For a non-parametric approach and mixed data, the RF approach is well-suited. The neural network approach is, comparatively, substantially slower than the forest/linear case and does not scale well to large sample sizes. Generally, we recommend using the forest based approach, because of the non-parametric nature and computational speed. However, we note that for smaller sample sizes, the neural network approach might in fact be the best option.
 
 ## Fair-twin inspection
 The university admission example presented in Section \ref{Method} demonstrates how we can compute counterfactual values for an individual while preserving their relative educational achievement. In particular, for a male student with values $(a, e, t, y)$, we compute his "fair-twin" values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$ - the values the student would have obtained, had he been female. To explicitly compare a person to their hypothetical fair-twin, we use the `fairTwins()` function, applied to an object of class `"fairadapt"`:
@@ -363,9 +374,9 @@ ggplot(dat[1:nsamples], aes(x = salary, fill = sex)) +
 There is a clear shift between the two genders, meaning that `male` employees are currently treated better than `female` employees. However, there could be differences in `salary` which are not due to gender inequality, but have to do with the economic region in which the employee works. This needs to be accounted for as well, i.e. the difference between economic regions is not to be removed. To solve the problem, the US governemnt applies \pkg{fairadapt}:
 
 ```{r census-adapt, include=T}
-FA.govcensus <- fairadapt(salary ~ ., train.data = dat[1:nsamples], 
-  test.data = dat[(nsamples+1)],
-  adj.mat = adj.mat, protect.A = protect.A, visualize.graph = F)
+FA.govcensus <- fairadapt(salary ~ ., train.data = dat[1:nsamples],
+                          adj.mat = adj.mat, protect.A = protect.A, 
+                          visualize.graph = F)
 ```
 
 After applying the adaptation, we inspect whether the problem has improved. The densities after adaptation can be plotted using the `autoplot()` function:
@@ -375,7 +386,14 @@ autoplot(FA.govcensus, when = "after") +
   ggtitle("Adapted salary density by gender")
 ```
 
-Finally, we can do fair-twin inspection using the `fair_twins()` function, to see how feature values of individual employees have changed:
+If we obtain additional testing data, and wish to adapt it as well, we can use the `predict()` function:
+```{r census-predict, include=T}
+new.test <- dat[seq.int(nsamples + 1L, nsamples + 10L, 1L)]
+adapt.test <- predict(FA.govcensus, newdata = new.test)
+head(adapt.test)
+```
+
+Finally, we can do fair-twin inspection using the `fairTwins()` function, to see how feature values of individual employees have changed:
 
 ```{r census-twins, include=T}
 inspect.cols <- c("sex", "age", "education_level", "salary")

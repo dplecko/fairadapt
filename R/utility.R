@@ -1,15 +1,17 @@
 
-CatOrder <- function(outcome, var, u.val) {
+CatOrder <- function(outcome, var) {
 
   u.val <- levels(var)
+  u.val <- u.val[(u.val %in% var)]
   cond.expect <- cat.enc <- rep(0, length(u.val))
 
   for (i in 1:length(u.val)) {
 
     cond.expect[i] <- mean(as.numeric(outcome[var == u.val[i]]), na.rm = TRUE)
-
+    if (is.na(cond.expect[i])) browser()
     assertthat::assert_that(!is.na(cond.expect[i]),
-                            msg = "New factor levels appearing in the test data, which is disallowed")
+                            msg = "New factor levels appearing in the test data,
+                                   which is disallowed")
 
   }
 
@@ -39,7 +41,8 @@ MarginalMatching <- function(x, base.ind) {
 
   fitted.x.baseline <- c(fitted.x.baseline,
                          rep(length(fitted.value.counts),
-                             max(0, length(x.non.baseline) - length(fitted.x.baseline))))
+                             max(0, length(x.non.baseline) -
+                                    length(fitted.x.baseline))))
   fitted.x.baseline <- fitted.x.baseline[1:length(x.non.baseline)]
 
   x.non.baseline[order(x.non.baseline)] <- fitted.x.baseline
@@ -50,10 +53,14 @@ MarginalMatching <- function(x, base.ind) {
 
 }
 
-DecodeDiscrete <- function(var, u.val, type) {
+DecodeDiscrete <- function(var, u.val, type, full.len) {
 
-  indices <- round(var)
-  assertthat::assert_that(is.integer(indices), all(indices > 0L))
+  if (length(var) < full.len) var <- c(var, rep(NA_real_, full.len -
+                                                           length(var)))
+  indices <- as.integer(round(var))
+  assertthat::assert_that(all(indices[!is.na(indices)] > 0L))
+  assertthat::assert_that(all(indices[!is.na(indices)] <= length(u.val)),
+                          msg = "New value appearing, unseen in train data")
 
   decode <- u.val[indices]
 
@@ -67,4 +74,5 @@ DecodeDiscrete <- function(var, u.val, type) {
                 character = decode)
 
   res
+
 }

@@ -1,4 +1,6 @@
-#' @importFrom ggplot2 autoplot
+#' @importFrom ggplot2 autoplot ggplot aes geom_density ggtitle
+#' @importFrom ggplot2 scale_fill_discrete xlab scale_y_continuous
+#' @importFrom ggplot2 geom_bar geom_text theme_minimal
 #' @importFrom cowplot plot_grid
 #' @method autoplot fairadapt
 #' @export
@@ -35,7 +37,7 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
         xlab(x$protect.A) + ggtitle(paste("Outcome proportions", whn,
                                           "adaptation")) +
         scale_y_continuous(labels = scales::percent) +
-        scale_fill_discrete(name = names(FA.basic$train)[1L]) +
+        scale_fill_discrete(name = names(x$train)[1L]) +
         geom_text(aes( y= get_pos(..count..),
           label = scales::percent(
             round(..count../tapply(..count.., ..x.. ,sum)[..x..], 4))
@@ -126,7 +128,7 @@ plot.fairadapt <- function(x, graph = F, when = "after", ...) {
 
 }
 
-#' Fair Twin Inspection convenience function
+#' Fair Twin Inspection convenience function.
 #'
 #' @param x Object of class \code{fairadapt}, a result of an adaptation
 #' procedure.
@@ -138,7 +140,7 @@ plot.fairadapt <- function(x, graph = F, when = "after", ...) {
 #' which specifies which subset of columns is to be displayed in the result.
 #' @return A \code{data.frame}, containing the original and adapted values
 #' of the requested individuals. Adapted columns have \code{_adapted} appended
-#' to their
+#' to their original name.
 #' @examples
 #' uni.adj.mat <- array(0, dim = c(4, 4))
 #' colnames(uni.adj.mat) <- rownames(uni.adj.mat) <-
@@ -159,6 +161,7 @@ fairTwins <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
   UseMethod("fairTwins", x)
 }
 
+#' @method fairTwins fairadapt
 #' @export
 fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
 
@@ -166,17 +169,21 @@ fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
     cols <- c(x$protect.A, cols)
 
   if (!is.null(train.id)) {
+
     target.id <- train.id
     if (is.null(cols)) cols <- names(x$train)
     df.target <- x$train[, cols, drop = F]
     df.adapt <- x$adapt.train[train.id, cols, drop = F]
     names(df.adapt) <- paste0(names(df.adapt), "_adapted")
+
   } else if (!is.null(test.id)) {
+
     target.id <- test.id
-    if (is.null(cols)) cols <- names(x$test)
+    if (is.null(cols)) cols <- names(x$adapt.test)
     df.target <- x$test[, cols, drop = F]
     df.adapt <- x$adapt.test[test.id, cols, drop = F]
     names(df.adapt) <- paste0(names(df.adapt), "_adapted")
+
   }
 
   col.ord <- sapply(setdiff(names(df.target), x$protect.A),
@@ -188,17 +195,23 @@ fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
 
 }
 
+#' @method predict fairadapt
 #' @export
-predict.fairadapt <- function(x, newdata) {
+predict.fairadapt <- function(object, newdata, ...) {
 
-  assertthat::assert_that(all(names(newdata) %in% names(x$adapt.test)),
-                          msg = "Columns missing in the data")
+  assertthat::assert_that(all(names(object$adapt.test) %in% names(newdata)),
+                          msg = "Columns missing in newdata")
 
-  engine <- x$q.Engine
+  engine <- object$q.Engine
+  newdata[, object$protect.A] <- as.factor(newdata[, object$protect.A])
+  newdata[, object$protect.A] <- relevel(newdata[, object$protect.A],
+                                         ref = object$base.lvl)
   adapt <- newdata
-  base.ind <- newdata[, x$protect.A] == x$base.lvl
+  adapt[, object$protect.A] <- factor(object$base.lvl,
+                                      levels = levels(newdata[, object$protect.A]))
+  base.ind <- newdata[, object$protect.A] == object$base.lvl
 
-  for (var in names(engine)) {
+  for (var in setdiff(names(engine), all.vars(object$formual)[1L])) {
 
 
     assertthat::assert_that(class(newdata[, var]) == engine[[var]][["type"]],
@@ -206,6 +219,11 @@ predict.fairadapt <- function(x, newdata) {
 
     # i) encode the variable if needed
     if (engine[[var]][["discrete"]]) {
+
+      assertthat::assert_that(
+        all(newdata[, var] %in% engine[[var]][["unique.values"]]),
+        msg = paste0("New, unseen values of variable ", var, ". Disallowed.")
+      )
 
       newdata[, var] <- factor(newdata[, var],
                                levels = engine[[var]][["unique.values"]])
@@ -218,12 +236,12 @@ predict.fairadapt <- function(x, newdata) {
     }
 
     # ii) computeQuants()
-    adapt[, var] <-
+    adapt[!base.ind, var] <-
       computeQuants(
         engine[[var]][["object"]],
         newdata[, c(var, engine[[var]][["parents"]]), drop = FALSE],
-        adapt[, engine[[var]][["parents"]], drop = FALSE],
-        base.ind
+        adapt[!base.ind, engine[[var]][["parents"]], drop = FALSE],
+        base.ind, test = TRUE
       )
 
     # iii) decode discrete
@@ -231,11 +249,11 @@ predict.fairadapt <- function(x, newdata) {
 
       adapt.var <-
         DecodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
-                       engine[[var]][["type"]])
+                       engine[[var]][["type"]], length(adapt[, var]))
 
       newdata.var <-
         DecodeDiscrete(newdata[, var], engine[[var]][["unique.values"]],
-                       engine[[var]][["type"]])
+                       engine[[var]][["type"]], length(newdata[, var]))
 
       newdata[, var] <- newdata.var
       adapt[, var] <- adapt.var

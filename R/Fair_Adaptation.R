@@ -16,7 +16,7 @@
 ##' @param formula Object of class \code{formula} describing the response and
 ##' the covariates.
 ##' @param train.data,test.data Training data & testing data, both of class
-##' \code{data.frame}.
+##' \code{data.frame}. Test data is by default \code{NULL}.
 ##' @param adj.mat Matrix of class \code{matrix} encoding the relationships in
 ##' the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
 ##' node i to node j. Must include all the variables appearing in the formula
@@ -66,7 +66,7 @@
 ##' Fair Data Adaptation with Quantile Preservation \cr
 ##' @import stats
 ##' @export
-fairadapt <- function(formula, train.data, test.data,
+fairadapt <- function(formula, train.data, test.data = NULL,
   adj.mat = NULL, cfd.mat = NULL, top.ord = NULL,
   protect.A, res.vars = NULL,
   quant.method = fairadapt:::rangerQuants, visualize.graph = FALSE) {
@@ -142,6 +142,7 @@ fairadapt <- function(formula, train.data, test.data,
 
     A.des <- GetDescendants(protect.A, adj.mat, top.ord)
     A.root <- top.ord[1] == protect.A
+    ig <- NULL
 
   }
 
@@ -161,12 +162,13 @@ fairadapt <- function(formula, train.data, test.data,
       res.vars <- c(res.vars, curr.var)
     if (is.element(curr.var, res.vars) | !is.element(curr.var, A.des)) next
 
-    q.Engine[[curr.var]][["type"]] <- class(org.data[, curr.var])
+    q.Engine[[curr.var]] <- list()
+    q.Engine[[curr.var]][["type"]] <- type <- class(org.data[, curr.var])
 
 
     q.Engine[[curr.var]][["discrete"]] <- discrete <- FALSE
     curr.parents <- AdjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
-    q.Engine[[curr.var]][["parents"]] <- class(org.data[, curr.var])
+    q.Engine[[curr.var]][["parents"]] <- curr.parents
 
     row.idx <- rep(TRUE, full.len)
 
@@ -227,17 +229,11 @@ fairadapt <- function(formula, train.data, test.data,
     # if discrete, recode back to discrete or factor
     if (discrete) {
 
-      adapt.var <- MakeLength(
-        DecodeDiscrete(adapt.data[row.idx, curr.var], unique.values,
-                       class(adapt.data[row.idx, curr.var])),
-        train.len, full.len
-      )
+      adapt.var <- DecodeDiscrete(adapt.data[row.idx, curr.var], unique.values,
+                                  type, full.len)
 
-      org.var <- MakeLength(
-        DecodeDiscrete(org.data[row.idx, curr.var], unique.values,
-          class(org.data[row.idx, curr.var])),
-        train.len, full.len
-      )
+      org.var <- DecodeDiscrete(org.data[row.idx, curr.var], unique.values,
+                                type, full.len)
 
       adapt.data[, curr.var] <- adapt.var
       org.data[, curr.var] <- org.var
