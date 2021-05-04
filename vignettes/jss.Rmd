@@ -262,9 +262,9 @@ The summary of the various differences between the methods is given in Table \re
     \begin{tabular}{>{\centering\arraybackslash} m{3.5cm}| >{\centering\arraybackslash} m{3cm} >{\centering\arraybackslash}m{3cm} >{\centering\arraybackslash}m{3cm}}
   & Random Forests & Neural Networks & Linear Regression \\ \hline
   \texttt{R}-package & \pkg{ranger} & \pkg{mcqrnn} & \pkg{quantreg} \\ \hline
-  \texttt{quant.method} argument & `rangerQuants` & `mcqrnnQuants` & `linearQuants` \\ \hline
+  \texttt{quant.method} & \code{rangerQuants} & \code{mcqrnnQuants} & \code{linearQuants} \\ \hline
   complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ \hline
-  default parameters & $ntrees = 500$ \newline $mtry = \sqrt{p}$ & 2-layer fully connected feed-forward network & . \\ \hline
+  default parameters & $ntrees = 500$ \newline $mtry = \sqrt{p}$ & 2-layer fully connected feed-forward network & \code{"br"} method of Barrodale and Roberts used for fitting \\ \hline
   $T(200, 4)$ & $0.4$ sec & $89$ sec & $0.3$ sec \\ \hline
   $T(500, 4)$ & $0.9$ sec & $202$ sec & $0.5$ sec \\ \hline
 \end{tabular}
