@@ -3,3 +3,9 @@
 .RData
 .Ruserdata
 *copy.R
+*.tex
+*.cls
+*.bst
+*.aux
+*.bbl
+*.fdb_latexmk

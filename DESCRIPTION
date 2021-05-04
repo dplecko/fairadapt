@@ -18,7 +18,17 @@ Imports:
     assertthat,
     quantreg,
     qrnn,
-    igraph
-RoxygenNote: 7.1.0
+    igraph,
+    ggplot2,
+    cowplot,
+    scales
+RoxygenNote: 7.1.1
 Suggests:
-    testthat (>= 2.1.0)
+    testthat (>= 2.1.0),
+    knitr,
+    rmarkdown,
+    markdown
+VignetteBuilder:
+    knitr
+Depends:
+    R (>= 2.10)

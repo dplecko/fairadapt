@@ -1,7 +1,7 @@
 CorrectInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
                          protect.A, resolving.variables = NULL, quant.method) {
 
-  assertthat::assert_that(quant.method %in% c("forest", "forest2", "linear", "nn"))
+  #assertthat::assert_that(quant.method %in% c("forest", "forest2", "linear", "nn"))
 
   if (is.null(adj.mat)) {
 
@@ -31,11 +31,11 @@ CorrectInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.o
   assertthat::assert_that(is.element(protect.A, ap.nms))
 
   train.data <- model.frame(formula, train.data)
-  test.data <- test.data[, colnames(train.data)[-1]]
+  if (!is.null(test.data)) test.data <- test.data[, colnames(train.data)[-1]]
 
   assertthat::assert_that(sum(is.na(train.data)) == 0, nrow(train.data) > 0)
 
-  assertthat::assert_that(sum(is.na(test.data)) == 0)
+  if (!is.null(test.data)) assertthat::assert_that(sum(is.na(test.data)) == 0)
 
   assertthat::assert_that(sum(!is.element(colnames(train.data), ap.nms)) == 00)
 

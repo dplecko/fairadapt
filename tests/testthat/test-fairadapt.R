@@ -24,7 +24,9 @@ test_that("Fairadapt Works", {
   cfd <- adjacency.matrix
   cfd[,] <- 0
 
-  for(method in c("forest", "forest2", "linear")) {
+  for(method in c(fairadapt:::rangerQuants,
+                  fairadapt:::linearQuants,
+                  fairadapt:::mcqrnnQuants)) {
 
     L <- fairadapt(Y ~ ., train.data = DataGen(100), test.data = DataGen(100),
       adj.mat = adjacency.matrix, protect.A = "A", quant.method = method)
@@ -37,42 +39,53 @@ test_that("Fairadapt Works", {
 
   }
 
-  data <- read.csv(file.path("..", "real-data", "compas", "compas-scores-two-years.csv"))
+  L <- fairadapt(Y ~ ., train.data = DataGen(100), test.data = DataGen(100),
+                 top.ord = c("A", "X", "Y"), protect.A = "A")
+  expect_true(is.list(L))
+
+  data <- read.csv(file.path("..", "real-data", "compas",
+                             "compas-scores-two-years.csv"))
   columns.keep <- which(names(data)
-    %in% c("age", "sex", "juv_fel_count",
-      "juv_misd_count", "juv_other_count", "priors_count",
-      "c_charge_degree", "race", "two_year_recid")
+                        %in% c("age", "sex", "juv_fel_count",
+                               "juv_misd_count", "juv_other_count", "priors_count",
+                               "c_charge_degree", "race", "two_year_recid")
   )
 
   data <- data[, columns.keep]
-  levels(data$race) <- c("Non-White", "Non-White", "White", "Non-White", "Non-White", "Non-White")
+  levels(data$race) <- c("Non-White", "Non-White", "White", "Non-White",
+                         "Non-White", "Non-White")
   data$race <- relevel(data$race, "White")
 
   adjacency.matrix <- array(0, dim = c(ncol(data), ncol(data)))
   colnames(adjacency.matrix) <- c("age", "sex", "juv_fel_count",
-    "juv_misd_count", "juv_other_count", "priors_count",
-    "c_charge_degree", "race", "two_year_recid")
+                                  "juv_misd_count", "juv_other_count",
+                                  "priors_count",
+                                  "c_charge_degree", "race", "two_year_recid")
   rownames(adjacency.matrix) <- colnames(adjacency.matrix)
 
   # adding the edges to the matrix
-  adjacency.matrix[c("race", "sex", "age"), c("juv_fel_count", "juv_misd_count",
-    "juv_other_count", "priors_count",
-    "c_charge_degree", "two_year_recid")] <- 1
+  adjacency.matrix[c("race", "sex", "age"),
+                   c("juv_fel_count", "juv_misd_count",
+                     "juv_other_count", "priors_count",
+                     "c_charge_degree", "two_year_recid")] <- 1
   adjacency.matrix[c("juv_fel_count", "juv_misd_count", "juv_other_count"),
-    c("priors_count", "c_charge_degree", "two_year_recid")] <- 1
+                   c("priors_count", "c_charge_degree", "two_year_recid")] <- 1
   adjacency.matrix["priors_count", c("c_charge_degree", "two_year_recid")] <- 1
   adjacency.matrix["c_charge_degree", "two_year_recid"] <- 1
 
-  train <- data[1:5000, ]
-  test <- data[-(1:5000), ]
+  train <- data[1:1000, ]
+  test <- data[1001:2000, ]
 
   compasL <- fairadapt(two_year_recid ~ ., train.data = train, test.data = test,
-    adj.mat = adjacency.matrix, protect.A = "race", quant.method = method)
+                       adj.mat = adjacency.matrix, protect.A = "race",
+                       quant.method = fairadapt:::rangerQuants)
 
-  expect_equal(compasL[[1]]$priors_count[train$race == "White"], train$priors_count[train$race == "White"])
+  expect_equal(compasL$adapt.train$priors_count[train$race == "White"],
+               train$priors_count[train$race == "White"])
 
-  mse <- mean((compasL[[1]]$priors_count[!(train$race == "White")] - train$priors_count[!(train$race == "White")])^2)
-  print(mse)
+  mse <- mean((compasL[[1]]$priors_count[!(train$race == "White")] -
+                 train$priors_count[!(train$race == "White")])^2)
+
   expect_true(mse < 10)
 
 })

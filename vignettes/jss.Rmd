@@ -11,6 +11,13 @@ author:
       Rämistrasse 101
       CH-8092 Zurich
     email: \email{drago.plecko@stat.math.ethz.ch}
+  - name: Nicolas Bennett
+    affiliation: ETH Zürich
+    address: >
+      Seminar for Statistics
+      Rämistrasse 101
+      CH-8092 Zurich
+    email: \email{nicolas.bennett@stat.math.ethz.ch}
   - name: Nicolai Meinshausen
     affiliation: ETH Zürich
     address: >
@@ -19,7 +26,14 @@ author:
       CH-8092 Zurich
     email: \email{meinshausen@stat.math.ethz.ch}
 abstract: >
-  The abstract of the article.
+  Machine learning algorithms are useful for various predictions tasks, but they can also
+  learn how to discriminate, based on gender, race or some other sensitive attribute. This
+  realization gave rise to the field of fair machine learning, which aims to measure and
+  mitigate such algorithmic bias. This manuscript describes the implementation of the
+  \pkg{fairadapt} R-package, a causal inference pre-processing method, which, using the 
+  causal graphical model, answers hypothetical questions of the form "What would my
+  salary have been, had I been of a different gender/race?". Such counterfactual reasoning
+  can help eliminate discrimination and help justify fair decisions.
 keywords:
   formatted: [algorithmic fairness, causal inference, machine learning]
   plain:     [algorithmic fairness, causal inference, machine learning]
@@ -40,6 +54,7 @@ preamble: >
   \newcommand{\an}{\mathrm{an}}
   \newcommand{\drago}[1]{{\color{red} Drago: {#1}}}
   \newcommand{\pr}{\mathbbm{P}}
+  \newcommand{\ex}{\mathbbm{E}}
   \renewcommand{\tilde}[1]{ {#1}^{(fp)}}
   \def\ci{{\perp\!\!\!\perp}}
   \pgfmathdeclarefunction{gauss}{2}{\pgfmathparse{1/(#2*sqrt(2*pi))*exp(-((x-#1)^2)/(2*#2^2))}}
@@ -69,18 +84,18 @@ library(ggplot2)
 # Introduction
 \label{Introduction}
 
-Machine learning is used with increasing frequency in . Algorithms are now used for decision-making in socially sensitive situations, such as predicting credit-score ratings or recidivism during parole. Important early works noted that algorithms are capable of learning societal biases, for example with respect to race \citep{larson2016compas} or gender \citep{blau2003, lambrecht2019algorithmic}. This realization started an important debate in the machine learning community about fairness of algorithms and their impact on decision-making.
+Machine learning algorithms are now used for decision-making in socially sensitive situations, such as predicting credit-score ratings or recidivism during parole. Important early works noted that algorithms are capable of learning societal biases, for example with respect to race \citep{larson2016compas} or gender \citep{blau2003, lambrecht2019algorithmic}. This realization started an important debate in the machine learning community about fairness of algorithms and their impact on decision-making.
 
-The first step of fairness is defining and measuring discrimination. Some inuitive notions have been statistically formalized in order to provide fairness metrics. For example, the notion of demographic parity \citep{darlington1971} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$. Another notion, termed equality of odds \citep{hardt2016}, requires the false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example), written mathematically as $\widehat{Y} \ci A \mid Y$. To this day, various different notions of fairness exist, which are sometimes incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a predictor $\widehat{Y}$ simultaneously. There is no consensus on which notion of fairness is the correct one.
+The first step of fairness is defining and measuring discrimination. Some inuitive notions have been statistically formalized in order to provide fairness metrics. For example, the notion of \textit{demographic parity} \citep{darlington1971} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$. Another notion, termed \textit{equality of odds} \citep{hardt2016}, requires the false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example), written mathematically as $\widehat{Y} \ci A \mid Y$. To this day, various different notions of fairness exist, which are sometimes incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a predictor $\widehat{Y}$ simultaneously. There is no consensus on which notion of fairness is the correct one.
 
 The discussion on algorithmic fairness is, however, not restricted to the machine learning domain. There are many legal and philosophical aspects that have arisen. For example, the legal distinction between disparate impact and disparate treatment \citep{mcginley2011ricci} is important for assessing fairness from a judicial point of view. This in turn emphasizes the importance of the interpretation behind the decision-making process, which is often not the case with black-box machine learning algorithms. For this reason, research in fairness through a causal inference lens has gained more attention.
 
-There are several ways causal inference can help us understand and measure discrimination. The first is counterfactual reasoning \citep{galles1998axiomatic}, which allows us to argue what might have happened under different circumstances which did not ocurr. For example, we might ask whether a female candidate would had been employed, had she been male? This motivated another notions of fairness, termed \textit{counterfactual fairness} \citep{kusner2017counterfactual}, which states that the decision made should stay the same, even if we hypothetically changed someone's race or gender (written succintly as $\widehat{Y}(a) = \widehat{Y}(a')$ in the potential outcome notation). Further, important work has been done in order to decompose the parity gap measure (used for assesing demographic parity), $\pr(\widehat{Y} = 1 \mid A = a) - \pr(\widehat{Y} = 1 \mid A = a')$, into the direct, indirect and spurious components. Lastly, the work of \cite{kilbertus2017avoiding} introduces the so-called resolving variables, in order to relax the possibly prohibitively strong notion of demographic parity. 
-This manuscript describes the details of the fair data adaptation method \citep{plecko2020fair}, available on CRAN as the \pkg{fairadapt} package. 
+There are several ways causal inference can help us understand and measure discrimination. The first is counterfactual reasoning \citep{galles1998axiomatic}, which allows us to argue what might have happened under different circumstances which did not occur. For example, we might ask whether a female candidate would had been employed, had she been male? This motivated another notion of fairness, termed \textit{counterfactual fairness} \citep{kusner2017counterfactual}, which states that the decision made should stay the same, even if we hypothetically changed someone's race or gender (written succintly as $\widehat{Y}(a) = \widehat{Y}(a')$ in the potential outcome notation). Further, important work has been done in order to decompose the parity gap measure (used for assesing demographic parity), $\pr(\widehat{Y} = 1 \mid A = a) - \pr(\widehat{Y} = 1 \mid A = a')$, into the direct, indirect and spurious components. Lastly, the work of \cite{kilbertus2017avoiding} introduces the so-called resolving variables, in order to relax the possibly prohibitively strong notion of demographic parity. 
+This manuscript describes the details of the fair data adaptation method \citep{plecko2020fair}. The approach aims to combine the notions of counterfactual fairness and resolving variables and to explicitly compute counterfactul values of individuals. The implementation is available on CRAN as the \pkg{fairadapt} package.
 
-We note that as of the day of writing of the manuscript, there are only 4 CRAN packages related fair machine learning, with \pkg{fairadapt} being the only causal method. Even though many papers on the topic have been published, the fairness domain is still lacking good quality implementations of the existing methods.
+We note that as of the day of writing of the manuscript, there are only 4 CRAN packages related fair machine learning. The \pkg{fairml} package implements the non-convex method of \cite{komiyama2018nonconvex}. Packages \pkg{fairness} and \pkg{fairmodels} serve as diagnostic tools for measuring algorithmic bias, together with an implementation of several pre and post-processing methods for bias mitigation. However, the \pkg{fairadapt} package is the only causal method. Even though many papers on the topic have been published, the fairness domain is still lacking good quality implementations of the existing methods.
 
-The rest of the manuscript is organized as follows. In Section \ref{Method} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some of the important concepts of causal inference. In Section \ref{Implementation} we discuss the implementation details and guide the user as to how to use the package. In Section \ref{Illustration} we illustrate the usage of \pkg{fairadapt} by using a large, real-world dataset for a hypothetical fairness application.
+The rest of the manuscript is organized as follows. In Section \ref{Method} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some of the important concepts of causal inference. In Section \ref{Implementation} we discuss the implementation details and guide the user as to how to use the package. In Section \ref{Illustration} we illustrate the usage of \pkg{fairadapt} by using a large, real-world dataset for a hypothetical fairness application. In Section \ref{Extensions} we explain some important extensions, such as Semi-Markovian models and resolving variables.
 
 # Methodology
 \label{Method}
@@ -107,12 +122,12 @@ Consider the following example. Variable $A$ is the protected attribute, in this
 			\end{scope}
 			\end{tikzpicture}
 \end{center}
-The main problem is that the attribute $A$, gender, has a causal effect on variables $E$, $T$ and $Y$, which we wish to eliminate. For each individual with observed values $(a, e, t, y)$ we want to find a mapping
+Attribute $A$, gender, has a causal effect on variables $E$, $T$ and $Y$, and we wish to eliminate this effect. For each individual with observed values $(a, e, t, y)$ we want to find a mapping
 \[(a, e, t, y) \longrightarrow  (\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y}),\]
 which finds the value the person would have obtained in a world where everyone is female. Explicitly, for a male person with education value $e$, we give it the transformed value $\tilde{e}$ chosen such that $$\pr(E \geq e \mid A = a') = \pr(E \geq \tilde{e} \mid A = a). $$
-The main idea is that the \textit{relative educational achievement within the subgroup} would stay the same if we changed someone's gender. If you are male and you have a higher educational achievement than 60\% of all males in the dataset, we assume you would be better than 60\% of females had you been female. After computing everyone's education (in the `female' world), we continue by computing the transformed test score values $\tilde{T}$. The approach is again similar, but this time we condition on educational achievement. That is, a male with values $(E, T) = (e, t)$ is assigned a test score $\tilde{t}$ such that
+The main idea is that the \textit{relative educational achievement within the subgroup} would stay the same if we changed someone's gender. If you are male and you have a higher educational achievement than 60\% of all males in the dataset, we assume you would be better than 60\% of females had you been female\footnote{This assumption is empirically untestable, since it is impossible to observe both a female and a male version of the same individual.}. After computing everyone's education (in the `female' world), we continue by computing the transformed test score values $\tilde{T}$. The approach is again similar, but this time we condition on educational achievement. That is, a male with values $(E, T) = (e, t)$ is assigned a test score $\tilde{t}$ such that
 $$\pr(T \geq t \mid E = e, A = a') = \pr(T \geq \tilde{t} \mid E = \tilde{e}, A = a),$$
-where the value $\tilde{e}$ was obtained in the previous step. The step can be visualized as follows
+where the value $\tilde{e}$ was obtained in the previous step. The step can be visualized as follows\footnote{In the visualization, the test scores of male applicants have higher values. We emphasize this is in no way a view implied by the authors, simply a currently observed societal bias in certain university admission datasets.}
 \begin{center}
   \begin{tikzpicture}
     \begin{axis}[
@@ -127,15 +142,15 @@ where the value $\tilde{e}$ was obtained in the previous step. The step can be v
     ]
   \addplot [very thick,green!50!black] {gauss(4,1)};
   \addplot [very thick,blue!50!black] {gauss(6.5,0.8)};
-  \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:2.718,0.175) to[bend left = 30] (axis cs:5.474,0.219);
-  \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:4.524401, 0.3476926) to[bend left = 30] (axis cs:6.919520, 0.4346158);
+  \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:5.474,0.219) to[bend left = 30] (axis cs:2.718,0.175);
+  \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:6.919520, 0.4346158) to[bend left = 30] (axis cs:4.524401, 0.3476926);
 
   \node at (axis cs:2.718,0.175) [above, left] {$10\%$ female};
   \node at (axis cs:5.474,0.219) [right] {$10\%$ male};
   \node at (axis cs:4.524401, 0.3476926) [above=0.5cm] {$70\%$ female};
   \node at (axis cs:6.919520, 0.4346158) [right] {$70\%$ male};
 
-  \node at (axis cs:4,0.5) [below = 0.65cm, left = 0.4cm, green!50!black] {$T \geq t \mid E = e, A = a'$};
+  \node at (axis cs:4,0.5) [below = 0.65cm, left = 0.4cm, green!50!black] {$T \mid E = e, A = a'$};
   \node at (axis cs:6.5,0.5) [below = 1cm, right = 0.9cm, blue!50!black] {$T \mid E = \tilde{e}, A = a$};
 
   \end{axis}
@@ -146,10 +161,9 @@ In the last step, the outcome variable $Y$ needs to be adjusted. The adaptation 
 \begin{equation} \label{eq:labeltransform}
 	\pr(Y \geq y \mid E = e, T = t, A = a') = \pr(Y \geq \tilde{y} \mid E = \tilde{e}, T = \tilde{t}, A = a).
 \end{equation}
-This way of counterfactual correction is known as \textit{recursive substitution} \citep[Chapter~7]{pearl2009}.
+This way of counterfactual correction is known as \textit{recursive substitution} \citep[Chapter~7]{pearl2009}. 
 
-Before we describe the approach above fully, we introduce an important causal inference concept, related to our discussion:
-\begin{definition}
+We next describe the approach from above formally. The reader who is not interested in the mathematical detail is encouraged to go straight to Section \ref{Implementation}. We start by introducing an important causal inference concept, related to our discussion, namely the \textit{structural causal model}.
   A structural causal model (SCM) is a 4-tuple $<V, U, \mathcal{F}, P(u)>$, where
   \begin{itemize}
     \item $V = \lbrace V_1, ..., V_n \rbrace$ is the set of observed (endogeneous) variables
@@ -157,19 +171,18 @@ Before we describe the approach above fully, we introduce an important causal in
     \item $\mathcal{F} = \lbrace f_1, ..., f_n \rbrace$ is the set of functions determining $V$, $v_i \gets f_i(\pa(v_i), u_i)$, where $\pa(V_i) \subset V, U_i \subset U$ are the functional arguments of $f_i$
     \item $P(u)$ is a distribution over the exogeneous variables $U$.
   \end{itemize}
-\end{definition}
 We note that any particular SCM is accompanied by a graphical model $\mathcal{G}$ (a directed acyclic graph), which summarizes which functional arguments are necessary for computing the values of each $V_i$ (that it is, how variables affect each other). We assume throughout, without loss of generality, that
 \begin{enumerate}[(i)]
 			\item $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$
 			\item exogeneous variables $U_i$ are uniformly distributed on $[0, 1]$
 \end{enumerate}
-We first discuss the so-called Markovian case in which all exogeneous variables $U_i$ are mutually independent.
+We first discuss the so-called Markovian case in which all exogeneous variables $U_i$ are mutually independent. Some relevant extensions, like the Semi-Markovian case (where $U_i$ variables are allowed to have mutual dependencies) and the case of so called \textit{resolving variables}, are discussed in Section \ref{Extensions}.
 
 ## Basic formulation - Markovian SCMs
 
 Suppose that $Y$ taking values in $\mathbbm{R}$ is an outcome of interest and $A$ the protected attribute taking two values $a, a'$. Our goal is to describe a pre-processing method which transform the entire data $V$ into its fair version $\tilde{V}$. This is done by computing the counterfactual values $V(A = a)$ which would have been obtained by the individuals, had everyone had the same protected attribute $A = a$.
 
-More precisely, going back to the *university admission* example in equate, we want to "equate" the distributions
+More precisely, going back to the *university admission* example above, we want to "equate" the distributions
 \begin{equation}
   V_i \mid \pa(V_i), A = a \text{ and } V_i \mid \pa(V_i), A = a'.
 \end{equation}
@@ -191,109 +204,51 @@ Since each function $f_i$ of the original SCM is reparametrized so that $f_i(\pa
 \end{algorithm}
 The $f_i$ assignment functions of the SCM are of course unknown, but are learned non-parametrically at each step. Notice that Algorithm \ref{algo:fairadapt} is computing the counterfactual values $V(A = a)$ under the $do(A = a)$ intervention for each individual, while keeping the latent quantiles $U$ fixed. In the case of continuous variables, the latent quantiles $U$ can be determined exactly, while for the discrete case, this is more subtle and described in detail in the original fair data adaptation manuscript \citep[Section~5]{plecko2020fair}.
 
-## Adding resolving variables
-\citet{kilbertus2017avoiding} discuss that in some situations the protected attribute $A$ can affect variables in a non-discriminatory way. For instance, in the Berkeley admissions dataset \citep{bickel1975sex} we observe that females often apply for departments with lower admission rates and consequently have a lower admission probability. However, we perhaps would not wish to account for this difference in the adaptation procedure if we were to argue that department choice is a choice everybody is free to make. This motivated the following definition:
-	\begin{definition}[Resolving variables, \citet{kilbertus2017avoiding}] \label{resolving}
-		Let $\mathcal{G}$ be the causal graph of the data generating mechanism. Let the descendants of variable $A$ be denoted by $\de(A)$. A variable $R$ is called resolving if
-		\begin{enumerate}[(i)]
-			\item $R \in \de(A)$
-			\item the causal effect of $A$ on $R$ is considered to be non-discriminatory
-\end{enumerate}
-\end{definition}
-In presence of resolving variables, we compute the counterfactual under a more complicated intervention do$(A = a, R = R(a'))$. The potential outcome value $V(A = a, R = R(a'))$ is obtained by setting $A = a$ and computing the counterfactual while keeping the values of resolving variables to those they \textit{attained naturally}. This is a nested counterfactual and the difference in Algorithm \ref{algo:fairadapt} is simply that resolving variables $R$ are skipped over in the for-loop. 
-
-## Semi-Markovian and topological ordering variant
-
-So far we were concerned with the Markovian case, which assumes that all exogeneous variables $U_i$ are mutually independent. However, in practice this need not be the case. If there are mutual dependencies between the $U_i$s, we are dealing with a so-called Semi-Markovian model. These dependencies between latent variables are represented by dashed, bidirected arrows in the causal diagram. In the university admission example, suppose we had that $U_E \not\!\perp\!\!\!\perp U_T$, meaning that latent variables corresponding to education and test score are correlated. Then the graphical model would be represented as
-\begin{center}
-	\begin{tikzpicture}
-	[>=stealth, rv/.style={circle, draw, thick, minimum size=7mm}, rvc/.style={triangle, draw, thick, minimum size=8mm}, node distance=7mm]
-	\pgfsetarrows{latex-latex};
-	\begin{scope}
-	\node[rv] (a) at (-3,0) {$A$};
-	\node[rv] (v1) at (-1,0) {$E$};
-	\node[rv] (v2) at (1,0) {$T$};
-	\node[rv] (y) at (3,0) {$Y$};
-	\draw[->] (a) -- (v1);
-	\draw[->] (a) edge[bend left = 30] (v2);
-	\draw[->] (v1) -- (v2);
-	\draw[->] (v1) edge[bend left = 30] (y);
-	\draw[->] (v2) -- (y);
-	\path[<->, dashed] (v1) edge[bend right = 20] (v2);
-	\end{scope}
-	\end{tikzpicture}
-\end{center}
-There is an important difference in the adaptation procedure for Semi-Markovian case: when inferring the latent quantiles $U_i$ of variable $V_i$, in the Markovian case, only the direct parents $\pa(V_i)$ are needed. In the Semi-Markovian case, due to correlation of latent variables, using only the $\pa(V_i)$ can lead to biased estimates of the $U_i$. Instead, the set of direct parents needs to be extended, described in detail in \ref{tian2002general}. We briefly sketch the argument. Let the \textit{C-components} be a partition of the set $V$, such that all $$\Pa(V_i) := (C(V_i) \cup pa(C(V_i))) \cap \an(V_i),$$
-where $\an(V_i)$ are the ancestors of $V_i$. The procedure remains the same as in Algorithm \ref{algo:fairadapt}, with the difference that the set of direct parents $\pa(V_i)$ is replaced by $\Pa(V_i)$ at each step.
-
-## Questions of identifiability
-
-So far, we have not discussed whether it is always possible to do the counterfactual inference described above. In the causal literature, an intervention is \textit{identifiable} if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. The important result by \ref{tian2002general} states that an intervention do$(X = x)$ on a singleton variable $X$ is identifiable if and only if there is not bidirected path between $X$ and $\ch(X)$. Therefore, the intervention is identifiable if
-
-* the model is Markovian
-* the model is Semi-Markovian and
- - there is no bidirected path between $A$ and $\ch(A)$, and 
- - there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
-
 # Implementation
 \label{Implementation}
 
-The implementation is based on the main function `fairadapt()`. We list the most important function arguments and then show these should be specified
+The implementation is based on the main function `fairadapt()`, which returns an S3 object of class `"fairadapt"`. We list the most important arguments of the function and then show how these should be specified:
 
 * `formula`, argument of type `formula` specifies the dependent and explanatory variables
-* `adj.mat`, `cfd.mat` arguments of type `matrix` encode the adjacency and confounding matrices respectively 
-* `top.ord` of type `character` is a vector which needs to be specified if `adj.mat` and `cfd.mat` are not known 
+* `adj.mat` argument of type `matrix` encodes the adjacency matrix
 * `train.data`, `test.data` of type `data.frame` 
-* `protect.A` of type `character` is of length one and names the protected attribute, `res.vars` of type `character` is a vector naming all resolving variables and can vary in length
+* `protect.A` of type `character` is of length one and names the protected attribute.
+
+```{r min-example, include=T}
+uni.adj.mat <- array(0, dim = c(4, 4))
+colnames(uni.adj.mat) <- rownames(uni.adj.mat) <-
+  c("gender", "edu", "test", "score")
+
+uni.adj.mat["gender", c("edu", "test")] <-
+  uni.adj.mat["edu", c("test", "score")] <-
+  uni.adj.mat["test", "score"] <- 1L
+
+nsamp <- 200
+
+FA.basic <- fairadapt(score ~ ., 
+  train.data = uni_admission[1:nsamp, ], 
+  test.data = uni_admission[(nsamp+1):(2*nsamp), ],
+  adj.mat = uni.adj.mat, protect.A = "gender", res.vars = NULL,
+  visualize.graph = F, quant.method = fairadapt:::rangerQuants)
+
+FA.basic
+```
+The `"fairadapt"` `S3` class has several associated generics and methods. For instance, `print(FA.basic)` shows some information about the object call, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as ($Y$ denoting the outcome variable) $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$ respectively. The total variation, in the case of binary $Y$, corresponds to the parity gap.
 
 ## Specifying the graphical model
 
-The \pkg{fairadapt} supposes the underlying graphical model $\mathcal{G}$ is known. The model is specified by the adjacency matrix and the confounding matrix. For example, suppose we have the following causal graph $\mathcal{G}$.
-
-For such a graph, we construct the adjacency and confounding matrices and visualize the graph with the `VisualizeGraph()` convenience function that builds on top of the \pkg{igraph} package.
-
-```{r mat, include=T}
-adj.mat <- cfd.mat <- array(0, dim = c(4, 4))
-colnames(adj.mat) <- rownames(adj.mat) <-
-  colnames(cfd.mat) <- rownames(cfd.mat) <- c("A", "E", "T", "Y")
-
-adj.mat["A", c("E", "T")] <-
-  adj.mat["E", c("T", "Y")] <-
-  adj.mat["T", "Y"] <-
-  cfd.mat["E", "T"] <- 
-  cfd.mat["T", "E"] <- 1L
-
-toy.graph <- fairadapt:::VisualizeGraph(adj.mat, cfd.mat)
-plot(toy.graph, vertex.size = 25, vertex.label.cex = 0.5, 
+The \pkg{fairadapt} supposes the underlying graphical model $\mathcal{G}$ is known. The model is specified by the adjacency matrix. For example, suppose we take the causal graph $\mathcal{G}$ of the university admission example above. For such a graph, we construct the adjacency matrix and the graph with the `GraphModel()` convenience function that builds on top of the \pkg{igraph} package.
+```{r mat, include=T, out.width="200px", out.height="200px"}
+toy.graph <- graphModel(uni.adj.mat)
+plot(toy.graph, vertex.size = 40, vertex.label.cex = 0.5, 
   vertex.label.color = "black")
 ```
 
-## A joint training step
+## Quantile learning step
 
-We describe the training step using the `fairadapt()` function. We start by constructing a data generator which gives samples from an SCM corresponding to the graph as above
-```{r data-gen, include=T}
-GenerateData <- function(n) {
-  
-  epsE <- rnorm(n)
-  epsT <- rnorm(n) / sqrt(2) + epsE / sqrt(2)
-  
-  A <- rbinom(n, 1, 0.5)
-  E <- 1 / 2 * A - 1 / 4 + epsE
-  T <- 1 / 3 * E + 1 / 3 * A - 2 / 3 + epsT
-  Y <- 1 / 3 * E + 1 / 2 * T + rnorm(n)
-  
-  data.frame(A, E, T, Y)
-  
-}
-```
+We describe the training step using the `fairadapt()` function. The `fairadapt()` function can be used in two slightly distinct ways. The first option is by specifying training and testing data at the same time. The data adaptation is then applied to the combination of train and test data, in order to learn the latent quantiles as precisely as possible (with the exception of label $Y$ which is unavailable on the test set). The second option is use only the `train.data` argument when calling `fairadapt()`, after which the `predict()` function can be used to adapt test data at a later stage.
 
-The `fairadapt()` function works so that training and testing data are given at the same time. The data adaptation is applied to the combination of the two datasets, in order to learn the latent quantiles as precisely as possible (with the exception of label $Y$ which is unavailable on the test set). We note that `train.data` and `test.data` need to have column names which appear in the names of the adjacency matrix `colnames(adj.mat)`. The protected attribute $A$ is given as a character vector `protect.A` of length one.
-
-```{r fairadapt, include=T}
-L <- fairadapt(Y ~ ., train.data = GenerateData(100), test.data = GenerateData(100),
-  adj.mat = adj.mat, cfd.mat = cfd.mat, protect.A = "A",
-  visualize.graph = F, quant.method = "forest")
-```
+We note that `train.data` and `test.data` need to have column names which appear in the names of the adjacency matrix `colnames(adj.mat)`. The protected attribute $A$ is given as a character vector `protect.A` of length one.
 
 The quantile learning step in Algorithm \ref{algo:fairadapt} can be done using three different methods:
 \begin{itemize}
@@ -301,24 +256,32 @@ The quantile learning step in Algorithm \ref{algo:fairadapt} can be done using t
 \item Non-crossing quantile neural networks \citep{cannon2018non}
 \item Linear Quantile Regression \citep{qr}
 \end{itemize}
-The summary of the various differences between the methods is given in Table \ref{tab:qmethods}. 
-
+The summary of the various differences between the methods is given in Table \ref{tab:qmethods}.
 \begin{table}
     \centering
     \begin{tabular}{>{\centering\arraybackslash} m{3.5cm}| >{\centering\arraybackslash} m{3cm} >{\centering\arraybackslash}m{3cm} >{\centering\arraybackslash}m{3cm}}
   & Random Forests & Neural Networks & Linear Regression \\ \hline
   \texttt{R}-package & \pkg{ranger} & \pkg{mcqrnn} & \pkg{quantreg} \\ \hline
-  \texttt{quant.method} argument & \texttt{"forest"} & \texttt{"nn"} & \texttt{"linear"} \\ \hline
-  complexity & $O(n^2\log n)$ & $O(n*?)$ & $O(n)$ \\ \hline
-  default parameters & $ntrees = 500$ \newline $mtry = \sqrt{p}$ & 2-layer fully connected perceptron & . \\ \hline
-  Time Ex1 & 5 sec & 25 sec & 3 sec \\ \hline
-  Time Ex2 & 20 sec & 30 sec & 10 sec \\ \hline
+  \texttt{quant.method} & \code{rangerQuants} & \code{mcqrnnQuants} & \code{linearQuants} \\ \hline
+  complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ \hline
+  default parameters & $ntrees = 500$ \newline $mtry = \sqrt{p}$ & 2-layer fully connected feed-forward network & \code{"br"} method of Barrodale and Roberts used for fitting \\ \hline
+  $T(200, 4)$ & $0.4$ sec & $89$ sec & $0.3$ sec \\ \hline
+  $T(500, 4)$ & $0.9$ sec & $202$ sec & $0.5$ sec \\ \hline
 \end{tabular}
-    \caption{.}
+    \caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the NN. $T(n, 4)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and testing samples.}
     \label{tab:qmethods}
 \end{table}
+The choice of quantile learning method is done by specifying the `quant.method` argument, which is of class `function` and constructs the quantile regression object. For more details and an example, see `?rangerQuants`. Together with the `quant.method` constructor, `S3`-dispatch is used for inferring the quantiles. This allows the user to specify their own quantile learning methods easily. 
+
+We quickly discuss the quantile learning methods included in the package. Using the linear quantile method is the fastest option. However, it cannot handle the non-parametric case. For a non-parametric approach and mixed data, the RF approach is well-suited. The neural network approach is, comparatively, substantially slower than the forest/linear case and does not scale well to large sample sizes. Generally, we recommend using the forest based approach, because of the non-parametric nature and computational speed. However, we note that for smaller sample sizes, the neural network approach might in fact be the best option.
 
 ## Fair-twin inspection
+The university admission example presented in Section \ref{Method} demonstrates how we can compute counterfactual values for an individual while preserving their relative educational achievement. In particular, for a male student with values $(a, e, t, y)$, we compute his "fair-twin" values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$ - the values the student would have obtained, had he been female. To explicitly compare a person to their hypothetical fair-twin, we use the `fairTwins()` function, applied to an object of class `"fairadapt"`:
+
+```{r fairtwin-uni, include = T}
+fairTwins(FA.basic, train.id = seq.int(1L, 5L, 1L))
+```
+In this example, we compute the values in a "female" world. Therefore, for female applicants, the values stay the same, while for male applicants the values are adapted, as can be seen from the output.
 
 # Illustration
 \label{Illustration}
@@ -327,7 +290,7 @@ Here we describe an example of a possible real-world use of \pkg{fairadapt}. Sup
 To do this, the government is using the from the 2018 American Community Survey by the US Census Bureau. We load the pre-processed version of the dataset:
 
 ```{r load-census, include=T}
-load("census_gov.RData")
+dat <- gov_census
 print(head(dat))
 
 # group the columns
@@ -357,7 +320,7 @@ adj.mat[protect.A, c(fam, edu, work, out)] <-
   adj.mat[work, out] <- 
   cfd.mat[protect.A, dmgraph] <- cfd.mat[dmgraph, protect.A] <- 1L
 
-census.graph <- fairadapt:::VisualizeGraph(adj.mat, cfd.mat)
+census.graph <- graphModel(adj.mat, cfd.mat)
 plot(census.graph, vertex.size = 20, vertex.label.cex = 0.5, 
   vertex.label.color = "black")
 ```
@@ -400,10 +363,8 @@ Before applying `fairadapt()`, we first log-transform the salaries and look at t
 # log-transform the salaries
 dat$salary <- log(dat$salary)
 
-# measure IE, SE, DE
-#CausalExplanation(dat[1:10000], protect.A, c(fam, edu, work), dmgraph, out, x0 = "female", x1 = "male")
 # plot density before adaptation
-nsamples <- 20000
+nsamples <- 2000
 
 ggplot(dat[1:nsamples], aes(x = salary, fill = sex)) +
   geom_density(alpha = 0.4)  + theme_minimal() + 
@@ -413,30 +374,134 @@ ggplot(dat[1:nsamples], aes(x = salary, fill = sex)) +
 There is a clear shift between the two genders, meaning that `male` employees are currently treated better than `female` employees. However, there could be differences in `salary` which are not due to gender inequality, but have to do with the economic region in which the employee works. This needs to be accounted for as well, i.e. the difference between economic regions is not to be removed. To solve the problem, the US governemnt applies \pkg{fairadapt}:
 
 ```{r census-adapt, include=T}
-L <- fairadapt(salary ~ ., train.data = dat[1:nsamples], test.data = dat[(nsamples+1)],
-  adj.mat = adj.mat, protect.A = protect.A, visualize.graph = F)
+FA.govcensus <- fairadapt(salary ~ ., train.data = dat[1:nsamples],
+                          adj.mat = adj.mat, protect.A = protect.A, 
+                          visualize.graph = F)
 ```
 
-After applying the adaptation, we inspect whether the problem has improved:
+After applying the adaptation, we inspect whether the problem has improved. The densities after adaptation can be plotted using the `autoplot()` function:
 
 ```{r vis-adapt, include=T, fig.height=3}
-# measure IE, SE, DE again
-L[[1]]$sex <- dat[1:nsamples]$sex
-#CausalExplanation(L[[1]], protect.A, c(fam, edu, work), dmgraph, out, x0 = "female", x1 = "male")
-
-# plot density after adaptation
-ggplot(L[[1]], aes(x = salary, fill = sex)) +
-  geom_density(alpha = 0.4)  + theme_minimal() + 
+autoplot(FA.govcensus, when = "after") +
   ggtitle("Adapted salary density by gender")
 ```
 
-Finally, we can do fair-twin inspection to see how feature values of individual employees have changed:
+If we obtain additional testing data, and wish to adapt it as well, we can use the `predict()` function:
+```{r census-predict, include=T}
+new.test <- dat[seq.int(nsamples + 1L, nsamples + 10L, 1L)]
+adapt.test <- predict(FA.govcensus, newdata = new.test)
+head(adapt.test)
+```
+
+Finally, we can do fair-twin inspection using the `fairTwins()` function, to see how feature values of individual employees have changed:
 
 ```{r census-twins, include=T}
 inspect.cols <- c("sex", "age", "education_level", "salary")
-idx <- sample(which(dat[1:nsamples]$sex == "male"), 5)
-print(dat[idx, inspect.cols, with = F])
-print(L[[1]][idx, inspect.cols, with = F])
+fairTwins(FA.govcensus, train.id = 1:5, cols = inspect.cols)
 ```
 
-Note that `age` does not change, since it is not a descendant of $A$. However, attributes `"education_level"` and `"salary"` do change, as they are descendants of $A$.
+The values are unchanged for the female individuals. Note that `age` does not change for any individual, since it is not a descendant of $A$. However, variables `education_level` and `salary` do change for males, as they are descendants of $A$. 
+
+The variable `hours_worked` is also a descendant of $A$. However, one might argue that this variable should not be adapted in the procedure, that is, that it should remain the same, even if we hypothetically change the person's gender. This is the idea behind \textit{resolving variables}, introduced in the next section.
+
+# Extensions
+\label{Extensions}
+
+## Adding resolving variables
+
+\cite{kilbertus2017avoiding} discuss that in some situations the protected attribute $A$ can affect variables in a non-discriminatory way. For instance, in the Berkeley admissions dataset \citep{bickel1975sex} we observe that females often apply for departments with lower admission rates and consequently have a lower admission probability. However, we perhaps would not wish to account for this difference in the adaptation procedure if we were to argue that department choice is a choice everybody is free to make. This motivated the following reasoning, found in \citet{kilbertus2017avoiding}. A variable $R$ is called resolving if
+\begin{enumerate}[(i)]
+		\item $R \in \de(A)$, where $\de(A)$ are the descendants of $A$ in the causal graph $\mathcal{G}$
+		\item the causal effect of $A$ on $R$ is considered to be non-discriminatory
+\end{enumerate}
+In presence of resolving variables, we compute the counterfactual under a more complicated intervention do$(A = a, R = R(a'))$. The potential outcome value $V(A = a, R = R(a'))$ is obtained by setting $A = a$ and computing the counterfactual while keeping the values of resolving variables to those they \textit{attained naturally}. This is a nested counterfactual and the difference in Algorithm \ref{algo:fairadapt} is simply that resolving variables $R$ are skipped over in the for-loop. We run the following code to compute the fair adaptation with the variable `test` being resolving in the `uni_admission` dataset
+
+```{r res-uni-admission, include=T}
+FA.resolving <- fairadapt(score ~ .,
+  train.data = uni_admission[1:nsamp, ], 
+  test.data = uni_admission[(nsamp+1):(2*nsamp), ],
+  adj.mat = uni.adj.mat, protect.A = "gender", res.vars = "test",
+  visualize.graph = F)
+  
+FA.resolving
+```
+We note that the total variation in this case is larger than in the `FA.basic` example from Section \ref{Implementation}, with no resolvers. The intuitive reasoning here is that resolving variables allow for some discrimination, so we expect to see a larger total variation between the groups. Finally, we can visualize the graph
+```{r resolving-graph, include = T, out.width="200px", out.height="200px"}
+plot(graphModel(uni.adj.mat, res.vars = "test"),
+  vertex.size = 40, vertex.label.cex = 0.5, 
+  vertex.label.color = "black")
+```
+which shows a different color for the resolving variable `test`. The resolving variables are red-colored in order to be distinguished from other variables.
+
+## Semi-Markovian and topological ordering variant
+
+In Section \ref{Method} we were concerned with the Markovian case, which assumes that all exogeneous variables $U_i$ are mutually independent. However, in practice this need not be the case. If there are mutual dependencies between the $U_i$s, we are dealing with a so-called Semi-Markovian model. These dependencies between latent variables are represented by dashed, bidirected arrows in the causal diagram. In the university admission example, suppose we had that $U_{\text{test}} \not\!\perp\!\!\!\perp U_{\text{score}}$, meaning that latent variables corresponding to variable test and final score are correlated. Then the graphical model would be represented as
+\begin{center}
+	\begin{tikzpicture}
+	[>=stealth, rv/.style={circle, draw, thick, minimum size=7mm}, rvc/.style={triangle, draw, thick, minimum size=8mm}, node distance=7mm]
+	\pgfsetarrows{latex-latex};
+	\begin{scope}
+	\node[rv] (a) at (-3,0) {$A$};
+	\node[rv] (v1) at (-1,0) {$E$};
+	\node[rv] (v2) at (1,0) {$T$};
+	\node[rv] (y) at (3,0) {$Y$};
+	\draw[->] (a) -- (v1);
+	\draw[->] (a) edge[bend left = 30] (v2);
+	\draw[->] (v1) -- (v2);
+	\draw[->] (v1) edge[bend left = 30] (y);
+	\draw[->] (v2) -- (y);
+	\path[<->, dashed] (v2) edge[bend right = 20] (y);
+	\end{scope}
+	\end{tikzpicture}
+\end{center}
+There is an important difference in the adaptation procedure for Semi-Markovian case: when inferring the latent quantiles $U_i$ of variable $V_i$, in the Markovian case, only the direct parents $\pa(V_i)$ are needed. In the Semi-Markovian case, due to correlation of latent variables, using only the $\pa(V_i)$ can lead to biased estimates of the $U_i$. Instead, the set of direct parents needs to be extended, described in detail in \citep{tian2002general}. We briefly sketch the argument. Let the \textit{C-components} be a partition of the set $V$, such that each $C-component$ contains a set of variables which are mutually connect by bidirected arrows. Let $C(V_i)$ denote the whole C-component of variable $V_i$. We then define the set of extended parents
+$$\Pa(V_i) := (C(V_i) \cup pa(C(V_i))) \cap \an(V_i),$$
+where $\an(V_i)$ are the ancestors of $V_i$. The adaptation procedure in the Semi-Markovian case remains the same as in Algorithm \ref{algo:fairadapt}, with the difference that the set of direct parents $\pa(V_i)$ is replaced by $\Pa(V_i)$ at each step.
+
+To include the bidirected confounding arcs in the adaptation, we use the `cfd.mat` argument of type `matrix` such that
+
+* `cfd.mat` has the same dimension, column and row names as `adj.mat`
+* `cfd.mat` is symmetric and setting `cfd.mat["Vi", "Vj"] <- cfd.mat["Vj", "Vi"] <- 1L` indicates that there is a bidirected edge between variables $V_i$ and $V_j$.
+
+Alternatively, instead of using the extended parent set $\Pa(V_i)$, we can use the "largest possible" set of parents, namely the ancestors $\an(V_i)$. This approach is implemented, and the user only needs to specify the topological ordering. This is done by specifying the `top.ord` argument which is a `character` vector, containing the correct ordering of the names appearing in `names(train.data)`.
+
+The following code runs the adaptation in the Semi-Markovian case:
+```{r semi-markov-uni, include=T}
+uni.cfd.mat <- array(0, dim = c(4, 4))
+colnames(uni.cfd.mat) <- rownames(uni.cfd.mat) <- colnames(uni.adj.mat)
+
+uni.cfd.mat["test", "score"] <- uni.cfd.mat["score", "test"] <- 1L
+FA.semimarkov <- fairadapt(score ~ .,
+  train.data = uni_admission[1:nsamp, ], 
+  test.data = uni_admission[(nsamp+1):(2*nsamp), ],
+  adj.mat = uni.adj.mat, cfd.mat = uni.cfd.mat, protect.A = "gender",
+  visualize.graph = F)
+```
+We visualize the graph that was used for the adaptation.
+```{r graph-semimarkov, include=T, out.width="200px", out.height="200px"}
+plot(FA.semimarkov, graph = T, vertex.size = 40, 
+  vertex.label.cex = 0.5, vertex.label.color = "black")
+```
+<!--We can also visualize the difference in the `score` variable, due to the addition of the bidirected edge. 
+```{r vis-diff, include=T}
+plot(
+  FA.basic[["adapt.train"]][["score"]],
+  FA.semimarkov[["adapt.train"]][["score"]], pch = 19,
+  main = "Markovian vs. Semi-Markovian case on uni_admission",
+  xlab = "Markov adaptation score",
+  ylab = "Semi-Markov adaptation score"
+)
+abline(0, 1, col = "red", lwd = 2)
+```
+The red line in the plot represents the $y = x$ line. Note that the two adaptation approaches yield a slightly different answer. 
+-->
+## Questions of identifiability
+
+So far, we have not discussed whether it is always possible to do the counterfactual inference described in the paper. In the causal literature, an intervention is \textit{identifiable} if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. The important result by \cite{tian2002general} states that an intervention do$(X = x)$ on a singleton variable $X$ is identifiable if and only if there is no bidirected path between $X$ and $\ch(X)$. Therefore, the intervention is identifiable if
+
+* the model is Markovian
+* the model is Semi-Markovian and
+  - there is no bidirected path between $A$ and $\ch(A)$, and 
+  - there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
+ 
+Based on this, the `fairadapt()` function sometimes returns a error, if the specified intervention is not possible to compute. One additional limitation is that \pkg{fairadapt} currently does not support \textit{front-door identification} \citep[Chapter~3]{pearl2009}, but we hope to include this in a future version.
