@@ -1,7 +1,7 @@
 ---
 title:
+  plain:     "fairadapt: Causal Reasoning for Fair Data Pre-processing"
   formatted: "\\pkg{fairadapt}: Causal Reasoning for Fair Data Pre-processing"
-  plain:     "fairadapt: causal reasoning for fair data pre-processing"
   short:     "\\pkg{fairadapt}: Fair Data Adaptation"
 author:
   - name: Drago Plecko

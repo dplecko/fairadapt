@@ -9,6 +9,7 @@
 *.aux
 *.bbl
 *.fdb_latexmk
+*.log
 doc
 Meta
 docs
