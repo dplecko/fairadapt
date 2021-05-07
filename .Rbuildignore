@@ -8,3 +8,4 @@
 ^Meta$
 ^vignettes/jss\.(cls|bst)$
 ^\.github$
+^LICENSE\.md$
