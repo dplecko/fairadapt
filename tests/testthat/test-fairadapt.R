@@ -43,8 +43,10 @@ test_that("Fairadapt Works", {
                  top.ord = c("A", "X", "Y"), protect.A = "A")
   expect_true(is.list(L))
 
-  data <- read.csv(file.path("..", "real-data", "compas",
-                             "compas-scores-two-years.csv"))
+  data <- system.file("testdata", "compas-scores-two-years.rds",
+                      package = "fairadapt")
+  data <- readRDS(data)
+
   columns.keep <- which(names(data)
                         %in% c("age", "sex", "juv_fel_count",
                                "juv_misd_count", "juv_other_count", "priors_count",
