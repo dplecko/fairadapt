@@ -6,6 +6,8 @@
 #' @export
 autoplot.fairadapt <- function(x, when = "after", ...) {
 
+  ..x.. <- ..count.. <- NULL
+
   plt <- list()
 
   for(tgt in c("train", "adapt.train")) {

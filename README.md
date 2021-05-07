@@ -1,13 +1,28 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# fairadapt
+# [fairadapt](https://dplecko.github.io/fairadapt/)
+
+<!-- badges: start -->
+
+[![Lifecycle](https://img.shields.io/badge/lifecycle-stable-brightgreen.svg)](https://lifecycle.r-lib.org/articles/stages.html#stable)
+[![R build
+status](https://github.com/dplecko/fairadapt/workflows/build/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Abuild)
+[![R check
+status](https://github.com/dplecko/fairadapt/workflows/check/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Acheck)
+[![pkgdown build
+status](https://github.com/dplecko/fairadapt/workflows/pkgdown/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Apkgdown)
+[![covr
+status](https://github.com/dplecko/fairadapt/workflows/coverage/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Acoverage)
+[![Codecov test
+coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://codecov.io/gh/dplecko/fairadapt)
+<!-- badges: end -->
 
 fairadapt is a package intended to remove bias from machine learning
 algorithms. In particular, it implements the pre-processing procedure
 described in [Plecko &
 Meinshausen, 2019](https://arxiv.org/abs/1911.06685) (all the code used
-for producing the figures in the paper can be found in the `tests`
+for producing the figures in the paper can be found in the `jmlr-paper`
 folder). The main idea is to adapt the training and testing data in a
 way which prevents any further training procedure from learning an
 undesired bias. The package currently offers the pre-processing step,
@@ -53,9 +68,10 @@ adjacency.matrix["educatoin_num", c("workclass", "hours_per_week",
 adjacency.matrix[c("workclass", "hours_per_week", "occupation"), "income"] <- 1
 
 # reading in the UCI Adult data
-adult <- read.csv("./tests/real-data/adult/UCIAdult.csv")
-adult[, c("X", "race")] <- NULL
-adult[, "sex"] <- factor(adult[, "sex"], levels = c("Male","Female"))
+adult <- readRDS(
+  system.file("extdata", "uci_adult.rds", package = "fairadapt")
+)
+
 train.size <- n1
 test.size <- n2
 L <- fairadapt(income ~ ., train.data = adult[1:train.size, ],
