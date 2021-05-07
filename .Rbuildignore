@@ -9,3 +9,6 @@
 ^vignettes/jss\.(cls|bst)$
 ^\.github$
 ^LICENSE\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
