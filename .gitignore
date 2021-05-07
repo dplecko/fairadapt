@@ -9,3 +9,5 @@
 *.aux
 *.bbl
 *.fdb_latexmk
+doc
+Meta
