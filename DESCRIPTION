@@ -36,6 +36,7 @@ Suggests:
     rmarkdown,
     markdown,
     data.table,
-    rticles
+    rticles,
+    mvtnorm
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
