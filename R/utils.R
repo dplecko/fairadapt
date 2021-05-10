@@ -1,49 +1,54 @@
+
 swap <- function(x, i, j) {
 
   keep <- x[i]
   x[i] <- x[j]
   x[j] <- keep
 
-  return(x)
-
+  x
 }
 
-expit <- function(x) return(exp(x)/(1+exp(x)))
+expit <- function(x) exp(x)/(1+exp(x))
+
+seq_row <- function(x) seq_len(nrow(x))
+
+seq_col <- function(x) seq_len(ncol(x))
 
 makeLength <- function(x, train.len, full.len) {
 
-  assertthat::assert_that(length(x) %in% c(train.len, full.len))
-  assertthat::assert_that(!is.factor(x))
+  assert_that(length(x) %in% c(train.len, full.len), !is.factor(x))
 
-  if(length(x) != full.len) x <- c(x, rep(NA, full.len - train.len))
+  if (length(x) != full.len) {
+    x <- c(x, rep(NA, full.len - train.len))
+  }
 
   x
-
 }
-
 
 catOrder <- function(outcome, var) {
 
   u.val <- levels(var)
   u.val <- u.val[(u.val %in% var)]
-  cond.expect <- cat.enc <- rep(0, length(u.val))
 
-  for (i in 1:length(u.val)) {
+  cat.enc <- rep(0, length(u.val))
+  cond.expect <- cat.enc
+
+  for (i in seq_along(u.val)) {
 
     cond.expect[i] <- mean(as.numeric(outcome[var == u.val[i]]), na.rm = TRUE)
-    if (is.na(cond.expect[i])) browser()
-    assertthat::assert_that(!is.na(cond.expect[i]),
-                            msg = "New factor levels appearing in the test data,
-                                   which is disallowed")
 
+    assert_that(!is.na(cond.expect[i]),
+                msg = paste("New factor levels appearing in the test data",
+                            "which is disallowed"))
   }
 
-  if (length(cond.expect) != length(unique(cond.expect)))
-    cond.expect <- cond.expect +
-    rnorm(length(cond.expect), sd = sd(cond.expect)/10000)
+  if (length(cond.expect) != length(unique(cond.expect))) {
+    cond.expect <- cond.expect + rnorm(
+      length(cond.expect), sd = sd(cond.expect) / 10000
+    )
+  }
 
   u.val[order(cond.expect)]
-
 }
 
 marginalMatching <- function(x, base.ind) {
@@ -55,47 +60,55 @@ marginalMatching <- function(x, base.ind) {
     length(x.non.baseline)
   fitted.x.baseline <- NULL
 
-  for (i in 1:length(fitted.value.counts)) {
+  for (i in seq_along(fitted.value.counts)) {
 
-    fitted.x.baseline <- c(fitted.x.baseline,
-                           rep(i, round(fitted.value.counts[i])))
-
+    fitted.x.baseline <- c(
+      fitted.x.baseline,
+      rep(i, round(fitted.value.counts[i]))
+    )
   }
 
-  fitted.x.baseline <- c(fitted.x.baseline,
-                         rep(length(fitted.value.counts),
-                             max(0, length(x.non.baseline) -
-                                    length(fitted.x.baseline))))
-  fitted.x.baseline <- fitted.x.baseline[1:length(x.non.baseline)]
+  fitted.x.baseline <- c(
+    fitted.x.baseline,
+    rep(
+      length(fitted.value.counts),
+      max(0, length(x.non.baseline) - length(fitted.x.baseline))
+    )
+  )
+
+  fitted.x.baseline <- fitted.x.baseline[seq_along(x.non.baseline)]
 
   x.non.baseline[order(x.non.baseline)] <- fitted.x.baseline
+
   x[!base.ind] <- x.non.baseline
   x[base.ind] <- x.baseline
 
   x
-
 }
 
 decodeDiscrete <- function(var, u.val, type, full.len) {
 
-  if (length(var) < full.len) var <- c(var, rep(NA_real_, full.len -
-                                                           length(var)))
+  if (length(var) < full.len) {
+    var <- c(var, rep(NA_real_, full.len - length(var)))
+  }
+
   indices <- as.integer(round(var))
-  assertthat::assert_that(all(indices[!is.na(indices)] > 0L))
-  assertthat::assert_that(all(indices[!is.na(indices)] <= length(u.val)),
-                          msg = "New value appearing, unseen in train data")
+
+  assert_that(all(indices[!is.na(indices)] > 0L),
+              all(indices[!is.na(indices)] <= length(u.val)),
+              msg = "New value appearing, unseen in train data")
 
   decode <- u.val[indices]
 
-  assertthat::assert_that(is.element(type, c("numeric", "integer", "factor",
-                                             "character")),
-                          msg = "Unexpected class in decoding")
+  assert_that(
+    is.element(type, c("numeric", "integer", "factor", "character")),
+    msg = "Unexpected class in decoding"
+  )
 
-  res <- switch(type, integer = as.integer(decode),
-                factor = factor(decode, levels = u.val),
-                numeric = as.numeric(decode),
-                character = decode)
-
-  res
-
+  switch(type,
+    integer = as.integer(decode),
+    factor = factor(decode, levels = u.val),
+    numeric = as.numeric(decode),
+    character = decode
+  )
 }

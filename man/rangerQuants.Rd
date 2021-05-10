@@ -2,20 +2,27 @@
 % Please edit documentation in R/quants.R
 \name{rangerQuants}
 \alias{rangerQuants}
-\title{Compute Quantiles using random forests (`ranger` package) in the Quantile Learning step.}
+\title{Compute Quantiles using random forests (`ranger` package) in the Quantile
+Learning step.}
 \usage{
 rangerQuants(data, A.root, ind)
 }
 \arguments{
-\item{data}{A \code{data.frame} with data to be used for quantile regression.}
+\item{data}{A \code{data.frame} with data to be used for quantile
+regression.}
 
-\item{A.root}{A \code{logical(1L)} indicating whether the protected attribute `A` is a root node of the causal graph. Used for splitting the quantile regression.}
+\item{A.root}{A \code{logical(1L)} indicating whether the protected
+attribute `A` is a root node of the causal graph. Used for splitting the
+quantile regression.}
 
-\item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which samples have the baseline value of the protected attribute.}
+\item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which
+samples have the baseline value of the protected attribute.}
 }
 \value{
-A `ranger` or a `rangersplit` `S3` object, depending on the value of the `A.root` argument.
+A `ranger` or a `rangersplit` `S3` object, depending on the value
+of the `A.root` argument.
 }
 \description{
-Compute Quantiles using random forests (`ranger` package) in the Quantile Learning step.
+Compute Quantiles using random forests (`ranger` package) in the Quantile
+Learning step.
 }

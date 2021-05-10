@@ -13,7 +13,7 @@ fairadapt(
   top.ord = NULL,
   protect.A,
   res.vars = NULL,
-  quant.method = fairadapt:::rangerQuants,
+  quant.method = rangerQuants,
   visualize.graph = FALSE
 )
 }

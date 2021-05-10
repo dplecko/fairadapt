@@ -7,15 +7,20 @@
 computeQuants(x, data, newdata, ind, ...)
 }
 \arguments{
-\item{x}{Object with an associated `computeQuants()` method, to be used for inferring quantiles.}
+\item{x}{Object with an associated `computeQuants()` method, to be used for
+inferring quantiles.}
 
-\item{data}{\code{data.frame} containing samples used in the quantile regression.}
+\item{data}{\code{data.frame} containing samples used in the quantile
+regression.}
 
-\item{newdata}{\code{data.frame} containing counterfactual values for which the quantiles need to be inferred.}
+\item{newdata}{\code{data.frame} containing counterfactual values for which
+the quantiles need to be inferred.}
 
-\item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which samples have the baseline value of the protected attribute.}
+\item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which
+samples have the baseline value of the protected attribute.}
 
-\item{...}{Additional arguments to be passed down to respective method functions.}
+\item{...}{Additional arguments to be passed down to respective method
+functions.}
 }
 \value{
 A vector of counterfactual values corresponding to `newdata`.
