@@ -1,100 +1,63 @@
-CorrectInput <- function(formula, train.data, test.data, adjacency.matrix,
-                         protected.attribute, resolving.variables = NULL, quant.method) {
+CorrectInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
+                         protect.A, resolving.variables = NULL, quant.method) {
 
-  if (!WithinRange(adjacency.matrix)) {
-    stop("Adjacency matrix has entries different from 0,1")
+  #assertthat::assert_that(quant.method %in% c("forest", "forest2", "linear", "nn"))
 
-  }
+  if (is.null(adj.mat)) {
 
-  if (is.null(colnames(adjacency.matrix)) | is.null(rownames(adjacency.matrix))) {
-
-    stop("Row or column names of the adjacency matrix missing")
+    assertthat::assert_that(!is.null(top.ord))
+    ap.nms <- top.ord
 
   }
 
-  if (!setequal(rownames(adjacency.matrix), colnames(adjacency.matrix))) {
+  else {
 
-    stop("Row and column names of the adjacency matrix do not match")
+    assertthat::assert_that(!is.null(colnames(adj.mat)), !is.null(rownames(adj.mat)))
+    assertthat::assert_that(WithinRange(adj.mat))
+    assertthat::assert_that(setequal(rownames(adj.mat), colnames(adj.mat)))
 
-  }
+    adj.mat <- adj.mat[colnames(adj.mat), ]
 
-  if (!(quant.method %in% c("forest", "forest2", "linear", "nn"))) {
+    assertthat::assert_that(IsAcyclic(adj.mat))
 
-    stop("quant.method must be one of `forest`, `forest2`, `linear` or `nn`.")
-
-  }
-
-  if (length(colnames(adjacency.matrix)) != length(unique(colnames(adjacency.matrix)))) {
-
-    stop("Column names are not unique")
+    ap.nms <- colnames(adj.mat)
 
   }
 
-  if (length(rownames(adjacency.matrix)) != length(unique(rownames(adjacency.matrix)))) {
+  assertthat::assert_that(length(ap.nms) == length(unique(ap.nms)))
 
-    stop("Row names are not unique")
+  assertthat::assert_that(sum(!is.element(resolving.variables, colnames(adj.mat))) == 0)
 
-  }
-
-  adjacency.matrix <- adjacency.matrix[colnames(adjacency.matrix), ]
-
-  if (!IsAcyclic(adjacency.matrix)) {
-
-    stop("The specified DAG is not acylic")
-
-  }
-
-  if (!is.null(resolving.variables)) {
-
-    if (sum(!is.element(resolving.variables,colnames(adjacency.matrix)))) {
-
-      stop("There are resolving variables not appearing in the specified DAG")
-
-    }
-
-  }
-
-  if (!is.element(protected.attribute,colnames(adjacency.matrix))) {
-
-    stop("Protected attribute missing in the specified DAG")
-
-  }
+  assertthat::assert_that(is.element(protect.A, ap.nms))
 
   train.data <- model.frame(formula, train.data)
-  test.data <- test.data[, colnames(train.data)[-1]]
+  if (!is.null(test.data)) test.data <- test.data[, colnames(train.data)[-1]]
 
-  if (sum(is.na(train.data))) {
+  assertthat::assert_that(sum(is.na(train.data)) == 0, nrow(train.data) > 0)
 
-    stop("NA values in the training data")
+  if (!is.null(test.data)) assertthat::assert_that(sum(is.na(test.data)) == 0)
 
-  }
-
-  if (sum(is.na(test.data))) {
-
-    stop("NA values in the test set")
-
-  }
-
-  if (sum(!is.element(colnames(train.data),colnames(adjacency.matrix)))) {
-
-    stop("There are covariates not appearing in the specified DAG")
-
-  }
+  assertthat::assert_that(sum(!is.element(colnames(train.data), ap.nms)) == 00)
 
 }
 
 WithinRange <- function(mat) {
+
   matrix.size <- dim(mat)
   num.odd.entries <- sum(!is.element(mat,c(0,1)))
   return(num.odd.entries == 0)
+
 }
 
 IsAcyclic <- function(mat) {
+
   matrix.size <- dim(mat)
   num.walks <- mat
   for (i in 1:matrix.size[1]) {
     num.walks <- mat + num.walks %*% mat
   }
   acyclic <- (sum(diag(num.walks)) == 0)
+
   return(acyclic)
+
 }
