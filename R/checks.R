@@ -1,4 +1,4 @@
-CorrectInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
+correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
                          protect.A, resolving.variables = NULL, quant.method) {
 
   #assertthat::assert_that(quant.method %in% c("forest", "forest2", "linear", "nn"))
@@ -13,12 +13,12 @@ CorrectInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.o
   else {
 
     assertthat::assert_that(!is.null(colnames(adj.mat)), !is.null(rownames(adj.mat)))
-    assertthat::assert_that(WithinRange(adj.mat))
+    assertthat::assert_that(withinRange(adj.mat))
     assertthat::assert_that(setequal(rownames(adj.mat), colnames(adj.mat)))
 
     adj.mat <- adj.mat[colnames(adj.mat), ]
 
-    assertthat::assert_that(IsAcyclic(adj.mat))
+    assertthat::assert_that(isAcyclic(adj.mat))
 
     ap.nms <- colnames(adj.mat)
 
@@ -41,7 +41,7 @@ CorrectInput <- function(formula, train.data, test.data, adj.mat, cfd.mat, top.o
 
 }
 
-WithinRange <- function(mat) {
+withinRange <- function(mat) {
 
   matrix.size <- dim(mat)
   num.odd.entries <- sum(!is.element(mat,c(0,1)))
@@ -49,7 +49,7 @@ WithinRange <- function(mat) {
 
 }
 
-IsAcyclic <- function(mat) {
+isAcyclic <- function(mat) {
 
   matrix.size <- dim(mat)
   num.walks <- mat

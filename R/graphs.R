@@ -1,5 +1,5 @@
 
-GetDescendants <- function(var, adj.mat, top.ord = NULL) {
+getDescendants <- function(var, adj.mat, top.ord = NULL) {
 
   if (is.null(adj.mat)) {
 
@@ -28,7 +28,7 @@ GetDescendants <- function(var, adj.mat, top.ord = NULL) {
 
 }
 
-GetAncestors <- function(var, adj.mat, top.ord = NULL) {
+getAncestors <- function(var, adj.mat, top.ord = NULL) {
 
   if (is.null(adj.mat)) {
 
@@ -55,11 +55,11 @@ GetAncestors <- function(var, adj.mat, top.ord = NULL) {
 
 }
 
-GetParents <- function(var, adj.mat, top.ord = NULL) {
+getParents <- function(var, adj.mat, top.ord = NULL) {
 
-  if (is.null(adj.mat)) return(GetAncestors(var, adj.mat, top.ord))
+  if (is.null(adj.mat)) return(getAncestors(var, adj.mat, top.ord))
 
-  if (length(var) > 1) return(Reduce(c, lapply(var, GetParents, adj.mat)))
+  if (length(var) > 1) return(Reduce(c, lapply(var, getParents, adj.mat)))
 
   parent.indicators <- adj.mat[, var] == 1
   parents <- row.names(adj.mat)[parent.indicators]
@@ -68,11 +68,11 @@ GetParents <- function(var, adj.mat, top.ord = NULL) {
 
 }
 
-GetChildren <- function(var, adj.mat, top.ord = NULL) {
+getChildren <- function(var, adj.mat, top.ord = NULL) {
 
-  if (is.null(adj.mat)) return(GetDescendants(var, adj.mat, top.ord))
+  if (is.null(adj.mat)) return(getDescendants(var, adj.mat, top.ord))
 
-  if (length(var) > 1) return(Reduce(c, lapply(var, GetChildren, adj.mat)))
+  if (length(var) > 1) return(Reduce(c, lapply(var, getChildren, adj.mat)))
 
   ch.idx <- adj.mat[var, ] == 1
   children <- row.names(adj.mat)[ch.idx]
@@ -81,7 +81,7 @@ GetChildren <- function(var, adj.mat, top.ord = NULL) {
 
 }
 
-ConfoundedComponent <- function(var, cfd.matrix) {
+confoundedComponent <- function(var, cfd.matrix) {
 
   assertthat::assert_that(identical(cfd.matrix, t(cfd.matrix)))
 
@@ -103,23 +103,23 @@ ConfoundedComponent <- function(var, cfd.matrix) {
 
 }
 
-AdjustmentSet <- function(var, adj.mat, cfd.mat, top.ord) {
+adjustmentSet <- function(var, adj.mat, cfd.mat, top.ord) {
 
   if(is.null(adj.mat)) return(top.ord[1:(which(top.ord == var)-1)])
 
-  cc <- ConfoundedComponent(var, cfd.mat)
+  cc <- confoundedComponent(var, cfd.mat)
 
   intersect(
-    GetAncestors(var, adj.mat),
+    getAncestors(var, adj.mat),
     union(
       cc,
-      GetParents(cc, adj.mat)
+      getParents(cc, adj.mat)
     )
   )
 
 }
 
-TopologicalOrdering <- function(adj.mat) {
+topologicalOrdering <- function(adj.mat) {
 
   matrix.size <- dim(adj.mat)
   num.walks <- adj.mat
@@ -140,7 +140,7 @@ TopologicalOrdering <- function(adj.mat) {
 
       if (comparison.matrix[top.order[j], top.order[i]]) {
 
-        top.order <- Swap(top.order, i, j)
+        top.order <- swap(top.order, i, j)
 
       }
     }
@@ -151,11 +151,11 @@ TopologicalOrdering <- function(adj.mat) {
 
 }
 
-NonID <- function(iv, adj.mat, cfd.mat) {
+nonId <- function(iv, adj.mat, cfd.mat) {
 
   any(
     sapply(iv, function(var) length(intersect(
-        GetChildren(var, adj.mat), ConfoundedComponent(var, cfd.mat)
+        getChildren(var, adj.mat), confoundedComponent(var, cfd.mat)
       )
     ) > 0)
   )

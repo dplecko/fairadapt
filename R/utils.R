@@ -1,4 +1,4 @@
-Swap <- function(x, i, j) {
+swap <- function(x, i, j) {
 
   keep <- x[i]
   x[i] <- x[j]
@@ -10,7 +10,7 @@ Swap <- function(x, i, j) {
 
 expit <- function(x) return(exp(x)/(1+exp(x)))
 
-MakeLength <- function(x, train.len, full.len) {
+makeLength <- function(x, train.len, full.len) {
 
   assertthat::assert_that(length(x) %in% c(train.len, full.len))
   assertthat::assert_that(!is.factor(x))
@@ -22,7 +22,7 @@ MakeLength <- function(x, train.len, full.len) {
 }
 
 
-CatOrder <- function(outcome, var) {
+catOrder <- function(outcome, var) {
 
   u.val <- levels(var)
   u.val <- u.val[(u.val %in% var)]
@@ -46,7 +46,7 @@ CatOrder <- function(outcome, var) {
 
 }
 
-MarginalMatching <- function(x, base.ind) {
+marginalMatching <- function(x, base.ind) {
 
   x.baseline <- round(x[base.ind])
   x.non.baseline <- x[!base.ind]
@@ -76,7 +76,7 @@ MarginalMatching <- function(x, base.ind) {
 
 }
 
-DecodeDiscrete <- function(var, u.val, type, full.len) {
+decodeDiscrete <- function(var, u.val, type, full.len) {
 
   if (length(var) < full.len) var <- c(var, rep(NA_real_, full.len -
                                                            length(var)))

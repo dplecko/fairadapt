@@ -250,11 +250,11 @@ predict.fairadapt <- function(object, newdata, ...) {
     if (engine[[var]][["discrete"]]) {
 
       adapt.var <-
-        DecodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
+        decodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
                        engine[[var]][["type"]], length(adapt[, var]))
 
       newdata.var <-
-        DecodeDiscrete(newdata[, var], engine[[var]][["unique.values"]],
+        decodeDiscrete(newdata[, var], engine[[var]][["unique.values"]],
                        engine[[var]][["type"]], length(newdata[, var]))
 
       newdata[, var] <- newdata.var

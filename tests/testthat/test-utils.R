@@ -13,7 +13,7 @@ test_that("Categorical Encoding Works", {
 
   #expect_equal(ord1, ord2)
 
-  mmatch1 <- MarginalMatching(
+  mmatch1 <- marginalMatching(
     c(rep(c(1, 2, 3), each = 10), rep(0, 30)),
     rep(c(T, F), each = 30)
   )

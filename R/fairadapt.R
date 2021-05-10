@@ -72,7 +72,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
   quant.method = fairadapt:::rangerQuants, visualize.graph = FALSE) {
 
   # verify correctness of input
-  CorrectInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
+  correctInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
                protect.A, res.vars, quant.method)
 
   # reorder the adjacency matrix if necessary
@@ -121,10 +121,10 @@ fairadapt <- function(formula, train.data, test.data = NULL,
   # obtain topological ordering and descendants of A
   if(is.null(top.ord)) { # Markovian / Semi-Markovian case
 
-    top.ord <- TopologicalOrdering(adj.mat)
-    A.des <- GetDescendants(protect.A, adj.mat)
-    A.root <- (length(GetParents(protect.A, adj.mat)) == 0L) &
-      (length(ConfoundedComponent(protect.A, cfd.mat)) == 1L)
+    top.ord <- topologicalOrdering(adj.mat)
+    A.des <- getDescendants(protect.A, adj.mat)
+    A.root <- (length(getParents(protect.A, adj.mat)) == 0L) &
+      (length(confoundedComponent(protect.A, cfd.mat)) == 1L)
 
     ig <- graphModel(adj.mat, cfd.mat)
 
@@ -134,13 +134,13 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
     }
 
-    # fail if NonID
-    if (NonID(c(protect.A, res.vars), adj.mat, cfd.mat))
+    # fail if nonId
+    if (nonId(c(protect.A, res.vars), adj.mat, cfd.mat))
       stop("The desired intervention is non-identifiable")
 
   } else { # Topological Ordering case
 
-    A.des <- GetDescendants(protect.A, adj.mat, top.ord)
+    A.des <- getDescendants(protect.A, adj.mat, top.ord)
     A.root <- top.ord[1] == protect.A
     ig <- NULL
 
@@ -156,7 +156,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
     # must change for topological order approach/also for when A is not root
 
-    changed.parents <- intersect(GetParents(curr.var, adj.mat, top.ord),
+    changed.parents <- intersect(getParents(curr.var, adj.mat, top.ord),
                                  union(A.des, protect.A))
     if (sum(!is.element(changed.parents, res.vars)) == 0)
       res.vars <- c(res.vars, curr.var)
@@ -167,7 +167,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
 
     q.Engine[[curr.var]][["discrete"]] <- discrete <- FALSE
-    curr.parents <- AdjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
+    curr.parents <- adjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
     q.Engine[[curr.var]][["parents"]] <- curr.parents
 
     row.idx <- rep(TRUE, full.len)
@@ -183,7 +183,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
         org.data[, curr.var] <-
           factor(org.data[, curr.var],
-                 levels = CatOrder(org.data[row.idx, 1],
+                 levels = catOrder(org.data[row.idx, 1],
                                    org.data[row.idx, curr.var]))
 
       } else org.data[, curr.var] <- factor(org.data[, curr.var])
@@ -195,11 +195,11 @@ fairadapt <- function(formula, train.data, test.data = NULL,
                  runif(length(org.data[row.idx, curr.var]), -0.5, 0.5)
 
       ### fct <- EncodeDiscrete2()
-      ### EncodeDiscrete2 uses the CatOrder function to make var into a factor
+      ### EncodeDiscrete2 uses the catOrder function to make var into a factor
       ### int.enc <- as.integer(fct) + runif(length(fct), -0.5, 0.5)
 
       org.data[, curr.var] <- adapt.data[, curr.var] <-
-        MakeLength(int.enc, train.len, full.len)
+        makeLength(int.enc, train.len, full.len)
 
     }
 
@@ -215,24 +215,24 @@ fairadapt <- function(formula, train.data, test.data = NULL,
       computeQuants(object, qr.data, cf.parents, base.ind[row.idx])
 
     # check if there exists a resolving ancestor
-    ancestors <- GetAncestors(curr.var, adj.mat, top.ord)
+    ancestors <- getAncestors(curr.var, adj.mat, top.ord)
     res.anc <- (sum(is.element(ancestors, res.vars)) > 0)
 
     # enforce Marginal Matching if there is no resolving ancestor & discrete
     if (discrete & !res.anc & A.root) {
 
       adapt.data[row.idx, curr.var] <-
-        MarginalMatching(adapt.data[row.idx, curr.var], base.ind[row.idx])
+        marginalMatching(adapt.data[row.idx, curr.var], base.ind[row.idx])
 
     }
 
     # if discrete, recode back to discrete or factor
     if (discrete) {
 
-      adapt.var <- DecodeDiscrete(adapt.data[row.idx, curr.var], unique.values,
+      adapt.var <- decodeDiscrete(adapt.data[row.idx, curr.var], unique.values,
                                   type, full.len)
 
-      org.var <- DecodeDiscrete(org.data[row.idx, curr.var], unique.values,
+      org.var <- decodeDiscrete(org.data[row.idx, curr.var], unique.values,
                                 type, full.len)
 
       adapt.data[, curr.var] <- adapt.var

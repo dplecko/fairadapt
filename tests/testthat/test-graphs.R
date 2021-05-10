@@ -11,9 +11,9 @@ test_that("Graph Utils Work", {
   adj["X1", "X2"] <- adj["X2", "X3"] <- adj["X3", "X4"] <- adj["X4", "X5"] <- 1
 
 
-  expect_equal(ConfoundedComponent("X1", cfd), c("X1", "X3", "X5"))
+  expect_equal(confoundedComponent("X1", cfd), c("X1", "X3", "X5"))
 
-  expect_equal(AdjustmentSet("X5", adj, cfd), c("X1", "X2", "X3", "X4"))
+  expect_equal(adjustmentSet("X5", adj, cfd), c("X1", "X2", "X3", "X4"))
 
 
   adj <- array(0, dim = c(5,5))
@@ -23,14 +23,14 @@ test_that("Graph Utils Work", {
 
   cfd <- adj
   cfd[,] <- 0
-  expect_false(NonID("A", adj, cfd))
+  expect_false(nonId("A", adj, cfd))
 
   cfd["A", "X1"] <- cfd["X1", "A"] <- 1
-  expect_true(NonID("A", adj, cfd))
+  expect_true(nonId("A", adj, cfd))
 
-  expect_equal(GetDescendants("A", adj), c("X1", "X2", "X3", "Y"))
-  expect_equal(GetParents("X2", adj), c("X1"))
-  expect_equal(GetAncestors("X2", adj), c("A", "X1"))
-  expect_equal(TopologicalOrdering(adj), c("A", "X1", "X2", "X3", "Y"))
+  expect_equal(getDescendants("A", adj), c("X1", "X2", "X3", "Y"))
+  expect_equal(getParents("X2", adj), c("X1"))
+  expect_equal(getAncestors("X2", adj), c("A", "X1"))
+  expect_equal(topologicalOrdering(adj), c("A", "X1", "X2", "X3", "Y"))
 
 })
