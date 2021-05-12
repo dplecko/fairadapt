@@ -41,6 +41,8 @@
 #' @param visualize.graph A \code{logical} indicating whether the causal graph
 #' should be plotted upon calling the \code{fairadapt()} function. Default
 #' value is \code{FALSE}.
+#' @param ... Forwarded to the function passed as `quant.method`.
+#'
 #' @return An object of class \code{fairadapt}, containing the original and
 #' adapted training and testing data, together with the causal graph and some
 #' additional meta-information.
@@ -70,7 +72,7 @@
 fairadapt <- function(formula, train.data, test.data = NULL,
   adj.mat = NULL, cfd.mat = NULL, top.ord = NULL,
   protect.A, res.vars = NULL, quant.method = rangerQuants,
-  visualize.graph = FALSE) {
+  visualize.graph = FALSE, ...) {
 
   # verify correctness of input
   correctInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
@@ -211,7 +213,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
     assert_that(ncol(qr.data) == (ncol(cf.parents) + 1))
 
-    object <- quant.method(qr.data, A.root, base.ind[row.idx])
+    object <- quant.method(qr.data, A.root, base.ind[row.idx], ...)
     q.Engine[[curr.var]][["object"]] <- object
 
     adapt.data[!base.ind & row.idx, curr.var] <-

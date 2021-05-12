@@ -14,7 +14,8 @@ fairadapt(
   protect.A,
   res.vars = NULL,
   quant.method = rangerQuants,
-  visualize.graph = FALSE
+  visualize.graph = FALSE,
+  ...
 )
 }
 \arguments{
@@ -54,6 +55,8 @@ used for quantile regression. Possible values are "forest", "forest2",
 \item{visualize.graph}{A \code{logical} indicating whether the causal graph
 should be plotted upon calling the \code{fairadapt()} function. Default
 value is \code{FALSE}.}
+
+\item{...}{Forwarded to the function passed as `quant.method`.}
 }
 \value{
 An object of class \code{fairadapt}, containing the original and

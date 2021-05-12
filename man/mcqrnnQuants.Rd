@@ -5,7 +5,14 @@
 \title{Compute Quantiles using monotone quantile regression neural networks
 (`mcqrnn` package) in the Quantile Learning step.}
 \usage{
-mcqrnnQuants(data, A.root, ind)
+mcqrnnQuants(
+  data,
+  A.root,
+  ind,
+  tau = seq(0.005, 0.995, by = 0.01),
+  iter.max = 500,
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{data.frame} with data to be used for quantile
@@ -17,6 +24,8 @@ quantile regression.}
 
 \item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which
 samples have the baseline value of the protected attribute.}
+
+\item{tau, iter.max, ...}{Forwarded to [qrnn::mcqrnn.fit()].}
 }
 \value{
 An `mcqrnn` `S3` object.

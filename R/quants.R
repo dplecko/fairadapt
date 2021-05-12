@@ -8,25 +8,29 @@
 #' quantile regression.
 #' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
 #' samples have the baseline value of the protected attribute.
+#' @param min.node.size,... Forwarded to [ranger::ranger()].
 #'
 #' @return A `ranger` or a `rangersplit` `S3` object, depending on the value
 #' of the `A.root` argument.
 #'
 #' @export
-rangerQuants <- function(data, A.root, ind) {
+rangerQuants <- function(data, A.root, ind, min.node.size = 20, ...) {
 
   if (A.root) {
     return(
       structure(
-        list(class0 = rangerQuants(data[ind, ], FALSE, NULL),
-             class1 = rangerQuants(data[!ind, ], FALSE, NULL)),
+        list(
+          class0 = rangerQuants(data[ind, ], FALSE, NULL,
+                                min.node.size = min.node.size, ...),
+          class1 = rangerQuants(data[!ind, ], FALSE, NULL,
+                                min.node.size = min.node.size, ...)),
         class = "rangersplit"
       )
     )
   }
 
   ranger::ranger(formula(data), data = data, quantreg = TRUE,
-                 keep.inbag = TRUE, min.node.size = 20)
+                 keep.inbag = TRUE, min.node.size = min.node.size, ...)
 }
 
 #' Compute Quantiles using linear quantile regression (`quantreg` package) in
@@ -39,18 +43,23 @@ rangerQuants <- function(data, A.root, ind) {
 #' quantile regression.
 #' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
 #' samples have the baseline value of the protected attribute.
+#' @param tau,... Forwarded to [quantreg::rq()].
 #'
 #' @return A `rqs` or a `quantregsplit` `S3` object, depending on the value of
 #' the `A.root` argument.
 #'
 #' @export
-linearQuants <- function(data, A.root, ind) {
+linearQuants <- function(data, A.root, ind,
+                         tau = c(0.001, seq(0.005, 0.995, by = 0.01), 0.999),
+                         ...) {
 
   if (A.root) {
     return(
       structure(
-        list(class0 = linearQuants(data[ind, ], FALSE, NULL),
-             class1 = linearQuants(data[!ind, ], FALSE, NULL)),
+        list(
+          class0 = linearQuants(data[ind, ], FALSE, NULL, tau = tau, ...),
+          class1 = linearQuants(data[!ind, ], FALSE, NULL, tau = tau, ...)
+        ),
         class = "quantregsplit"
       )
     )
@@ -68,8 +77,7 @@ linearQuants <- function(data, A.root, ind) {
     form <- formula(data[, keep.cols])
   }
 
-  quantreg::rq(form, data = data,
-               tau = c(0.001, seq(0.005, 0.995, by = 0.01), 0.999))
+  quantreg::rq(form, data = data, tau = tau, ...)
 }
 
 #' Compute Quantiles using monotone quantile regression neural networks
@@ -82,18 +90,20 @@ linearQuants <- function(data, A.root, ind) {
 #' quantile regression.
 #' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
 #' samples have the baseline value of the protected attribute.
+#' @param tau,iter.max,... Forwarded to [qrnn::mcqrnn.fit()].
 #'
 #' @return An `mcqrnn` `S3` object.
 #'
 #' @export
-mcqrnnQuants <- function(data, A.root, ind) {
+mcqrnnQuants <- function(data, A.root, ind, tau = seq(0.005, 0.995, by = 0.01),
+                         iter.max = 500, ...) {
 
   data.matrix <- matrix(as.numeric(unlist(data)), nrow = nrow(data))
 
   object <- qrnn::mcqrnn.fit(x = data.matrix[, -1L, drop = FALSE],
                              y = matrix(data.matrix[, 1L], ncol = 1),
-                             tau = seq(0.005, 0.995, by = 0.01),
-                             n.trials = 1, iter.max = 500, trace = FALSE)
+                             tau = tau, n.trials = 1, iter.max = iter.max,
+                             trace = FALSE, ...)
 
   structure(object, class = "mcqrnnobj")
 }

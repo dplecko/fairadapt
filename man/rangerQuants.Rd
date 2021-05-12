@@ -5,7 +5,7 @@
 \title{Compute Quantiles using random forests (`ranger` package) in the Quantile
 Learning step.}
 \usage{
-rangerQuants(data, A.root, ind)
+rangerQuants(data, A.root, ind, min.node.size = 20, ...)
 }
 \arguments{
 \item{data}{A \code{data.frame} with data to be used for quantile
@@ -17,6 +17,8 @@ quantile regression.}
 
 \item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which
 samples have the baseline value of the protected attribute.}
+
+\item{min.node.size, ...}{Forwarded to [ranger::ranger()].}
 }
 \value{
 A `ranger` or a `rangersplit` `S3` object, depending on the value

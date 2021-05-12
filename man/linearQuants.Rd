@@ -5,7 +5,13 @@
 \title{Compute Quantiles using linear quantile regression (`quantreg` package) in
 the Quantile Learning step.}
 \usage{
-linearQuants(data, A.root, ind)
+linearQuants(
+  data,
+  A.root,
+  ind,
+  tau = c(0.001, seq(0.005, 0.995, by = 0.01), 0.999),
+  ...
+)
 }
 \arguments{
 \item{data}{A \code{data.frame} with data to be used for quantile
@@ -17,6 +23,8 @@ quantile regression.}
 
 \item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which
 samples have the baseline value of the protected attribute.}
+
+\item{tau, ...}{Forwarded to [quantreg::rq()].}
 }
 \value{
 A `rqs` or a `quantregsplit` `S3` object, depending on the value of
