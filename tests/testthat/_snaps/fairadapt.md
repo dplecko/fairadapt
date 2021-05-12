@@ -1,4 +1,4 @@
-# Fairadapt works
+# fairadapt
 
     {
       "type": "double",
