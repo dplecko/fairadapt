@@ -164,7 +164,9 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     }
 
     q.Engine[[curr.var]] <- list()
-    q.Engine[[curr.var]][["type"]] <- type <- class(org.data[, curr.var])
+
+    type <- class(org.data[, curr.var])
+    q.Engine[[curr.var]][["type"]] <- type
 
     discrete <- FALSE
     q.Engine[[curr.var]][["discrete"]] <- discrete

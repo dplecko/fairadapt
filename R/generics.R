@@ -231,7 +231,7 @@ predict.fairadapt <- function(object, newdata, ...) {
 
   base.ind <- newdata[, object$protect.A] == object$base.lvl
 
-  for (var in setdiff(names(engine), all.vars(object$formual)[1L])) {
+  for (var in setdiff(names(engine), all.vars(object$formula)[1L])) {
 
     assert_that(class(newdata[, var]) == engine[[var]][["type"]],
                 msg = "Mismatch in column type with training data")
