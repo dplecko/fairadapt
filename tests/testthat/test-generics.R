@@ -23,74 +23,64 @@ test_that("generics", {
   adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
                     byrow = TRUE, dimnames = list(vars, vars))
 
-  funs <- c(rangerQuants, linearQuants)
+  # random forest
 
-  for (i in seq_along(funs)) {
+  ad.rf <- fairadapt(y ~ ., train.data = train, test.data = test,
+                     adj.mat = adj.mat, protect.A = "a", seed = 2021)
 
-    mod <- fairadapt(y ~ ., train.data = train, test.data = test,
-                     adj.mat = adj.mat, protect.A = "a",
-                     quant.method = funs[[i]])
+  aut.plt <- autoplot(ad.rf)
 
-    aut.plt <- autoplot(mod)
+  expect_s3_class(aut.plt, "ggplot")
 
-    expect_s3_class(aut.plt, "ggplot")
+  expect_snapshot_plot("auto_rf", print(aut.plt))
+  # extra print should not be necessary
+  expect_snapshot_plot("plot_rf", print(plot(ad.rf)))
+  expect_snapshot_plot("graph_rf", plot(ad.rf, graph = TRUE))
 
-    expect_snapshot_file(save_png(print(aut.plt)),
-                         paste0("auto_", i, ".png"))
-    # extra print should not be necessary
-    expect_snapshot_file(save_png(print(plot(mod))),
-                         paste0("plot_", i, ".png"))
-    expect_snapshot_file(save_png(plot(mod, graph = TRUE)),
-                         paste0("graph_", i, ".png"))
+  expect_snapshot_csv("ftdef_rf", fairTwins(ad.rf))
+  expect_snapshot_csv("fttrn_rf", fairTwins(ad.rf, train.id = NULL,
+                                            test.id = 1L))
+  expect_snapshot_csv("predi_rf", predict(ad.rf, pred))
 
-    expect_snapshot_file(
-      save_csv(fairTwins(mod)),
-      paste0("ftdef_", i, ".csv")
-    )
+  # linear
 
-    expect_snapshot_file(
-      save_csv(fairTwins(mod, train.id = NULL, test.id = 1L)),
-      paste0("fttrn_", i, ".csv")
-    )
+  ad.lin <- fairadapt(y ~ ., train.data = train, test.data = test,
+                      adj.mat = adj.mat, protect.A = "a",
+                      quant.method = linearQuants)
 
-    expect_snapshot_file(
-      save_csv(predict(mod, pred)),
-      paste0("predi_", i, ".csv")
-    )
-  }
+  aut.plt <- autoplot(ad.lin)
+
+  expect_s3_class(aut.plt, "ggplot")
+
+  expect_snapshot_plot("auto_lin", print(aut.plt))
+  # extra print should not be necessary
+  expect_snapshot_plot("plot_lin", print(plot(ad.lin)))
+  expect_snapshot_plot("graph_lin", plot(ad.lin, graph = TRUE))
+
+  expect_snapshot_csv("ftdef_lin", fairTwins(ad.lin))
+  expect_snapshot_csv("fttrn_lin", fairTwins(ad.lin, train.id = NULL,
+                                             test.id = 1L))
+  expect_snapshot_csv("predi_lin", predict(ad.lin, pred))
+
+  # cts
 
   cts <- dataGen(100, add_z = TRUE)
   cts$Y <- cts$X
 
-  i <- length(funs) + 1L
+  ad.cts <- fairadapt(y ~ ., train.data = cts, test.data = cts,
+                      adj.mat = adj.mat, protect.A = "a")
 
-  mod <- fairadapt(y ~ ., train.data = cts, test.data = cts, adj.mat = adj.mat,
-                    protect.A = "a")
-
-  aut.plt <- autoplot(mod)
+  aut.plt <- autoplot(ad.cts)
 
   expect_s3_class(aut.plt, "ggplot")
 
-  expect_snapshot_file(save_png(print(aut.plt)),
-                       paste0("auto_", i, ".png"))
+  expect_snapshot_plot("auto_cts", print(aut.plt))
   # extra print should not be necessary
-  expect_snapshot_file(save_png(print(plot(mod))),
-                       paste0("plot_", i, ".png"))
-  expect_snapshot_file(save_png(plot(mod, graph = TRUE)),
-                       paste0("graph_", i, ".png"))
+  expect_snapshot_plot("plot_cts", print(plot(ad.cts)))
+  expect_snapshot_plot("graph_cts", plot(ad.cts, graph = TRUE))
 
-  expect_snapshot_file(
-    save_csv(fairTwins(mod)),
-    paste0("ftdef_", i, ".csv")
-  )
-
-  expect_snapshot_file(
-    save_csv(fairTwins(mod, train.id = NULL, test.id = 1L)),
-    paste0("fttrn_", i, ".csv")
-  )
-
-  expect_snapshot_file(
-    save_csv(predict(mod, pred)),
-    paste0("predi_", i, ".csv")
-  )
+  expect_snapshot_csv("ftdef_cts", fairTwins(ad.cts))
+  expect_snapshot_csv("fttrn_cts", fairTwins(ad.cts, train.id = NULL,
+                                             test.id = 1L))
+  expect_snapshot_csv("predi_cts", predict(ad.cts, pred))
 })

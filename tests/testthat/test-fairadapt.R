@@ -27,7 +27,7 @@ test_that("fairadapt", {
 
   ran <- fairadapt(y ~ ., train.data = train, test.data = test,
                    adj.mat = adj.mat, protect.A = "a",
-                   quant.method = rangerQuants)
+                   quant.method = rangerQuants, seed = 2021)
 
   # both print() and str() throw
 
@@ -40,8 +40,8 @@ test_that("fairadapt", {
 
   expect_identical(ran[["protect.A"]], "a")
 
-  expect_snapshot_value(totVar(ran, "train", "y"), style = "json2")
-  expect_snapshot_value(totVar(ran, "adapt.train", "y"), style = "json2")
+  expect_snapshot_json(totVar(ran, "train", "y"))
+  expect_snapshot_json(totVar(ran, "adapt.train", "y"))
 
   ran.eng <- ran[["q.Engine"]]
 
@@ -85,8 +85,8 @@ test_that("fairadapt", {
 
   expect_identical(lin[["protect.A"]], "a")
 
-  expect_snapshot_value(totVar(lin, "train", "y"), style = "json2")
-  expect_snapshot_value(totVar(lin, "adapt.train", "y"), style = "json2")
+  expect_snapshot_json(totVar(lin, "train", "y"))
+  expect_snapshot_json(totVar(lin, "adapt.train", "y"))
 
   lin.eng <- lin[["q.Engine"]]
 
@@ -128,8 +128,8 @@ test_that("fairadapt", {
 
   expect_identical(qrn[["protect.A"]], "a")
 
-  expect_snapshot_value(totVar(qrn, "train", "y"), style = "json2")
-  expect_snapshot_value(totVar(qrn, "adapt.train", "y"), style = "json2")
+  expect_snapshot_json(totVar(qrn, "train", "y"))
+  expect_snapshot_json(totVar(qrn, "adapt.train", "y"))
 
   qrn.eng <- qrn[["q.Engine"]]
 
@@ -155,7 +155,7 @@ test_that("fairadapt", {
   # w/ top.ord
 
   rto <- fairadapt(y ~ ., train.data = train, test.data = test,
-                   top.ord = c("a", "x", "y"), protect.A = "a")
+                   top.ord = c("a", "x", "y"), protect.A = "a", seed = 2021)
 
   expect_type(rto, "list")
   expect_named(rto, fa.nms, ignore.order = TRUE)
@@ -199,7 +199,7 @@ test_that("fairadapt", {
 
   mod <- fairadapt(two_year_recid ~ ., train.data = train,
                    test.data = test, adj.mat = adj.mat, protect.A = "race",
-                   quant.method = rangerQuants)
+                   seed = 2021)
 
   ind <- train[["race"]] == "White"
 
@@ -265,37 +265,71 @@ test_that("fairadapt", {
   form <- as.formula(paste(tail(names(funs), n = 1), "~", "."))
   idx  <- test$a == 1
 
-  mse <- vector("list", length(funs) - 1L)
-  names(mse) <- head(names(funs), n = length(funs) - 1L)
+  mse.rf <- vector("list", length(funs) - 1L)
+  names(mse.rf) <- head(names(funs), n = length(funs) - 1L)
 
-  for (quant in c(rangerQuants, linearQuants)) {
+  # random forest
 
-    fair.sep <- fairadapt(form, train.data = train, test.data = NULL,
-                          adj.mat = adj.mat, cfd.mat = cfd.mat,
-                          protect.A = "a", quant.method = quant)
-    fair.sep <- predict(fair.sep, newdata = test)
+  fair.sep <- fairadapt(form, train.data = train, test.data = NULL,
+                        adj.mat = adj.mat, cfd.mat = cfd.mat,
+                        protect.A = "a", quant.method = rangerQuants,
+                        seed = 2021)
+  fair.sep <- predict(fair.sep, newdata = test)
 
-    fair.join <- fairadapt(form, train.data = train, test.data = test,
-                           adj.mat = adj.mat, cfd.mat = cfd.mat,
-                           protect.A = "a",  quant.method = quant)
-    fair.join <- fair.join[["adapt.test"]]
+  fair.join <- fairadapt(form, train.data = train, test.data = test,
+                         adj.mat = adj.mat, cfd.mat = cfd.mat,
+                         protect.A = "a",  quant.method = rangerQuants,
+                         seed = 2021)
+  fair.join <- fair.join[["adapt.test"]]
 
-    for (i in names(mse)) {
-      mse[[i]] <- list(
-        signif(100 * mean((fair.join[idx, i] - cfac[idx, i]) ^ 2)),
-        signif(100 * mean((fair.sep[idx, i]  - cfac[idx, i]) ^ 2))
-      )
-    }
-
-    expect_lt(mse[["x1"]][[1L]], 5)
-    expect_lt(mse[["x1"]][[2L]], 5)
-
-    expect_lt(mse[["x2"]][[1L]], 10)
-    expect_lt(mse[["x2"]][[2L]], 10)
-
-    expect_lt(mse[["x3"]][[1L]], 100)
-    expect_lt(mse[["x3"]][[2L]], 100)
-
-    expect_snapshot_value(mse, style = "json2")
+  for (i in names(mse.rf)) {
+    mse.rf[[i]] <- list(
+      signif(100 * mean((fair.join[idx, i] - cfac[idx, i]) ^ 2)),
+      signif(100 * mean((fair.sep[idx, i]  - cfac[idx, i]) ^ 2))
+    )
   }
+
+  expect_lt(mse.rf[["x1"]][[1L]], 5)
+  expect_lt(mse.rf[["x1"]][[2L]], 5)
+
+  expect_lt(mse.rf[["x2"]][[1L]], 10)
+  expect_lt(mse.rf[["x2"]][[2L]], 10)
+
+  expect_lt(mse.rf[["x3"]][[1L]], 100)
+  expect_lt(mse.rf[["x3"]][[2L]], 100)
+
+  expect_snapshot_json(mse.rf)
+
+  # linear
+
+  mse.lin <- vector("list", length(funs) - 1L)
+  names(mse.lin) <- head(names(funs), n = length(funs) - 1L)
+
+  fair.sep <- fairadapt(form, train.data = train, test.data = NULL,
+                        adj.mat = adj.mat, cfd.mat = cfd.mat,
+                        protect.A = "a", quant.method = linearQuants)
+  fair.sep <- predict(fair.sep, newdata = test)
+
+  fair.join <- fairadapt(form, train.data = train, test.data = test,
+                         adj.mat = adj.mat, cfd.mat = cfd.mat,
+                         protect.A = "a",  quant.method = linearQuants)
+  fair.join <- fair.join[["adapt.test"]]
+
+  for (i in names(mse.lin)) {
+    mse.lin[[i]] <- list(
+      signif(100 * mean((fair.join[idx, i] - cfac[idx, i]) ^ 2)),
+      signif(100 * mean((fair.sep[idx, i]  - cfac[idx, i]) ^ 2))
+    )
+  }
+
+  expect_lt(mse.lin[["x1"]][[1L]], 5)
+  expect_lt(mse.lin[["x1"]][[2L]], 5)
+
+  expect_lt(mse.lin[["x2"]][[1L]], 10)
+  expect_lt(mse.lin[["x2"]][[2L]], 10)
+
+  expect_lt(mse.lin[["x3"]][[1L]], 100)
+  expect_lt(mse.lin[["x3"]][[2L]], 100)
+
+  expect_snapshot_json(mse.lin)
 })

@@ -68,3 +68,32 @@ save_csv <- function(data) {
 }
 
 expit <- function(x) exp(x)/(1+exp(x))
+
+skip_on_r_version <- function(min_version = "3.6.0") {
+  if (getRversion() < min_version) {
+    skip(paste("R version <", min_version))
+  }
+}
+
+expect_snapshot_plot <- function(name, code) {
+
+  skip_on_os(c("windows", "linux", "solaris"))
+
+  path <- save_png(code)
+  expect_snapshot_file(path, paste0(name, ".png"))
+}
+
+expect_snapshot_csv <- function(name, code) {
+
+  skip_on_r_version("3.6.0")
+
+  path <- save_csv(code)
+  expect_snapshot_file(path, paste0(name, ".csv"))
+}
+
+expect_snapshot_json <- function(code) {
+
+  skip_on_r_version("3.6.0")
+
+  expect_snapshot_value(code, style = "json2")
+}
