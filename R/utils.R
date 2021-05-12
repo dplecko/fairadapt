@@ -8,8 +8,6 @@ swap <- function(x, i, j) {
   x
 }
 
-expit <- function(x) exp(x)/(1+exp(x))
-
 seq_row <- function(x) seq_len(nrow(x))
 
 seq_col <- function(x) seq_len(ncol(x))

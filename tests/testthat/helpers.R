@@ -66,3 +66,5 @@ save_csv <- function(data) {
 
   path
 }
+
+expit <- function(x) exp(x)/(1+exp(x))
