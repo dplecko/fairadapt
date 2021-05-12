@@ -1,56 +1,96 @@
-test_that("Fairadapt Class Works", {
 
-  adjacency.matrix <- array(0, dim = c(4,4))
-  colnames(adjacency.matrix) <- c("A", "Z", "Y","X")
-  rownames(adjacency.matrix) <- colnames(adjacency.matrix)
+test_that("generics", {
 
-  adjacency.matrix["A", "X"] <- 1
-  adjacency.matrix["X", "Y"] <- 1
-  adjacency.matrix["Z", c("Y", "X", "A")] <- 1
+  # set.seed(2021) gives "New value appearing, unseen in train data"
+  set.seed(2012)
 
-  DataGen <- function(n) {
+  train <- dataGen(100, add_z = TRUE)
+  test  <- dataGen(100, add_z = TRUE)
+  pred  <- dataGen(100, add_z = TRUE)
+  vars  <- c("a", "y", "x", "z")
 
-    A <- rbinom(n, size = 1, prob = 0.5)
-    Z <- rnorm(n)
-    coeff <- 1 / 4
-    dev <- 1
-    X <-  -A*coeff + coeff/2 + rnorm(n, sd = dev)
-    Y <- rbinom(n, size = 1, prob = expit((X)))
-    df <- data.frame(cbind(factor(Y), A, X, Z))
-    colnames(df) <- c("Y","A","X", "Z")
+  expect_setequal(colnames(train), vars)
+  expect_setequal(colnames(test), vars)
+  expect_setequal(colnames(pred), vars)
 
-    df
+  adj.mat <- c(
+    0L, 0L, 1L, 0L, # a
+    0L, 0L, 0L, 0L, # y
+    0L, 1L, 0L, 0L, # x
+    1L, 1L, 1L, 0L  # z
+  )
 
+  adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
+                    byrow = TRUE, dimnames = list(vars, vars))
+
+  funs <- c(rangerQuants, linearQuants)
+
+  for (i in seq_along(funs)) {
+
+    mod <- fairadapt(y ~ ., train.data = train, test.data = test,
+                     adj.mat = adj.mat, protect.A = "a",
+                     quant.method = funs[[i]])
+
+    aut.plt <- autoplot(mod)
+
+    expect_s3_class(aut.plt, "ggplot")
+
+    expect_snapshot_file(save_png(print(aut.plt)),
+                         paste0("auto_", i, ".png"))
+    # extra print should not be necessary
+    expect_snapshot_file(save_png(print(plot(mod))),
+                         paste0("plot_", i, ".png"))
+    expect_snapshot_file(save_png(plot(mod, graph = TRUE)),
+                         paste0("graph_", i, ".png"))
+
+    expect_snapshot_file(
+      save_csv(fairTwins(mod)),
+      paste0("ftdef_", i, ".csv")
+    )
+
+    expect_snapshot_file(
+      save_csv(fairTwins(mod, train.id = NULL, test.id = 1L)),
+      paste0("fttrn_", i, ".csv")
+    )
+
+    expect_snapshot_file(
+      save_csv(predict(mod, pred)),
+      paste0("predi_", i, ".csv")
+    )
   }
 
+  cts <- dataGen(100, add_z = TRUE)
+  cts$Y <- cts$X
 
-  for(method in c(fairadapt:::rangerQuants,
-                  fairadapt:::linearQuants)) {
+  i <- length(funs) + 1L
 
-      L <- fairadapt(Y ~ ., train.data = DataGen(100), test.data = DataGen(100),
-                     adj.mat = adjacency.matrix, protect.A = "A")
+  mod <- fairadapt(y ~ ., train.data = cts, test.data = cts, adj.mat = adj.mat,
+                    protect.A = "a")
 
-  }
-  cts_data <- DataGen(100)
-  cts_data$Y <- cts_data$X
-  L_cts <- fairadapt(Y ~ ., train.data = cts_data, test.data = cts_data,
-                 adj.mat = adjacency.matrix, protect.A = "A")
+  aut.plt <- autoplot(mod)
 
-  # autoplot
-  expect_true(ggplot2::is.ggplot(autoplot(L)))
-  expect_true(ggplot2::is.ggplot(autoplot(L_cts)))
+  expect_s3_class(aut.plt, "ggplot")
 
-  # plot
-  plot(L)
-  plot(L_cts)
-  plot(L, graph = TRUE)
-  print(L)
+  expect_snapshot_file(save_png(print(aut.plt)),
+                       paste0("auto_", i, ".png"))
+  # extra print should not be necessary
+  expect_snapshot_file(save_png(print(plot(mod))),
+                       paste0("plot_", i, ".png"))
+  expect_snapshot_file(save_png(plot(mod, graph = TRUE)),
+                       paste0("graph_", i, ".png"))
 
-  # fairTwins
-  expect_true(is.data.frame(fairTwins(L)))
-  expect_true(is.data.frame(fairTwins(L, train.id = NULL, test.id = 1L)))
+  expect_snapshot_file(
+    save_csv(fairTwins(mod)),
+    paste0("ftdef_", i, ".csv")
+  )
 
-  # predict function
-  expect_true(is.data.frame(predict(L, DataGen(100))))
+  expect_snapshot_file(
+    save_csv(fairTwins(mod, train.id = NULL, test.id = 1L)),
+    paste0("fttrn_", i, ".csv")
+  )
 
+  expect_snapshot_file(
+    save_csv(predict(mod, pred)),
+    paste0("predi_", i, ".csv")
+  )
 })

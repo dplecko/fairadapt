@@ -1,206 +1,301 @@
-test_that("Fairadapt Works", {
 
-  adjacency.matrix <- array(0, dim = c(3,3))
-  colnames(adjacency.matrix) <- c("A","Y","X")
-  rownames(adjacency.matrix) <- colnames(adjacency.matrix)
+test_that("fairadapt", {
 
-  adjacency.matrix["A", "X"] <- 1
-  adjacency.matrix["X", "Y"] <- 1
+  set.seed(2021)
 
-  DataGen <- function(n) {
+  train <- dataGen(100)
+  test  <- dataGen(100)
+  vars  <- c("a", "y", "x")
 
-    A <- rbinom(n, size = 1, prob = 0.5)
-    coeff <- 1 / 4
-    dev <- 1
-    X <-  -A*coeff + coeff/2 + rnorm(n, sd = dev)
-    Y <- rbinom(n, size = 1, prob = expit((X)))
-    df <- data.frame(cbind(factor(Y), A, X))
-    colnames(df) <- c("Y","A","X")
+  expect_setequal(colnames(train), vars)
+  expect_setequal(colnames(test), vars)
 
-    df
+  adj.mat <- c(
+    0L, 0L, 1L, # a
+    0L, 0L, 0L, # y
+    0L, 1L, 0L  # x
+  )
 
+  adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
+                    byrow = TRUE, dimnames = list(vars, vars))
+
+  fa.nms <- c("adapt.train", "adapt.test", "train", "test", "base.lvl",
+              "base.ind", "formula", "res.vars", "protect.A", "graph",
+              "q.Engine")
+
+  # random forest
+
+  ran <- fairadapt(y ~ ., train.data = train, test.data = test,
+                   adj.mat = adj.mat, protect.A = "a",
+                   quant.method = rangerQuants)
+
+  # both print() and str() throw
+
+  expect_type(ran, "list")
+  expect_named(ran, fa.nms, ignore.order = TRUE)
+
+  expect_s3_class(ran, "fairadapt")
+  expect_s3_class(ran[["adapt.train"]], "data.frame")
+  expect_s3_class(ran[["adapt.test"]], "data.frame")
+
+  expect_identical(ran[["protect.A"]], "a")
+
+  expect_snapshot_value(totVar(ran, "train", "y"), style = "json2")
+  expect_snapshot_value(totVar(ran, "adapt.train", "y"), style = "json2")
+
+  ran.eng <- ran[["q.Engine"]]
+
+  expect_type(ran.eng, "list")
+  expect_named(ran.eng, setdiff(vars, "a"), ignore.order = TRUE)
+
+  for (i in setdiff(vars, "a")) {
+
+    expect_true("object" %in% names(ran.eng[[i]]))
+
+    obj <- ran.eng[[i]][["object"]]
+
+    expect_s3_class(obj, "rangersplit")
+
+    expect_named(obj, c("class0", "class1"))
+    expect_s3_class(obj[["class0"]], "ranger")
+    expect_s3_class(obj[["class1"]], "ranger")
+
+    expect_true("parents" %in% names(ran.eng[[i]]))
+
+    expect_identical(
+      ran.eng[[i]][["parents"]],
+      names(which(adj.mat[, i] == 1L))
+    )
   }
 
-  cfd <- adjacency.matrix
-  cfd[,] <- 0
+  # linear
 
-  for(method in c(fairadapt:::rangerQuants,
-                  fairadapt:::linearQuants,
-                  fairadapt:::mcqrnnQuants)) {
+  lin <- fairadapt(y ~ ., train.data = train, test.data = test,
+                   adj.mat = adj.mat, protect.A = "a",
+                   quant.method = linearQuants)
 
-    L <- fairadapt(Y ~ ., train.data = DataGen(100), test.data = DataGen(100),
-      adj.mat = adjacency.matrix, protect.A = "A", quant.method = method)
+  # both print() and str() throw
 
-    expect_true(is.list(L))
+  expect_type(lin, "list")
+  expect_named(lin, fa.nms, ignore.order = TRUE)
 
-    expect_true(is.data.frame(L[[1]]))
+  expect_s3_class(lin, "fairadapt")
+  expect_s3_class(lin[["adapt.train"]], "data.frame")
+  expect_s3_class(lin[["adapt.test"]], "data.frame")
 
-    expect_true(is.data.frame(L[[2]]))
+  expect_identical(lin[["protect.A"]], "a")
 
+  expect_snapshot_value(totVar(lin, "train", "y"), style = "json2")
+  expect_snapshot_value(totVar(lin, "adapt.train", "y"), style = "json2")
+
+  lin.eng <- lin[["q.Engine"]]
+
+  expect_type(lin.eng, "list")
+  expect_named(lin.eng, setdiff(vars, "a"), ignore.order = TRUE)
+
+  for (i in setdiff(vars, "a")) {
+
+    expect_true("object" %in% names(lin.eng[[i]]))
+
+    obj <- lin.eng[[i]][["object"]]
+
+    expect_s3_class(obj, "quantregsplit")
+
+    expect_named(obj, c("class0", "class1"))
+    expect_s3_class(obj[["class0"]], "rqs")
+    expect_s3_class(obj[["class1"]], "rqs")
+
+    expect_true("parents" %in% names(lin.eng[[i]]))
+
+    expect_identical(
+      lin.eng[[i]][["parents"]],
+      names(which(adj.mat[, i] == 1L))
+    )
   }
 
-  L <- fairadapt(Y ~ ., train.data = DataGen(100), test.data = DataGen(100),
-                 top.ord = c("A", "X", "Y"), protect.A = "A")
-  expect_true(is.list(L))
+  # neural network
+
+  qrn <- fairadapt(y ~ ., train.data = train, test.data = test,
+                   adj.mat = adj.mat, protect.A = "a",
+                   quant.method = mcqrnnQuants)
+
+  expect_type(qrn, "list")
+  expect_named(qrn, fa.nms, ignore.order = TRUE)
+
+  expect_s3_class(qrn, "fairadapt")
+  expect_s3_class(qrn[["adapt.train"]], "data.frame")
+  expect_s3_class(qrn[["adapt.test"]], "data.frame")
+
+  expect_identical(qrn[["protect.A"]], "a")
+
+  expect_snapshot_value(totVar(qrn, "train", "y"), style = "json2")
+  expect_snapshot_value(totVar(qrn, "adapt.train", "y"), style = "json2")
+
+  qrn.eng <- qrn[["q.Engine"]]
+
+  expect_type(qrn.eng, "list")
+  expect_named(qrn.eng, setdiff(vars, "a"), ignore.order = TRUE)
+
+  for (i in setdiff(vars, "a")) {
+
+    expect_true("object" %in% names(qrn.eng[[i]]))
+
+    obj <- qrn.eng[[i]][["object"]]
+
+    expect_s3_class(obj, "mcqrnnobj")
+
+    expect_true("parents" %in% names(qrn.eng[[i]]))
+
+    expect_identical(
+      qrn.eng[[i]][["parents"]],
+      names(which(adj.mat[, i] == 1L))
+    )
+  }
+
+  # w/ top.ord
+
+  rto <- fairadapt(y ~ ., train.data = train, test.data = test,
+                   top.ord = c("a", "x", "y"), protect.A = "a")
+
+  expect_type(rto, "list")
+  expect_named(rto, fa.nms, ignore.order = TRUE)
+  expect_s3_class(rto, "fairadapt")
+
+  # for (i in setdiff(vars, "a")) {
+  #   expect_identical(
+  #     rto[["q.Engine"]][[i]][["parents"]],
+  #     ran[["q.Engine"]][[i]][["parents"]]
+  #   )
+  # }
 
   skip_on_cran()
+
+  # data example
 
   data <- system.file("testdata", "compas-scores-two-years.rds",
                       package = "fairadapt")
   data <- readRDS(data)
 
-  columns.keep <- which(names(data)
-                        %in% c("age", "sex", "juv_fel_count",
-                               "juv_misd_count", "juv_other_count",
-                               "priors_count","c_charge_degree", "race",
-                               "two_year_recid")
+  cols <- c("age", "sex", "juv_fel_count", "juv_misd_count", "juv_other_count",
+            "priors_count","c_charge_degree", "race", "two_year_recid")
+
+  adj.mat <- c(
+    0L, 0L, 1L, 1L, 1L, 1L, 1L, 0L, 1L, # age
+    0L, 0L, 1L, 1L, 1L, 1L, 1L, 0L, 1L, # sex
+    0L, 0L, 0L, 0L, 0L, 1L, 1L, 0L, 1L, # juv_fel_count
+    0L, 0L, 0L, 0L, 0L, 1L, 1L, 0L, 1L, # juv_misd_count
+    0L, 0L, 0L, 0L, 0L, 1L, 1L, 0L, 1L, # juv_other_count
+    0L, 0L, 0L, 0L, 0L, 0L, 1L, 0L, 1L, # priors_count
+    0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 1L, # c_charge_degree
+    0L, 0L, 1L, 1L, 1L, 1L, 1L, 0L, 1L, # race
+    0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L  # two_year_recid
   )
 
-  data <- data[, columns.keep]
-  levels(data$race) <- c("Non-White", "Non-White", "White", "Non-White",
-                         "Non-White", "Non-White")
-  data$race <- relevel(data$race, "White")
+  adj.mat <- matrix(adj.mat, nrow = length(cols), ncol = length(cols),
+                    byrow = TRUE, dimnames = rep(list(cols), 2L))
 
-  adjacency.matrix <- array(0, dim = c(ncol(data), ncol(data)))
-  colnames(adjacency.matrix) <- c("age", "sex", "juv_fel_count",
-                                  "juv_misd_count", "juv_other_count",
-                                  "priors_count",
-                                  "c_charge_degree", "race", "two_year_recid")
-  rownames(adjacency.matrix) <- colnames(adjacency.matrix)
+  train <- head(data, n = nrow(data) / 2)
+  test  <- tail(data, n = nrow(data) / 2)
 
-  # adding the edges to the matrix
-  adjacency.matrix[c("race", "sex", "age"),
-                   c("juv_fel_count", "juv_misd_count",
-                     "juv_other_count", "priors_count",
-                     "c_charge_degree", "two_year_recid")] <- 1
-  adjacency.matrix[c("juv_fel_count", "juv_misd_count", "juv_other_count"),
-                   c("priors_count", "c_charge_degree", "two_year_recid")] <- 1
-  adjacency.matrix["priors_count", c("c_charge_degree", "two_year_recid")] <- 1
-  adjacency.matrix["c_charge_degree", "two_year_recid"] <- 1
+  mod <- fairadapt(two_year_recid ~ ., train.data = train,
+                   test.data = test, adj.mat = adj.mat, protect.A = "race",
+                   quant.method = rangerQuants)
 
-  train <- data[1:1000, ]
-  test <- data[1001:2000, ]
+  ind <- train[["race"]] == "White"
 
-  compasL <- fairadapt(two_year_recid ~ ., train.data = train, test.data = test,
-                       adj.mat = adjacency.matrix, protect.A = "race",
-                       quant.method = fairadapt:::rangerQuants)
+  expect_equal(mod[["adapt.train"]][["priors_count"]][ind],
+                              train[["priors_count"]][ind])
 
-  expect_equal(compasL$adapt.train$priors_count[train$race == "White"],
-               train$priors_count[train$race == "White"])
+  expect_gt(10, mean((mod[["adapt.train"]][["priors_count"]][!ind] -
+                                     train[["priors_count"]][!ind]) ^ 2))
 
-  mse <- mean((compasL[[1]]$priors_count[!(train$race == "White")] -
-                 train$priors_count[!(train$race == "White")])^2)
-
-  expect_true(mse < 10)
-
-
-  pred_a123 <- function(adj.mat, cov.mat, phi, n = 5000, res = NULL, CFD = T,
-                        ...) {
-
-    c_SEM <- function(A, eps, res) {
-
-      L <- list()
-      X <- list()
-
-      for (i in 1:2) {
-
-        for(j in 1:ncol(eps)) {
-
-          if(!(paste0("X", j) %in% res) | i == 1)
-            X[[j]] <- phi[[j]](A[[i]], X, eps[, j])
-
-        }
-
-
-        df <- data.frame(A = A[[i]], Reduce(cbind, X))
-        names(df) <- c("A", paste0("X", 1:ncol(eps)))
-        L[[i]] <- df
-
-      }
-
-      L
-
-    }
-
-    cfd.mat <- ( (cov.mat != 0) + diag(ncol(cov.mat)) ) * CFD
-
-    set.seed(20211)
-    eps <- 1 * mvtnorm::rmvnorm(n, mean = rep(0, length(phi)),
-                                sigma = cov.mat[-1, -1] + diag(length(phi)))
-    A <- rbinom(n, 1, 0.5)
-
-    train.idx <- seq_len(n / 2)
-    train <- c_SEM(list(A, 0), eps, res)
-
-    test <- train[[1]][-train.idx, ]
-    cf <- train[[2]][-train.idx, ]
-    train <- train[[1]][train.idx, ]
-
-
-    # do adaptation
-    fair.sep <-
-      fairadapt::fairadapt(as.formula(paste0("X", length(phi), " ~ .")),
-                           train.data = train, test.data = NULL,
-                           adj.mat = adj.mat, cfd.mat = cfd.mat,
-                           protect.A = "A", res.vars = res,
-                           ...)
-
-    fair.sep <- predict(fair.sep, newdata = test)
-
-    fair.join <-
-      fairadapt::fairadapt(as.formula(paste0("X", length(phi), " ~ .")),
-                           train.data = train, test,
-                           adj.mat = adj.mat, cfd.mat = cfd.mat,
-                           protect.A = "A", res.vars = res,
-                           ...)[["adapt.test"]]
-
-
-
-    par(mfrow = c(length(phi) - 1L, 2L))
-
-    idx <- test$A == 1
-
-    for(i in paste0("X", seq_len(length(phi) - 1L))) {
-
-      MSE1 <- 100 * mean((fair.join[idx, i] - cf[idx, i])^2)
-      MSE2 <- 100 * mean((fair.sep[idx, i] - cf[idx, i])^2)
-
-      if (i == "X1") expect_true((MSE1 < 5) & (MSE2 < 5))
-      if (i == "X2") expect_true((MSE1 < 10) & (MSE2 < 10))
-      if (i == "X3") expect_true((MSE1 < 100) & (MSE2 < 100))
-
-    }
-
+  for (i in names(mod[["q.Engine"]])) {
+    expect_identical(
+      mod[["q.Engine"]][[i]][["parents"]],
+      names(which(adj.mat[, i] == 1L))
+    )
   }
 
-  f <- list(
-    function(A, X, eps1) 2*A - 1 + eps1,
-    function(A, X, eps2) 2*A - 1 + 1/25 * (X[[1]]+5)^2 + eps2,
-    function(A, X, eps3) 1/4 * (X[[1]]+5) * (X[[2]]+6) + eps3,
-    function(A, X, eps4) 0 * A + 0 / 2 * X[[1]] + 1 * X[[2]]*log((X[[2]])+50) +
-      1 / 50 * X[[3]]^3 + eps4
+  # synthetic example
+
+  funs <- list(
+    x1 = function(a, x, eps) {
+      2 * a - 1 + eps
+    },
+    x2 = function(a, x, eps) {
+      2 * a - 1 + 1 / 25 * (x[[1]] + 5) ^ 2 + eps
+    },
+    x3 = function(a, x, eps) {
+      1 / 4 * (x[[1]] + 5) * (x[[2]] + 6) + eps
+    },
+    x4 = function(a, x, eps) {
+      1 * x[[2]] * log(x[[2]] + 50) + 1 / 50 * x[[3]] ^ 3 + eps
+    }
   )
 
-  adj.mat <- array(0, dim = c(length(f) + 1, length(f) + 1))
-  colnames(adj.mat) <- rownames(adj.mat) <- c("A", paste0("X", 1:length(f)))
-  adj.mat["A", "X1"] <-
-    adj.mat["A", "X2"] <-
-    adj.mat["X1", "X2"] <-
-    adj.mat["X1", "X3"] <-
-    adj.mat["X2", "X3"] <-
-    adj.mat["X3", "X4"] <-
-    adj.mat["X2", "X4"] <-
-    1
+  vars <- c("a", names(funs))
 
-  cov.mat <- adj.mat
-  cov.mat[, ] <- 0
+  n <- 2000
 
-  pred_a123(adj.mat, cov.mat, phi = f, CFD = T, n=2000,
-            quant.method = fairadapt:::rangerQuants)
+  set.seed(20211)
 
-  pred_a123(adj.mat, cov.mat, phi = f, CFD = T, n=2000,
-            quant.method = fairadapt:::linearQuants)
+  eps <- mvtnorm::rmvnorm(n, mean = rep(0, length(funs)))
+  a   <- rbinom(n, 1, 0.5)
 
+  train <- sem(funs, a, eps)
+  test  <- tail(train, n = n / 2)
+  train <- head(train, n = n / 2)
 
+  cfac <- sem(funs, rep(0, n), eps)
+  cfac <- tail(cfac, n = n / 2)
 
+  adj.mat <- c(
+    0, 1, 1, 0, 0, # a
+    0, 0, 1, 1, 0, # x1
+    0, 0, 0, 1, 1, # x2
+    0, 0, 0, 0, 1, # x3
+    0, 0, 0, 0, 0  # x4
+  )
+
+  adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
+                    byrow = TRUE, dimnames = rep(list(vars), 2L))
+  cfd.mat <- diag(ncol(adj.mat))
+  dimnames(cfd.mat) <- dimnames(adj.mat)
+
+  form <- as.formula(paste(tail(names(funs), n = 1), "~", "."))
+  idx  <- test$a == 1
+
+  mse <- vector("list", length(funs) - 1L)
+  names(mse) <- head(names(funs), n = length(funs) - 1L)
+
+  for (quant in c(rangerQuants, linearQuants)) {
+
+    fair.sep <- fairadapt(form, train.data = train, test.data = NULL,
+                          adj.mat = adj.mat, cfd.mat = cfd.mat,
+                          protect.A = "a", quant.method = quant)
+    fair.sep <- predict(fair.sep, newdata = test)
+
+    fair.join <- fairadapt(form, train.data = train, test.data = test,
+                           adj.mat = adj.mat, cfd.mat = cfd.mat,
+                           protect.A = "a",  quant.method = quant)
+    fair.join <- fair.join[["adapt.test"]]
+
+    for (i in names(mse)) {
+      mse[[i]] <- list(
+        signif(100 * mean((fair.join[idx, i] - cfac[idx, i]) ^ 2)),
+        signif(100 * mean((fair.sep[idx, i]  - cfac[idx, i]) ^ 2))
+      )
+    }
+
+    expect_lt(mse[["x1"]][[1L]], 5)
+    expect_lt(mse[["x1"]][[2L]], 5)
+
+    expect_lt(mse[["x2"]][[1L]], 10)
+    expect_lt(mse[["x2"]][[2L]], 10)
+
+    expect_lt(mse[["x3"]][[1L]], 100)
+    expect_lt(mse[["x3"]][[2L]], 100)
+
+    expect_snapshot_value(mse, style = "json2")
+  }
 })

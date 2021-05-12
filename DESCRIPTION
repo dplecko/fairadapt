@@ -40,3 +40,4 @@ Suggests:
     mvtnorm
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
+Config/testthat/edition: 3
