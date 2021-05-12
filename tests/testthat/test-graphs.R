@@ -1,36 +1,57 @@
-test_that("Graph Utils Work", {
 
-  cfd <- array(0, dim = c(5, 5))
-  colnames(cfd) <- rownames(cfd) <- c("X1", "X2", "X3", "X4", "X5")
-  cfd["X1", "X3"] <- cfd["X3", "X1"] <-  1
-  cfd["X3", "X5"] <- cfd["X5", "X3"] <-  1
-  cfd["X2", "X4"] <- cfd["X4", "X2"] <-  1
+test_that("graph utils", {
 
-  adj <- array(0, dim = c(5, 5))
-  colnames(adj) <- rownames(adj) <- c("X1", "X2", "X3", "X4", "X5")
-  adj["X1", "X2"] <- adj["X2", "X3"] <- adj["X3", "X4"] <- adj["X4", "X5"] <- 1
+  cfd <- c(
+    0L, 0L, 1L, 0L, 0L, # x1
+    0L, 0L, 0L, 1L, 0L, # x2
+    1L, 0L, 0L, 0L, 1L, # x3
+    0L, 1L, 0L, 0L, 0L, # x4
+    0L, 0L, 1L, 0L, 0L  # x5
+  )
 
+  var <- paste0("x", seq_len(sqrt(length(cfd))))
+  cfd <- matrix(cfd, nrow = length(var), ncol = length(var),
+                byrow = TRUE, dimnames = list(var, var))
 
-  expect_equal(confoundedComponent("X1", cfd), c("X1", "X3", "X5"))
+  expect_equal(confoundedComponent("x1", cfd), c("x1", "x3", "x5"))
 
-  expect_equal(adjustmentSet("X5", adj, cfd), c("X1", "X2", "X3", "X4"))
+  adj <- c(
+    0L, 1L, 0L, 0L, 0L, # x1
+    0L, 0L, 1L, 0L, 0L, # x2
+    0L, 0L, 0L, 1L, 0L, # x3
+    0L, 0L, 0L, 0L, 1L, # x4
+    0L, 0L, 0L, 0L, 0L  # x5
+  )
 
+  adj <- matrix(adj, nrow = length(var), ncol = length(var),
+                byrow = TRUE, dimnames = list(var, var))
 
-  adj <- array(0, dim = c(5,5))
-  colnames(adj) <- rownames(adj) <-  c("A", "X1", "X2", "X3", "Y")
-  adj["A", "X1"] <- adj["X1", c("X2", "X3")] <- adj["X2", "X3"] <- 1
-  adj[c("X1", "X2", "X3"), "Y"] <- 1
+  expect_equal(adjustmentSet("x5", adj, cfd), c("x1", "x2", "x3", "x4"))
 
-  cfd <- adj
-  cfd[,] <- 0
-  expect_false(nonId("A", adj, cfd))
+  adj <- c(
+    0L, 1L, 0L, 0L, 0L, # a
+    0L, 0L, 1L, 1L, 1L, # x2
+    0L, 0L, 0L, 1L, 1L, # x3
+    0L, 0L, 0L, 0L, 1L, # x4
+    0L, 0L, 0L, 0L, 0L  # y
+  )
 
-  cfd["A", "X1"] <- cfd["X1", "A"] <- 1
-  expect_true(nonId("A", adj, cfd))
+  var <- c("a", "x1", "x2", "x3", "y")
 
-  expect_equal(getDescendants("A", adj), c("X1", "X2", "X3", "Y"))
-  expect_equal(getParents("X2", adj), c("X1"))
-  expect_equal(getAncestors("X2", adj), c("A", "X1"))
-  expect_equal(topologicalOrdering(adj), c("A", "X1", "X2", "X3", "Y"))
+  adj <- matrix(adj, nrow = length(var), ncol = length(var),
+                byrow = TRUE, dimnames = list(var, var))
+  cfd <- matrix(0L, nrow = length(var), ncol = length(var),
+                dimnames = list(var, var))
 
+  expect_false(nonId("a", adj, cfd))
+
+  cfd[rbind(c("a", "x1"),
+            c("x1", "a"))] <- 1L
+
+  expect_true(nonId("a", adj, cfd))
+
+  expect_equal(getDescendants("a", adj), c("x1", "x2", "x3", "y"))
+  expect_equal(getParents("x2", adj), c("x1"))
+  expect_equal(getAncestors("x2", adj), c("a", "x1"))
+  expect_equal(topologicalOrdering(adj), c("a", "x1", "x2", "x3", "y"))
 })
