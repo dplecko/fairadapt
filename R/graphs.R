@@ -9,11 +9,11 @@ getDescendants <- function(var, adj.mat, top.ord = NULL) {
       return(character(0))
     }
 
-    return(top.ord[seq.int(pos + 1, length(top.ord))])
+    return(top.ord[seq.int(pos + 1L, length(top.ord))])
   }
 
   if (is.null(adj.mat)) {
-    return(top.ord[seq.int(which(top.ord == var) + 1, length(top.ord))])
+    return(top.ord[seq.int(which(top.ord == var) + 1L, length(top.ord))])
   }
 
   num.walks <- adj.mat
@@ -32,10 +32,10 @@ getAncestors <- function(var, adj.mat, top.ord = NULL) {
     pos <- which(top.ord == var)
 
     if (pos == 1) {
-      return(character(0))
+      return(character(0L))
     }
 
-    return(top.ord[seq_len(pos - 1)])
+    return(top.ord[seq_len(pos - 1L)])
   }
 
   num.walks <- adj.mat
@@ -79,7 +79,7 @@ confoundedComponent <- function(var, cfd.matrix) {
 
   num.walks <- cfd.matrix
 
-  cfd.matrix <- cfd.matrix + diag(dim(cfd.matrix)[1])
+  cfd.matrix <- cfd.matrix + diag(dim(cfd.matrix)[1L])
 
   for (i in seq_len(nrow(cfd.matrix) + 1L)) {
     num.walks <- cfd.matrix + num.walks %*% cfd.matrix
@@ -110,7 +110,7 @@ topologicalOrdering <- function(adj.mat) {
   nrw <- nrow(adj.mat)
   num.walks <- adj.mat
 
-  for (i in seq_len(nrw + 1)) {
+  for (i in seq_len(nrw + 1L)) {
     num.walks <- adj.mat + num.walks %*% adj.mat
   }
 
@@ -118,9 +118,9 @@ topologicalOrdering <- function(adj.mat) {
 
   top.order <- colnames(adj.mat)
 
-  for (i in seq_len(nrw - 1)) {
+  for (i in seq_len(nrw - 1L)) {
 
-    for (j in seq.int(i + 1, nrw)) {
+    for (j in seq.int(i + 1L, nrw)) {
 
       if (comparison.matrix[top.order[j], top.order[i]]) {
         top.order <- swap(top.order, i, j)

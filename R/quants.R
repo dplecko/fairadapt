@@ -25,8 +25,8 @@ rangerQuants <- function(data, A.root, ind) {
     )
   }
 
-  ranger::ranger(formula(data), data = data, quantreg = T,
-                 keep.inbag = T, min.node.size = 20)
+  ranger::ranger(formula(data), data = data, quantreg = TRUE,
+                 keep.inbag = TRUE, min.node.size = 20)
 }
 
 #' Compute Quantiles using linear quantile regression (`quantreg` package) in
@@ -56,13 +56,13 @@ linearQuants <- function(data, A.root, ind) {
     )
   }
 
-  offending.cols <- 1 + which(
+  offending.cols <- 1L + which(
     vapply(seq_col(data)[-1L], function(x) length(unique(data[, x])), 1L) == 1
   )
 
   keep.cols <- which(!(seq_col(data) %in% offending.cols))
 
-  if (length(offending.cols) == (ncol(data) - 1)) {
+  if (length(offending.cols) == (ncol(data) - 1L)) {
     form <- as.formula(paste(names(data)[1L], "~ 1"))
   } else {
     form <- formula(data[, keep.cols])
@@ -90,8 +90,8 @@ mcqrnnQuants <- function(data, A.root, ind) {
 
   data.matrix <- matrix(as.numeric(unlist(data)), nrow = nrow(data))
 
-  object <- qrnn::mcqrnn.fit(x = data.matrix[, -1, drop = FALSE],
-                             y = matrix(data.matrix[, 1], ncol = 1),
+  object <- qrnn::mcqrnn.fit(x = data.matrix[, -1L, drop = FALSE],
+                             y = matrix(data.matrix[, 1L], ncol = 1),
                              tau = seq(0.005, 0.995, by = 0.01),
                              n.trials = 1, iter.max = 500, trace = FALSE)
 
@@ -124,7 +124,7 @@ computeQuants.ranger <- function(x, data, newdata, ind, test = FALSE, ...) {
   # GetQuants
   if (isTRUE(test)) {
 
-    empirical <- predict(x, data = data[, -1, drop = FALSE],
+    empirical <- predict(x, data = data[, -1L, drop = FALSE],
                          type = "quantiles", what = identity)
     empirical <- empirical$predictions
 
@@ -147,7 +147,7 @@ computeQuants.rangersplit <- function(x, data, newdata, ind, test = FALSE,
   # GetQuants
   if (isTRUE(test)) {
 
-    empirical <- predict(x$class1, data = data[!ind, -1, drop = FALSE],
+    empirical <- predict(x$class1, data = data[!ind, -1L, drop = FALSE],
                          type = "quantiles", what = identity)
     empirical <- empirical$predictions
 
@@ -166,7 +166,7 @@ computeQuants.rangersplit <- function(x, data, newdata, ind, test = FALSE,
 #' @export
 computeQuants.rqs <- function(x, data, newdata, ind, ...) {
 
-  empirical <- predict(x, newdata = data[, -1, drop = FALSE])
+  empirical <- predict(x, newdata = data[, -1L, drop = FALSE])
   quantiles <- predict(x, newdata = newdata)
 
   inferQuant(data, empirical, quantiles, ind)
@@ -175,7 +175,7 @@ computeQuants.rqs <- function(x, data, newdata, ind, ...) {
 #' @export
 computeQuants.quantregsplit <- function(x, data, newdata, ind, ...) {
 
-  empirical <- predict(x$class1, newdata = data[!ind, -1, drop = FALSE])
+  empirical <- predict(x$class1, newdata = data[!ind, -1L, drop = FALSE])
   quantiles <- predict(x$class0, newdata = newdata)
 
   inferQuantsplit(data, empirical, quantiles, ind)
@@ -184,7 +184,7 @@ computeQuants.quantregsplit <- function(x, data, newdata, ind, ...) {
 #' @export
 computeQuants.mcqrnnobj <- function(x, data, newdata, ind, ...) {
 
-  xmat <- matrix(as.numeric(unlist(data[, -1, drop = FALSE])),
+  xmat <- matrix(as.numeric(unlist(data[, -1L, drop = FALSE])),
                  nrow = nrow(data))
   empirical <- qrnn::mcqrnn.predict(x = xmat, parms = x)
 
@@ -196,7 +196,7 @@ computeQuants.mcqrnnobj <- function(x, data, newdata, ind, ...) {
 
 inferQuant <- function(data, empirical, quantiles, ind) {
 
-  eval <- data[, 1]
+  eval <- data[, 1L]
   U.hat <- vapply(seq_row(data), function(x) ecdf(empirical[x, ]) (eval[x]),
                   numeric(1L))
 
@@ -208,7 +208,7 @@ inferQuant <- function(data, empirical, quantiles, ind) {
 
 inferQuantsplit <- function(data, empirical, quantiles, ind) {
 
-  eval <- data[!ind, 1]
+  eval <- data[!ind, 1L]
   U.hat <- vapply(seq_row(data[!ind, ]),
                   function(x) ecdf(empirical[x, ]) (eval[x]),
                   numeric(1L))

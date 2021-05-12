@@ -86,7 +86,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
   if (!is.null(test.data)) {
 
-    test.data <- test.data[, colnames(train.data)[-1]]
+    test.data <- test.data[, colnames(train.data)[-1L]]
     test.data[, protect.A] <- as.factor(test.data[, protect.A])
     test.data <- cbind(NA, test.data)
     colnames(test.data) <- colnames(train.data)
@@ -106,7 +106,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
   # construct the initial version of adapted data
   adapt.data <- org.data
-  base.lvl <- levels(org.data[, protect.A])[1]
+  base.lvl <- levels(org.data[, protect.A])[1L]
   base.ind <- org.data[, protect.A] == base.lvl
   adapt.data[, protect.A] <- factor(base.lvl,
                                     levels = levels(org.data[, protect.A]))
@@ -136,14 +136,14 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
     # Topological Ordering case
     A.des <- getDescendants(protect.A, adj.mat, top.ord)
-    A.root <- top.ord[1] == protect.A
+    A.root <- top.ord[1L] == protect.A
     ig <- NULL
   }
 
   q.Engine <- list()
 
   # main procedure part
-  var_ind <- seq.int(which(top.ord == protect.A) + 1, length(top.ord))
+  var_ind <- seq.int(which(top.ord == protect.A) + 1L, length(top.ord))
 
   for (curr.var in top.ord[var_ind]) {
 
@@ -172,7 +172,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
     row.idx <- rep(TRUE, full.len)
 
-    if (curr.var == colnames(train.data)[1]) {
+    if (curr.var == colnames(train.data)[1L]) {
       row.idx[-seq_len(train.len)] <- FALSE
     }
 
@@ -186,7 +186,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
       if (is.factor(org.data[, curr.var])) {
 
         org.data[, curr.var] <- factor(
-          org.data[, curr.var], levels = catOrder(org.data[row.idx, 1],
+          org.data[, curr.var], levels = catOrder(org.data[row.idx, 1L],
                                                   org.data[row.idx, curr.var])
         )
 
@@ -205,7 +205,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
       org.data[, curr.var] <- adapt.data[, curr.var]
     }
 
-    ### perform the Adaptation
+    # perform the Adaptation
     qr.data <- org.data[row.idx, c(curr.var, curr.parents), drop = FALSE]
     cf.parents <- adapt.data[!base.ind & row.idx, curr.parents, drop = FALSE]
 

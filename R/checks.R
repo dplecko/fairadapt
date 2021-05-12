@@ -31,7 +31,7 @@ correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
   train.data <- model.frame(formula, train.data)
 
   if (!is.null(test.data)) {
-    test.data <- test.data[, colnames(train.data)[-1]]
+    test.data <- test.data[, colnames(train.data)[-1L]]
   }
 
   assert_that(sum(is.na(train.data)) == 0, nrow(train.data) > 0)
