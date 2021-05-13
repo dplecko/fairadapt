@@ -50,7 +50,9 @@ save_png <- function(code, width = 400, height = 400) {
 
   path <- tempfile(fileext = ".png")
 
-  png(path, width = width, height = height, type = "Xlib")
+  png(path, width = width, height = height, type = "quartz",
+      antialias = "none")
+
   on.exit(dev.off())
 
   code
