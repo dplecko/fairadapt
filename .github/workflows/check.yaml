@@ -66,6 +66,10 @@ jobs:
           pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
         shell: Rscript {0}
 
+      - name: Install X11 on macOS
+        if: runner.os == 'macOS'
+        run: brew cask install xquartz
+
       - name: Install dependencies
         run: |
           pak::local_install_dev_deps(upgrade = TRUE)

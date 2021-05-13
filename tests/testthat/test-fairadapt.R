@@ -278,14 +278,14 @@ test_that("fairadapt", {
 
   fair.sep <- with_seed(205,
     fairadapt(form, train.data = train, test.data = NULL, adj.mat = adj.mat,
-              cfd.mat = cfd.mat, protect.A = "a", seed = 205)
+              cfd.mat = cfd.mat, protect.A = "a")
   )
 
   fair.sep <- with_seed(205, predict(fair.sep, newdata = test))
 
   fair.join <- with_seed(205,
     fairadapt(form, train.data = train, test.data = test, adj.mat = adj.mat,
-              cfd.mat = cfd.mat, protect.A = "a", seed = 205)
+              cfd.mat = cfd.mat, protect.A = "a")
   )
 
   fair.join <- fair.join[["adapt.test"]]

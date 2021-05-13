@@ -75,9 +75,11 @@ skip_on_r_version <- function(min_version = "3.6.0") {
   }
 }
 
-expect_snapshot_plot <- function(name, code) {
+expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
 
-  skip_on_os(c("windows", "linux", "solaris"))
+  if (mac_only) {
+    skip_on_os(c("windows", "linux", "solaris"))
+  }
 
   skip_if_not_installed("ggplot2", "3.0.0")
 
@@ -85,7 +87,11 @@ expect_snapshot_plot <- function(name, code) {
   expect_snapshot_file(path, paste0(name, ".svg"))
 }
 
-expect_snapshot_csv <- function(name, code) {
+expect_snapshot_csv <- function(name, code, mac_only = TRUE) {
+
+  if (mac_only) {
+    skip_on_os(c("windows", "linux", "solaris"))
+  }
 
   skip_on_r_version("3.6.0")
 
@@ -93,7 +99,11 @@ expect_snapshot_csv <- function(name, code) {
   expect_snapshot_file(path, paste0(name, ".csv"))
 }
 
-expect_snapshot_json <- function(code) {
+expect_snapshot_json <- function(code, mac_only = TRUE) {
+
+  if (mac_only) {
+    skip_on_os(c("windows", "linux", "solaris"))
+  }
 
   skip_on_r_version("3.6.0")
 
