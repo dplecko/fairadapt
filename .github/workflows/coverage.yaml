@@ -23,7 +23,7 @@ jobs:
       - uses: r-lib/actions/setup-pandoc@v1
 
       - name: Install X11 on macOS
-        run: brew cask install xquartz
+        run: brew install --cask xquartz
 
       - name: Query dependencies
         run: |

@@ -46,11 +46,11 @@ sem <- function(f, a, e) {
   as.data.frame(c(list(a = a), x))
 }
 
-save_svg <- function(code, width = 7, height = 7) {
+save_png <- function(code, width = 400, height = 400) {
 
-  path <- tempfile(fileext = ".svg")
+  path <- tempfile(fileext = ".png")
 
-  svg(path, width = width, height = height)
+  png(path, width = width, height = height)
   on.exit(dev.off())
 
   code
@@ -75,6 +75,10 @@ skip_on_r_version <- function(min_version = "3.6.0") {
   }
 }
 
+skip_no_cairo <- function() {
+  skip_if_not(capabilities("cairo"), message = "Cairo not available")
+}
+
 expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
 
   if (mac_only) {
@@ -82,9 +86,10 @@ expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
   }
 
   skip_if_not_installed("ggplot2", "3.0.0")
+  skip_no_cairo()
 
-  path <- save_svg(code)
-  expect_snapshot_file(path, paste0(name, ".svg"))
+  path <- save_png(code)
+  expect_snapshot_file(path, paste0(name, ".png"))
 }
 
 expect_snapshot_csv <- function(name, code, mac_only = TRUE) {
