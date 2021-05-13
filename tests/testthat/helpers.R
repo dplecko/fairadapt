@@ -46,11 +46,11 @@ sem <- function(f, a, e) {
   as.data.frame(c(list(a = a), x))
 }
 
-save_png <- function(code, width = 400, height = 400) {
+save_svg <- function(code, width = 7, height = 7) {
 
-  path <- tempfile(fileext = ".png")
+  path <- tempfile(fileext = ".svg")
 
-  png(path, width = width, height = height)
+  svg(path, width = width, height = height)
   on.exit(dev.off())
 
   code
@@ -60,7 +60,7 @@ save_png <- function(code, width = 400, height = 400) {
 
 save_csv <- function(data) {
 
-  path <- tempfile(fileext = ".png")
+  path <- tempfile(fileext = ".csv")
 
   write.csv(data, path)
 
@@ -79,10 +79,10 @@ expect_snapshot_plot <- function(name, code) {
 
   skip_on_os(c("windows", "linux", "solaris"))
 
-  skip_on_ci()
+  skip_if_not_installed("ggplot2", "3.0.0")
 
-  path <- save_png(code)
-  expect_snapshot_file(path, paste0(name, ".png"))
+  path <- save_svg(code)
+  expect_snapshot_file(path, paste0(name, ".svg"))
 }
 
 expect_snapshot_csv <- function(name, code) {
@@ -122,7 +122,7 @@ with_seed <- function(seed, code, rng_kind = "default",
   eval.parent(code)
 }
 
-# the following utilities were pulled from withr
+# the following utilities originate from withr
 
 has_seed <- function() {
   exists(".Random.seed", globalenv(), mode = "integer", inherits = FALSE)

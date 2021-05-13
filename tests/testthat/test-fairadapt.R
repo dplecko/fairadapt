@@ -28,7 +28,7 @@ test_that("fairadapt", {
 
   ran <- with_seed(202,
     fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
-              protect.A = "a")
+              protect.A = "a", seed = 202)
   )
 
   # both print() and str() throw
@@ -160,7 +160,7 @@ test_that("fairadapt", {
 
   rto <- with_seed(202,
     fairadapt(y ~ ., train.data = train, test.data = test,
-              top.ord = c("a", "x", "y"), protect.A = "a")
+              top.ord = c("a", "x", "y"), protect.A = "a", seed = 202)
   )
 
   expect_type(rto, "list")
@@ -205,7 +205,7 @@ test_that("fairadapt", {
 
   mod <- with_seed(203,
     fairadapt(two_year_recid ~ ., train.data = train, test.data = test,
-              adj.mat = adj.mat, protect.A = "race")
+              adj.mat = adj.mat, protect.A = "race", seed = 203)
   )
 
   ind <- train[["race"]] == "White"
@@ -256,11 +256,11 @@ test_that("fairadapt", {
   cfac <- tail(cfac, n = n / 2)
 
   adj.mat <- c(
-    0, 1, 1, 0, 0, # a
-    0, 0, 1, 1, 0, # x1
-    0, 0, 0, 1, 1, # x2
-    0, 0, 0, 0, 1, # x3
-    0, 0, 0, 0, 0  # x4
+    0L, 1L, 1L, 0L, 0L, # a
+    0L, 0L, 1L, 1L, 0L, # x1
+    0L, 0L, 0L, 1L, 1L, # x2
+    0L, 0L, 0L, 0L, 1L, # x3
+    0L, 0L, 0L, 0L, 0L  # x4
   )
 
   adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
@@ -278,14 +278,14 @@ test_that("fairadapt", {
 
   fair.sep <- with_seed(205,
     fairadapt(form, train.data = train, test.data = NULL, adj.mat = adj.mat,
-              cfd.mat = cfd.mat, protect.A = "a")
+              cfd.mat = cfd.mat, protect.A = "a", seed = 205)
   )
 
   fair.sep <- with_seed(205, predict(fair.sep, newdata = test))
 
   fair.join <- with_seed(205,
     fairadapt(form, train.data = train, test.data = test, adj.mat = adj.mat,
-              cfd.mat = cfd.mat, protect.A = "a")
+              cfd.mat = cfd.mat, protect.A = "a", seed = 205)
   )
 
   fair.join <- fair.join[["adapt.test"]]

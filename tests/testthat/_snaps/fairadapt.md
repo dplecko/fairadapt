@@ -65,12 +65,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [2.28594]
+              "value": [2.59272]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [2.81414]
+              "value": [3.6116]
             }
           ]
         },
@@ -81,12 +81,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [3.46772]
+              "value": [3.7676]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [3.68645]
+              "value": [4.71966]
             }
           ]
         },
@@ -97,12 +97,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [36.1217]
+              "value": [40.9363]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [43.5425]
+              "value": [61.299]
             }
           ]
         }

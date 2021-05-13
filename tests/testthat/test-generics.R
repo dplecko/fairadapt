@@ -27,7 +27,7 @@ test_that("generics", {
 
   ad.rf <- with_seed(302,
     fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
-              protect.A = "a")
+              protect.A = "a", seed = 302)
   )
 
   aut.plt <- autoplot(ad.rf)
@@ -72,7 +72,7 @@ test_that("generics", {
 
   ad.cts <- with_seed(304,
     fairadapt(y ~ ., train.data = cts, test.data = cts, adj.mat = adj.mat,
-              protect.A = "a")
+              protect.A = "a", seed = 304)
   )
 
   aut.plt <- autoplot(ad.cts)
