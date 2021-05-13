@@ -54,7 +54,6 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
 }
 
 #' @importFrom graphics lines plot polygon
-#' @method print fairadapt
 #' @export
 print.fairadapt <- function(x, ...) {
 
@@ -90,7 +89,6 @@ print.fairadapt <- function(x, ...) {
   invisible(x)
 }
 
-#' @method plot fairadapt
 #' @export
 plot.fairadapt <- function(x, graph = FALSE, when = "after", ...) {
 
@@ -164,7 +162,6 @@ fairTwins <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
   UseMethod("fairTwins", x)
 }
 
-#' @method fairTwins fairadapt
 #' @export
 fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL,
                                 cols = NULL) {
@@ -209,7 +206,6 @@ fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL,
   res[, col.ord]
 }
 
-#' @method predict fairadapt
 #' @export
 predict.fairadapt <- function(object, newdata, ...) {
 

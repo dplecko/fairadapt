@@ -1,5 +1,5 @@
 
-dataGen <- function(n, add_z = FALSE, seed = NULL) {
+data_gen <- function(n, add_z = FALSE, seed = NULL) {
 
   if (!is.null(seed)) {
     set.seed(seed)
@@ -22,7 +22,7 @@ dataGen <- function(n, add_z = FALSE, seed = NULL) {
   res
 }
 
-totVar <- function(x, what, var) {
+tot_var <- function(x, what, var) {
 
   ind <- x[["base.ind"]][seq_len(nrow(x[[what]]))]
   dat <- x[[what]][[var]]
@@ -79,6 +79,8 @@ expect_snapshot_plot <- function(name, code) {
 
   skip_on_os(c("windows", "linux", "solaris"))
 
+  skip_on_ci()
+
   path <- save_png(code)
   expect_snapshot_file(path, paste0(name, ".png"))
 }
@@ -96,4 +98,68 @@ expect_snapshot_json <- function(code) {
   skip_on_r_version("3.6.0")
 
   expect_snapshot_value(code, style = "json2")
+}
+
+with_seed <- function(seed, code, rng_kind = "default",
+                      rng_normal_kind = rng_kind, rng_sample_kind = rng_kind) {
+
+  code <- substitute(code)
+
+  old_seed <- get_seed()
+  new_seed <- list(
+    seed = seed,
+    rng_kind = c(rng_kind, rng_normal_kind, rng_sample_kind)
+  )
+
+  if (is.null(old_seed)) {
+    on.exit(rm_seed())
+  } else {
+    on.exit(set_seed(old_seed))
+  }
+
+  set_seed(new_seed)
+
+  eval.parent(code)
+}
+
+# the following utilities were pulled from withr
+
+has_seed <- function() {
+  exists(".Random.seed", globalenv(), mode = "integer", inherits = FALSE)
+}
+
+get_seed <- function() {
+
+  if (!has_seed()) {
+    return(NULL)
+  }
+
+  seed <- get(".Random.seed", globalenv(), mode = "integer", inherits = FALSE)
+
+  list(random_seed = seed, rng_kind = RNGkind())
+}
+
+set_seed <- function(seed) {
+
+  if (getRversion() < "3.6") {
+    seed$rng_kind <- seed$rng_kind[1L:2L]
+  }
+  if (is.null(seed$seed)) {
+    do.call(RNGkind, args = as.list(seed$rng_kind))
+    assign(".Random.seed", seed$random_seed, globalenv())
+  } else {
+    do.call(RNGkind, args = as.list(seed$rng_kind))
+    set.seed(seed$seed)
+  }
+}
+
+rm_seed <- function() {
+
+  if (!has_seed()) {
+    return(NULL)
+  }
+
+  set.seed(seed = NULL)
+
+  rm(".Random.seed", envir = globalenv())
 }

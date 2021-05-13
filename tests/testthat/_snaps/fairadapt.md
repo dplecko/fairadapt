@@ -3,7 +3,7 @@
     {
       "type": "double",
       "attributes": {},
-      "value": [0.0320197]
+      "value": [-0.00480769]
     }
 
 ---
@@ -11,7 +11,7 @@
     {
       "type": "double",
       "attributes": {},
-      "value": [-0.00246305]
+      "value": [-0.00480769]
     }
 
 ---
@@ -19,7 +19,7 @@
     {
       "type": "double",
       "attributes": {},
-      "value": [0.0320197]
+      "value": [-0.00480769]
     }
 
 ---
@@ -27,7 +27,7 @@
     {
       "type": "double",
       "attributes": {},
-      "value": [-0.00246305]
+      "value": [-0.00480769]
     }
 
 ---
@@ -35,7 +35,7 @@
     {
       "type": "double",
       "attributes": {},
-      "value": [0.0320197]
+      "value": [-0.00480769]
     }
 
 ---
@@ -43,7 +43,7 @@
     {
       "type": "double",
       "attributes": {},
-      "value": [-0.00246305]
+      "value": [-0.00480769]
     }
 
 ---
@@ -65,12 +65,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [2.81007]
+              "value": [2.28594]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [1.92654]
+              "value": [2.81414]
             }
           ]
         },
@@ -81,12 +81,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [5.7724]
+              "value": [3.46772]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [3.02331]
+              "value": [3.68645]
             }
           ]
         },
@@ -97,12 +97,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [49.978]
+              "value": [36.1217]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [42.6419]
+              "value": [43.5425]
             }
           ]
         }
@@ -128,12 +128,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [0.397855]
+              "value": [0.743318]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [0.954941]
+              "value": [0.49155]
             }
           ]
         },
@@ -144,12 +144,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [1.92243]
+              "value": [1.16675]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [2.78955]
+              "value": [1.69257]
             }
           ]
         },
@@ -160,12 +160,12 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [7.91365]
+              "value": [8.51615]
             },
             {
               "type": "double",
               "attributes": {},
-              "value": [14.6401]
+              "value": [8.29332]
             }
           ]
         }

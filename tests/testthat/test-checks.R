@@ -1,11 +1,12 @@
 
 test_that("input verification", {
 
-  set.seed(2021)
+  with_seed(101, {
+    train <- data_gen(100)
+    test  <- data_gen(100)
+  })
 
-  train <- dataGen(100)
-  test  <- dataGen(100)
-  vars  <- c("a", "y", "x")
+  vars <- c("a", "y", "x")
 
   expect_setequal(colnames(train), vars)
   expect_setequal(colnames(test), vars)
@@ -58,7 +59,7 @@ test_that("input verification", {
     "not equal to 0"
   )
 
-  na.dat   <- dataGen(100)
+  na.dat   <- with_seed(102, data_gen(100))
   na.dat$x <- NA
 
   expect_error(
@@ -73,7 +74,7 @@ test_that("input verification", {
     "not equal to 0"
   )
 
-  w.dat <- dataGen(100)
+  w.dat <- with_seed(103, data_gen(100))
   w.dat <- cbind(w.dat, z = 0)
 
   expect_error(

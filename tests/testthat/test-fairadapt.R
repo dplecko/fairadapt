@@ -1,11 +1,12 @@
 
 test_that("fairadapt", {
 
-  set.seed(2021)
+  with_seed(201, {
+    train <- data_gen(100)
+    test  <- data_gen(100)
+  })
 
-  train <- dataGen(100)
-  test  <- dataGen(100)
-  vars  <- c("a", "y", "x")
+  vars <- c("a", "y", "x")
 
   expect_setequal(colnames(train), vars)
   expect_setequal(colnames(test), vars)
@@ -25,9 +26,10 @@ test_that("fairadapt", {
 
   # random forest
 
-  ran <- fairadapt(y ~ ., train.data = train, test.data = test,
-                   adj.mat = adj.mat, protect.A = "a",
-                   quant.method = rangerQuants, seed = 2021)
+  ran <- with_seed(202,
+    fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
+              protect.A = "a")
+  )
 
   # both print() and str() throw
 
@@ -40,8 +42,8 @@ test_that("fairadapt", {
 
   expect_identical(ran[["protect.A"]], "a")
 
-  expect_snapshot_json(totVar(ran, "train", "y"))
-  expect_snapshot_json(totVar(ran, "adapt.train", "y"))
+  expect_snapshot_json(tot_var(ran, "train", "y"))
+  expect_snapshot_json(tot_var(ran, "adapt.train", "y"))
 
   ran.eng <- ran[["q.Engine"]]
 
@@ -70,9 +72,10 @@ test_that("fairadapt", {
 
   # linear
 
-  lin <- fairadapt(y ~ ., train.data = train, test.data = test,
-                   adj.mat = adj.mat, protect.A = "a",
-                   quant.method = linearQuants)
+  lin <- with_seed(202,
+    fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
+              protect.A = "a", quant.method = linearQuants)
+  )
 
   # both print() and str() throw
 
@@ -85,8 +88,8 @@ test_that("fairadapt", {
 
   expect_identical(lin[["protect.A"]], "a")
 
-  expect_snapshot_json(totVar(lin, "train", "y"))
-  expect_snapshot_json(totVar(lin, "adapt.train", "y"))
+  expect_snapshot_json(tot_var(lin, "train", "y"))
+  expect_snapshot_json(tot_var(lin, "adapt.train", "y"))
 
   lin.eng <- lin[["q.Engine"]]
 
@@ -115,9 +118,10 @@ test_that("fairadapt", {
 
   # neural network
 
-  qrn <- fairadapt(y ~ ., train.data = train, test.data = test,
-                   adj.mat = adj.mat, protect.A = "a",
-                   quant.method = mcqrnnQuants)
+  qrn <- with_seed(202,
+    fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
+              protect.A = "a", quant.method = mcqrnnQuants)
+  )
 
   expect_type(qrn, "list")
   expect_named(qrn, fa.nms, ignore.order = TRUE)
@@ -128,8 +132,8 @@ test_that("fairadapt", {
 
   expect_identical(qrn[["protect.A"]], "a")
 
-  expect_snapshot_json(totVar(qrn, "train", "y"))
-  expect_snapshot_json(totVar(qrn, "adapt.train", "y"))
+  expect_snapshot_json(tot_var(qrn, "train", "y"))
+  expect_snapshot_json(tot_var(qrn, "adapt.train", "y"))
 
   qrn.eng <- qrn[["q.Engine"]]
 
@@ -154,8 +158,10 @@ test_that("fairadapt", {
 
   # w/ top.ord
 
-  rto <- fairadapt(y ~ ., train.data = train, test.data = test,
-                   top.ord = c("a", "x", "y"), protect.A = "a", seed = 2021)
+  rto <- with_seed(202,
+    fairadapt(y ~ ., train.data = train, test.data = test,
+              top.ord = c("a", "x", "y"), protect.A = "a")
+  )
 
   expect_type(rto, "list")
   expect_named(rto, fa.nms, ignore.order = TRUE)
@@ -197,9 +203,10 @@ test_that("fairadapt", {
   train <- head(data, n = nrow(data) / 2)
   test  <- tail(data, n = nrow(data) / 2)
 
-  mod <- fairadapt(two_year_recid ~ ., train.data = train,
-                   test.data = test, adj.mat = adj.mat, protect.A = "race",
-                   seed = 2021)
+  mod <- with_seed(203,
+    fairadapt(two_year_recid ~ ., train.data = train, test.data = test,
+              adj.mat = adj.mat, protect.A = "race")
+  )
 
   ind <- train[["race"]] == "White"
 
@@ -234,13 +241,12 @@ test_that("fairadapt", {
   )
 
   vars <- c("a", names(funs))
+  n    <- 2000
 
-  n <- 2000
-
-  set.seed(20211)
-
-  eps <- mvtnorm::rmvnorm(n, mean = rep(0, length(funs)))
-  a   <- rbinom(n, 1, 0.5)
+  with_seed(204, {
+    a   <- rbinom(n, 1, 0.5)
+    eps <- mvtnorm::rmvnorm(n, mean = rep(0, length(funs)))
+  })
 
   train <- sem(funs, a, eps)
   test  <- tail(train, n = n / 2)
@@ -270,16 +276,18 @@ test_that("fairadapt", {
 
   # random forest
 
-  fair.sep <- fairadapt(form, train.data = train, test.data = NULL,
-                        adj.mat = adj.mat, cfd.mat = cfd.mat,
-                        protect.A = "a", quant.method = rangerQuants,
-                        seed = 2021)
-  fair.sep <- predict(fair.sep, newdata = test)
+  fair.sep <- with_seed(205,
+    fairadapt(form, train.data = train, test.data = NULL, adj.mat = adj.mat,
+              cfd.mat = cfd.mat, protect.A = "a")
+  )
 
-  fair.join <- fairadapt(form, train.data = train, test.data = test,
-                         adj.mat = adj.mat, cfd.mat = cfd.mat,
-                         protect.A = "a",  quant.method = rangerQuants,
-                         seed = 2021)
+  fair.sep <- with_seed(205, predict(fair.sep, newdata = test))
+
+  fair.join <- with_seed(205,
+    fairadapt(form, train.data = train, test.data = test, adj.mat = adj.mat,
+              cfd.mat = cfd.mat, protect.A = "a")
+  )
+
   fair.join <- fair.join[["adapt.test"]]
 
   for (i in names(mse.rf)) {
@@ -305,14 +313,18 @@ test_that("fairadapt", {
   mse.lin <- vector("list", length(funs) - 1L)
   names(mse.lin) <- head(names(funs), n = length(funs) - 1L)
 
-  fair.sep <- fairadapt(form, train.data = train, test.data = NULL,
-                        adj.mat = adj.mat, cfd.mat = cfd.mat,
-                        protect.A = "a", quant.method = linearQuants)
-  fair.sep <- predict(fair.sep, newdata = test)
+  fair.sep <- with_seed(205,
+    fairadapt(form, train.data = train, test.data = NULL, adj.mat = adj.mat,
+              cfd.mat = cfd.mat, protect.A = "a", quant.method = linearQuants)
+  )
 
-  fair.join <- fairadapt(form, train.data = train, test.data = test,
-                         adj.mat = adj.mat, cfd.mat = cfd.mat,
-                         protect.A = "a",  quant.method = linearQuants)
+  fair.sep <- with_seed(205, predict(fair.sep, newdata = test))
+
+  fair.join <- with_seed(205,
+    fairadapt(form, train.data = train, test.data = test, adj.mat = adj.mat,
+              cfd.mat = cfd.mat, protect.A = "a",  quant.method = linearQuants)
+  )
+
   fair.join <- fair.join[["adapt.test"]]
 
   for (i in names(mse.lin)) {

@@ -2,9 +2,12 @@
 test_that("categorical encoding", {
 
   n <- 10000
-  x <- sample(seq_len(5), n, replace = TRUE)
   p <- c(0.5, 0.2, 0.1, 0.9, 0.3)
-  y <- rbinom(n, 1, p[x])
+
+  with_seed(401, {
+    x <- sample(seq_len(5), n, replace = TRUE)
+    y <- rbinom(n, 1, p[x])
+  })
 
   df <- data.frame(y, x = factor(x))
 

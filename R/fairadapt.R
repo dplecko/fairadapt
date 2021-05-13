@@ -213,7 +213,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     qr.data <- org.data[row.idx, c(curr.var, curr.parents), drop = FALSE]
     cf.parents <- adapt.data[!base.ind & row.idx, curr.parents, drop = FALSE]
 
-    assert_that(ncol(qr.data) == (ncol(cf.parents) + 1))
+    assert_that(ncol(qr.data) == (ncol(cf.parents) + 1L))
 
     object <- quant.method(qr.data, A.root, base.ind[row.idx], ...)
     q.Engine[[curr.var]][["object"]] <- object
@@ -248,7 +248,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
   structure(list(
     adapt.train = adapt.data[seq_len(train.len), ],
-    adapt.test = adapt.data[-seq_len(train.len), -1],
+    adapt.test = adapt.data[-seq_len(train.len), -1L],
     train = train.data,
     test = test.data,
     base.lvl = base.lvl,
