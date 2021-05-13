@@ -88,7 +88,7 @@ expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
   }
 
   skip_if_not_installed("ggplot2", "3.0.0")
-  skip_no_cairo()
+  skip_on_ci()
 
   path <- save_png(code)
   expect_snapshot_file(path, paste0(name, ".png"))

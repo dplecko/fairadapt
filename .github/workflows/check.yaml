@@ -81,8 +81,6 @@ jobs:
           options(width = 100)
           pkgs <- installed.packages()[, "Package"]
           sessioninfo::session_info(pkgs, include_base = TRUE)
-          getOption("bitmapType")
-          X11.options()
         shell: Rscript {0}
 
       - name: Check
