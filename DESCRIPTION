@@ -20,7 +20,7 @@ LazyData: true
 URL: https://github.com/dplecko/fairadapt
 BugReports: https://github.com/dplecko/fairadapt/issues
 Depends:
-    R (>= 3.4.0)
+    R (>= 3.5.0)
 Imports:
     ranger,
     assertthat,
@@ -40,3 +40,4 @@ Suggests:
     mvtnorm
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
+Config/testthat/edition: 3

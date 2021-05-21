@@ -18,9 +18,9 @@ status](https://github.com/dplecko/fairadapt/workflows/coverage/badge.svg)](http
 coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://codecov.io/gh/dplecko/fairadapt)
 <!-- badges: end -->
 
-fairadapt is a package intended to remove bias from machine learning
-algorithms. In particular, it implements the pre-processing procedure
-described in [Plecko &
+The R package fairadapt is intended for removing bias from machine
+learning algorithms. In particular, it implements the pre-processing
+procedure described in [Plecko &
 Meinshausen, 2019](https://arxiv.org/abs/1911.06685) (all the code used
 for producing the figures in the paper can be found in the `jmlr-paper`
 folder). The main idea is to adapt the training and testing data in a
@@ -42,41 +42,47 @@ install.packages("fairadapt")
 
 ## Example
 
+<!-- example could be expanded to show bias before correction -->
+
+<!-- add plot of adj.mat? visualization of how data changed? -->
+
 An example of how fairadapt can be used is demonstrated below on the UCI
 Adult dataset.
 
 ``` r
-## loading the package
+# loading the package
 library(fairadapt)
-## initialising the adjacency matrix
-adjacency.matrix <- array(0, dim = c(9, 9))
-colnames(adjacency.matrix) <- c("sex", "age", "native_country",
-                                "marital_status", "educatoin_num",
-                                "workclass", "hours_per_week", "occupation",
-                                "income")
-rownames(adjacency.matrix) <- colnames(adjacency.matrix)
-# addition of edges
-adjacency.matrix[c("sex","age","native_country"),
-                 c("marital_status", "educatoin_num",
-                   "workclass", "hours_per_week", "occupation",
-                   "income")] <- 1
-adjacency.matrix["marital_status",c("educatoin_num",
-                                    "workclass", "hours_per_week", "occupation",
-                                    "income")] <- 1
-adjacency.matrix["educatoin_num", c("workclass", "hours_per_week",
-                                    "occupation", "income")] <- 1
-adjacency.matrix[c("workclass", "hours_per_week", "occupation"), "income"] <- 1
+
+vars <- c("sex", "age", "native_country", "marital_status", "education_num",
+          "workclass", "hours_per_week", "occupation", "income")
+
+# initialising the adjacency matrix
+adj.mat <- c(
+  0, 0, 0, 1, 1, 1, 1, 1, 1, # sex
+  0, 0, 0, 1, 1, 1, 1, 1, 1, # age
+  0, 0, 0, 1, 1, 1, 1, 1, 1, # native_country
+  0, 0, 0, 0, 1, 1, 1, 1, 1, # marital_status
+  0, 0, 0, 0, 0, 1, 1, 1, 1, # education_num
+  0, 0, 0, 0, 0, 0, 0, 0, 1, # workclass
+  0, 0, 0, 0, 0, 0, 0, 0, 1, # hours_per_week
+  0, 0, 0, 0, 0, 0, 0, 0, 1, # occupation
+  0, 0, 0, 0, 0, 0, 0, 0, 0  # income
+)
+
+adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
+                  dimnames = list(vars, vars), byrow = TRUE)
 
 # reading in the UCI Adult data
 adult <- readRDS(
   system.file("extdata", "uci_adult.rds", package = "fairadapt")
 )
 
-train.size <- n1
-test.size <- n2
-L <- fairadapt(income ~ ., train.data = adult[1:train.size, ],
-               test.data = adult[train.size + 1:test.size, ], protect.A = "sex",
-               adj.mat = adjacency.matrix, res.vars = "hours_per_week")
-adapted.train.data <- L[[1]]
-adapted.test.data <- L[[2]]
+n <- nrow(adult) / 2
+
+mod <- fairadapt(income ~ ., train.data = head(adult, n = n),
+                 test.data = tail(adult, n = n), protect.A = "sex",
+                 adj.mat = adj.mat, res.vars = "hours_per_week")
+
+adapt.train <- mod[["adapt.train"]]
+adapt.test  <- mod[["adapt.test"]]
 ```
