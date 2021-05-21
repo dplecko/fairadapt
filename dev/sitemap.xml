@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/index.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/FairAdapt.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/computeQuants.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/fairTwins.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/gov_census.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/graphModel.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/linearQuants.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/mcqrnnQuants.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/rangerQuants.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/uni_admission.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/articles/jss.pdf</loc>
+  </url>
+</urlset>
