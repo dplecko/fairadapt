@@ -15,14 +15,14 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
     whn <- switch(tgt, train = "before", adapt.train = "after")
 
     vals <- x[[tgt]][[1L]]
-    protected <- x[["train"]][[x$protect.A]]
+    protected <- x[["train"]][[x$prot.attr]]
     df <- data.frame(vals, protected)
 
     if (length(unique(vals)) > 2L) {
 
       plt[[tgt]] <- ggplot(df, aes(x = vals, fill = protected)) +
         geom_density(alpha = 0.4) +
-        scale_fill_discrete(name = x$protect.A) +
+        scale_fill_discrete(name = x$prot.attr) +
         ggtitle(paste("Densities", whn , "adaptation")) +
         xlab(names(x$train)[1L]) +
         theme_minimal()
@@ -41,7 +41,7 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
         scale_y_continuous(labels = percent) +
         scale_fill_discrete(name = names(x$train)[1L]) +
         ggtitle(paste("Outcome proportions", whn, "adaptation")) +
-        xlab(x$protect.A) +
+        xlab(x$prot.attr) +
         theme_minimal()
     }
   }
@@ -59,9 +59,9 @@ print.fairadapt <- function(x, ...) {
 
   cat("Fairadapt result\n\n")
   cat("Call:\n", deparse(x$formula), "\n\n")
-  cat("Protected attribute:                 ", x$protect.A, "\n")
+  cat("Protected attribute:                 ", x$prot.attr, "\n")
   cat("Protected attribute levels:          ",
-      paste(sort(unique(x$train[[x$protect.A]])), collapse = ", "), "\n")
+      paste(sort(unique(x$train[[x$prot.attr]])), collapse = ", "), "\n")
 
   if(!is.null(x$res.vars)) {
     cat("Resolving variables:                 ",
@@ -89,44 +89,97 @@ print.fairadapt <- function(x, ...) {
   invisible(x)
 }
 
+#' @importFrom graphics barplot text
 #' @export
-plot.fairadapt <- function(x, graph = FALSE, when = "after", ...) {
+plot.fairadapt <- function(x, when = "after", ...) {
 
-  if (graph) {
+  base.idx <- x$base.ind[seq_len(nrow(x$train))]
 
-    plot(x$graph, ...)
+  target <- c("train", "adapt.train")
+  target <- switch(when, before = target[1L], after = target[2L], target)
+  reg <- length(unique(x$train[[1L]])) > 2L
 
-  } else if (length(unique(x$train[[1L]])) > 2L){
+  for (tgt in target) {
 
-    base.idx <- x$base.ind[seq_len(nrow(x$train))]
+    base.val <- x[[tgt]][[1L]][base.idx]
+    nonbase.val <- x[[tgt]][[1L]][!base.idx]
 
-    target <- c("train", "adapt.train")
-    target <- switch(when, before = target[1L], after = target[2L], target)
+    if (reg) {
 
-    for (tgt in target) {
-
-      base.val <- x[[tgt]][[1L]][base.idx]
-      nonbase.val <- x[[tgt]][[1L]][!base.idx]
       base.dens <- density(base.val)
       nonbase.dens <- density(nonbase.val)
 
       plot(base.dens,
-        main = paste("Densities", switch(tgt, train = "before", "after"),
-                     "adaptation"),
-        col = "blue",
-        ylim = c(0, max(base.dens$y, nonbase.dens$y)),
-        xlab = names(x$train)[1L]
+           main = paste("Densities", switch(tgt, train = "before", "after"),
+                        "adaptation"),
+           col = "blue",
+           ylim = c(0, max(base.dens$y, nonbase.dens$y)),
+           xlab = names(x$train)[1L]
       )
 
       lines(nonbase.dens, col = "red")
       polygon(base.dens, col = "steelblue", density = 50)
       polygon(nonbase.dens, col = "red", density = 50)
+
+    } else {
+
+      base.bar <- table(base.val)
+      base.bar <- 100 * base.bar / sum(base.bar)
+
+      nonbase.bar <- table(nonbase.val)
+      nonbase.bar <- 100 * nonbase.bar / sum(nonbase.bar)
+
+      x.names <- levels(x$train[[x$prot.attr]])
+
+      barplot(cbind(base.bar, nonbase.bar),
+              ylab = "Proportion", xlab = x$prot.attr,
+              main = paste("Class balance",
+                           switch(tgt, train = "before", "after"), "adaptation"),
+              legend = TRUE, args.legend = list(title = names(x$train)[1L]),
+              names.arg = x.names, col = c("red", "steelblue"), density = 50
+
+      )
+      # first text
+      val.f <- c(base.bar[1L], nonbase.bar[1L])
+      text(val.f / 2L, labels = paste0(round(val.f, 2), "%"))
+
+      # second text
+      val.s <- c(base.bar[2L], nonbase.bar[2L])
+      text(val.f + val.s / 2L, labels = paste0(round(val.s, 2), "%"))
+
     }
 
-  } else {
-
-    autoplot(x, when = when, ...)
   }
+
+}
+
+#' Visualize Graphical Causal Model
+#'
+#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' procedure.
+#' @param ... Additional arguments passed to the graph plotting function.
+visualizeGraph <- function(x, ...) {
+  UseMethod("visualizeGraph", x)
+}
+
+#' @export
+visualizeGraph.fairadapt <- function(x, ...) plot(x$graph, ...)
+
+#' Convenience function for returning adapted data
+#'
+#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' procedure.
+#' @param train A logical indicating whether train data should be returned.
+#' Defaults to \code{TRUE}. If \code{FALSE}, test data is returned.
+adaptedData <- function(x, train = TRUE) {
+  UseMethod("adaptedData", x)
+}
+
+#' @export
+adaptedData.fairadapt <- function(x, train = TRUE) {
+
+  if (train) x[["adapt.train"]] else x[["adapt.test"]]
+
 }
 
 #' Fair Twin Inspection convenience function.
@@ -154,7 +207,7 @@ plot.fairadapt <- function(x, graph = FALSE, when = "after", ...) {
 #' FA <- fairadapt(score ~ .,
 #'   train.data = uni_admission[1:100, ],
 #'   test.data = uni_admission[101:150, ],
-#'   adj.mat = uni.adj.mat, protect.A = "gender")
+#'   adj.mat = uni.adj.mat, prot.attr = "gender")
 #'
 #' fairTwins(FA, train.id = 1:5)
 #' @export
@@ -166,8 +219,8 @@ fairTwins <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
 fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL,
                                 cols = NULL) {
 
-  if (!is.null(cols) && !is.element(x$protect.A, cols)) {
-    cols <- c(x$protect.A, cols)
+  if (!is.null(cols) && !is.element(x$prot.attr, cols)) {
+    cols <- c(x$prot.attr, cols)
   }
 
   if (!is.null(train.id)) {
@@ -197,9 +250,9 @@ fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL,
     names(df.adapt) <- paste0(names(df.adapt), "_adapted")
   }
 
-  col.ord <- setdiff(names(df.target), x$protect.A)
+  col.ord <- setdiff(names(df.target), x$prot.attr)
   col.ord <- rbind(col.ord, paste0(col.ord, "_adapted"))
-  col.ord <- c(x$protect.A, col.ord)
+  col.ord <- c(x$prot.attr, col.ord)
 
   res <- cbind(df.target[target.id, , drop = FALSE], df.adapt)
 
@@ -212,20 +265,20 @@ predict.fairadapt <- function(object, newdata, ...) {
   assert_that(all(names(object$adapt.test) %in% names(newdata)),
               msg = "Columns missing in newdata")
 
-  engine <- object$q.Engine
+  engine <- object$q.engine
 
-  newdata[, object$protect.A] <- relevel(
-    as.factor(newdata[, object$protect.A]),
+  newdata[, object$prot.attr] <- relevel(
+    as.factor(newdata[, object$prot.attr]),
     ref = object$base.lvl
   )
 
   adapt <- newdata
-  adapt[, object$protect.A] <- factor(
+  adapt[, object$prot.attr] <- factor(
     object$base.lvl,
-    levels = levels(newdata[, object$protect.A])
+    levels = levels(newdata[, object$prot.attr])
   )
 
-  base.ind <- newdata[, object$protect.A] == object$base.lvl
+  base.ind <- newdata[, object$prot.attr] == object$base.lvl
 
   for (var in setdiff(names(engine), all.vars(object$formula)[1L])) {
 

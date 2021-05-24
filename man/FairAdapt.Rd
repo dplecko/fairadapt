@@ -6,12 +6,12 @@
 \usage{
 fairadapt(
   formula,
+  prot.attr,
   train.data,
   test.data = NULL,
   adj.mat = NULL,
   cfd.mat = NULL,
   top.ord = NULL,
-  protect.A,
   res.vars = NULL,
   quant.method = rangerQuants,
   visualize.graph = FALSE,
@@ -21,6 +21,9 @@ fairadapt(
 \arguments{
 \item{formula}{Object of class \code{formula} describing the response and
 the covariates.}
+
+\item{prot.attr}{A value of class \code{character} describing the binary
+protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.}
 
 \item{train.data, test.data}{Training data & testing data, both of class
 \code{data.frame}. Test data is by default \code{NULL}.}
@@ -39,9 +42,6 @@ include all the variables appearing in the formula object.}
 topological ordering of the causal graph. Default value is \code{NULL},
 but this argument must be supplied if \code{adj.mat} is not specified.
 Also must include all the variables appearing in the formula object.}
-
-\item{protect.A}{A value of class \code{character} describing the binary
-protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.}
 
 \item{res.vars}{A vector of class \code{character} listing all the resolving
 variables, which should not be changed by the adaption procedure. Default
@@ -91,7 +91,7 @@ uni.adj.mat["gender", c("edu", "test")] <-
 FA <- fairadapt(score ~ .,
   train.data = uni_admission[1:100, ],
   test.data = uni_admission[101:150, ],
-  adj.mat = uni.adj.mat, protect.A = "gender")
+  adj.mat = uni.adj.mat, prot.attr = "gender")
 
 FA
 

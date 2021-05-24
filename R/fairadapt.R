@@ -29,7 +29,7 @@
 #' topological ordering of the causal graph. Default value is \code{NULL},
 #' but this argument must be supplied if \code{adj.mat} is not specified.
 #' Also must include all the variables appearing in the formula object.
-#' @param protect.A A value of class \code{character} describing the binary
+#' @param prot.attr A value of class \code{character} describing the binary
 #' protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.
 #' @param res.vars A vector of class \code{character} listing all the resolving
 #' variables, which should not be changed by the adaption procedure. Default
@@ -58,7 +58,7 @@
 #' FA <- fairadapt(score ~ .,
 #'   train.data = uni_admission[1:100, ],
 #'   test.data = uni_admission[101:150, ],
-#'   adj.mat = uni.adj.mat, protect.A = "gender")
+#'   adj.mat = uni.adj.mat, prot.attr = "gender")
 #'
 #' FA
 #'
@@ -69,27 +69,27 @@
 #' @import stats
 #' @importFrom assertthat assert_that
 #' @export
-fairadapt <- function(formula, train.data, test.data = NULL,
+fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
   adj.mat = NULL, cfd.mat = NULL, top.ord = NULL,
-  protect.A, res.vars = NULL, quant.method = rangerQuants,
+  res.vars = NULL, quant.method = rangerQuants,
   visualize.graph = FALSE, ...) {
 
   # verify correctness of input
   correctInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
-               protect.A, res.vars, quant.method)
+               prot.attr, res.vars, quant.method)
 
   # reorder the adjacency matrix if necessary
   adj.mat <- adj.mat[colnames(adj.mat), ]
 
   # reorder columns and Factor-ize
   train.data <- model.frame(formula, train.data)
-  train.data[, protect.A] <- as.factor(train.data[, protect.A])
+  train.data[, prot.attr] <- as.factor(train.data[, prot.attr])
   train.len <- nrow(train.data)
 
   if (!is.null(test.data)) {
 
     test.data <- test.data[, colnames(train.data)[-1L]]
-    test.data[, protect.A] <- as.factor(test.data[, protect.A])
+    test.data[, prot.attr] <- as.factor(test.data[, prot.attr])
     test.data <- cbind(NA, test.data)
     colnames(test.data) <- colnames(train.data)
   }
@@ -108,10 +108,10 @@ fairadapt <- function(formula, train.data, test.data = NULL,
 
   # construct the initial version of adapted data
   adapt.data <- org.data
-  base.lvl <- levels(org.data[, protect.A])[1L]
-  base.ind <- org.data[, protect.A] == base.lvl
-  adapt.data[, protect.A] <- factor(base.lvl,
-                                    levels = levels(org.data[, protect.A]))
+  base.lvl <- levels(org.data[, prot.attr])[1L]
+  base.ind <- org.data[, prot.attr] == base.lvl
+  adapt.data[, prot.attr] <- factor(base.lvl,
+                                    levels = levels(org.data[, prot.attr]))
 
   # obtain topological ordering and descendants of A
   if (is.null(top.ord)) {
@@ -119,9 +119,9 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     # Markovian / Semi-Markovian case
 
     top.ord <- topologicalOrdering(adj.mat)
-    A.des <- getDescendants(protect.A, adj.mat)
-    A.root <- (length(getParents(protect.A, adj.mat)) == 0L) &&
-      (length(confoundedComponent(protect.A, cfd.mat)) == 1L)
+    A.des <- getDescendants(prot.attr, adj.mat)
+    A.root <- (length(getParents(prot.attr, adj.mat)) == 0L) &&
+      (length(confoundedComponent(prot.attr, cfd.mat)) == 1L)
 
     ig <- graphModel(adj.mat, cfd.mat)
 
@@ -130,22 +130,22 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     }
 
     # fail if nonId
-    if (nonId(c(protect.A, res.vars), adj.mat, cfd.mat)) {
+    if (nonId(c(prot.attr, res.vars), adj.mat, cfd.mat)) {
       stop("The desired intervention is non-identifiable")
     }
 
   } else {
 
     # Topological Ordering case
-    A.des <- getDescendants(protect.A, adj.mat, top.ord)
-    A.root <- top.ord[1L] == protect.A
+    A.des <- getDescendants(prot.attr, adj.mat, top.ord)
+    A.root <- top.ord[1L] == prot.attr
     ig <- NULL
   }
 
-  q.Engine <- list()
+  q.engine <- list()
 
   # main procedure part
-  var_ind <- seq.int(which(top.ord == protect.A) + 1L, length(top.ord))
+  var_ind <- seq.int(which(top.ord == prot.attr) + 1L, length(top.ord))
 
   for (curr.var in top.ord[var_ind]) {
 
@@ -153,7 +153,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     # must change for topological order approach/also for when A is not root
 
     changed.parents <- intersect(getParents(curr.var, adj.mat, top.ord),
-                                 union(A.des, protect.A))
+                                 union(A.des, prot.attr))
 
     if (sum(!is.element(changed.parents, res.vars)) == 0) {
       res.vars <- c(res.vars, curr.var)
@@ -163,16 +163,16 @@ fairadapt <- function(formula, train.data, test.data = NULL,
       next
     }
 
-    q.Engine[[curr.var]] <- list()
+    q.engine[[curr.var]] <- list()
 
     type <- class(org.data[, curr.var])
-    q.Engine[[curr.var]][["type"]] <- type
+    q.engine[[curr.var]][["type"]] <- type
 
     discrete <- FALSE
-    q.Engine[[curr.var]][["discrete"]] <- discrete
+    q.engine[[curr.var]][["discrete"]] <- discrete
 
     curr.parents <- adjustmentSet(curr.var, adj.mat, cfd.mat, top.ord)
-    q.Engine[[curr.var]][["parents"]] <- curr.parents
+    q.engine[[curr.var]][["parents"]] <- curr.parents
 
     row.idx <- rep(TRUE, full.len)
 
@@ -185,7 +185,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
         is.factor(org.data[, curr.var])) {
 
       discrete <- TRUE
-      q.Engine[[curr.var]][["discrete"]] <- discrete
+      q.engine[[curr.var]][["discrete"]] <- discrete
 
       if (is.factor(org.data[, curr.var])) {
 
@@ -200,7 +200,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
       }
 
       unique.values <- levels(org.data[, curr.var])
-      q.Engine[[curr.var]][["unique.values"]] <- unique.values
+      q.engine[[curr.var]][["unique.values"]] <- unique.values
 
       int.enc <- as.integer(org.data[row.idx, curr.var]) +
                  runif(length(org.data[row.idx, curr.var]), -0.5, 0.5)
@@ -216,7 +216,7 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     assert_that(ncol(qr.data) == (ncol(cf.parents) + 1L))
 
     object <- quant.method(qr.data, A.root, base.ind[row.idx], ...)
-    q.Engine[[curr.var]][["object"]] <- object
+    q.engine[[curr.var]][["object"]] <- object
 
     adapt.data[!base.ind & row.idx, curr.var] <-
       computeQuants(object, qr.data, cf.parents, base.ind[row.idx])
@@ -255,9 +255,9 @@ fairadapt <- function(formula, train.data, test.data = NULL,
     base.ind = base.ind,
     formula = formula,
     res.vars = res.vars,
-    protect.A = protect.A,
+    prot.attr = prot.attr,
     graph = ig,
-    q.Engine = q.Engine
+    q.engine = q.engine
   ), class = "fairadapt")
 
 }
