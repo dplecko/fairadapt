@@ -101,6 +101,9 @@ Uses only plain R." />
     </li>
   </ul>
 </li>
+<li>
+  <a href="../news/index.html">Changelog</a>
+</li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li>
@@ -135,12 +138,12 @@ Uses only plain <code>R</code>.</p>
 
     <pre class="usage"><span class='fu'>fairadapt</span><span class='op'>(</span>
   <span class='va'>formula</span>,
+  <span class='va'>prot.attr</span>,
   <span class='va'>train.data</span>,
   test.data <span class='op'>=</span> <span class='cn'>NULL</span>,
   adj.mat <span class='op'>=</span> <span class='cn'>NULL</span>,
   cfd.mat <span class='op'>=</span> <span class='cn'>NULL</span>,
   top.ord <span class='op'>=</span> <span class='cn'>NULL</span>,
-  <span class='va'>protect.A</span>,
   res.vars <span class='op'>=</span> <span class='cn'>NULL</span>,
   quant.method <span class='op'>=</span> <span class='va'>rangerQuants</span>,
   visualize.graph <span class='op'>=</span> <span class='cn'>FALSE</span>,
@@ -154,6 +157,11 @@ Uses only plain <code>R</code>.</p>
       <th>formula</th>
       <td><p>Object of class <code>formula</code> describing the response and
 the covariates.</p></td>
+    </tr>
+    <tr>
+      <th>prot.attr</th>
+      <td><p>A value of class <code>character</code> describing the binary
+protected attribute. Must be one of the entries of <code><a href='https://rdrr.io/r/base/colnames.html'>colnames(adj.mat)</a></code>.</p></td>
     </tr>
     <tr>
       <th>train.data, test.data</th>
@@ -180,11 +188,6 @@ include all the variables appearing in the formula object.</p></td>
 topological ordering of the causal graph. Default value is <code>NULL</code>,
 but this argument must be supplied if <code>adj.mat</code> is not specified.
 Also must include all the variables appearing in the formula object.</p></td>
-    </tr>
-    <tr>
-      <th>protect.A</th>
-      <td><p>A value of class <code>character</code> describing the binary
-protected attribute. Must be one of the entries of <code><a href='https://rdrr.io/r/base/colnames.html'>colnames(adj.mat)</a></code>.</p></td>
     </tr>
     <tr>
       <th>res.vars</th>
@@ -247,7 +250,7 @@ Fair Data Adaptation with Quantile Preservation <br /></p>
 <span class='va'>FA</span> <span class='op'>&lt;-</span> <span class='fu'>fairadapt</span><span class='op'>(</span><span class='va'>score</span> <span class='op'>~</span> <span class='va'>.</span>,
   train.data <span class='op'>=</span> <span class='va'>uni_admission</span><span class='op'>[</span><span class='fl'>1</span><span class='op'>:</span><span class='fl'>100</span>, <span class='op'>]</span>,
   test.data <span class='op'>=</span> <span class='va'>uni_admission</span><span class='op'>[</span><span class='fl'>101</span><span class='op'>:</span><span class='fl'>150</span>, <span class='op'>]</span>,
-  adj.mat <span class='op'>=</span> <span class='va'>uni.adj.mat</span>, protect.A <span class='op'>=</span> <span class='st'>"gender"</span><span class='op'>)</span>
+  adj.mat <span class='op'>=</span> <span class='va'>uni.adj.mat</span>, prot.attr <span class='op'>=</span> <span class='st'>"gender"</span><span class='op'>)</span>
 
 <span class='va'>FA</span>
 </div><div class='output co'>#&gt; Fairadapt result
