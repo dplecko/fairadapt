@@ -23,38 +23,38 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(Y ~ z + x, train.data = train, test.data = test,
-              adj.mat = adj.mat, protect.A = "a"),
+              adj.mat = adj.mat, prot.attr = "a"),
     "object 'Y' not found"
   )
 
   expect_error(
     fairadapt(y ~ z + x, train.data = train, test.data = test,
-              adj.mat = adj.mat, protect.A = "a"),
+              adj.mat = adj.mat, prot.attr = "a"),
     "object 'z' not found"
   )
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = adj.mat, protect.A = "A"),
+              adj.mat = adj.mat, prot.attr = "A"),
     "is not TRUE"
   )
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = adj.mat + 1, protect.A = "a"),
-    "is not TRUE"
+              adj.mat = adj.mat + 1, prot.attr = "a"),
+    "has entries that are not"
   )
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = adj.mat, protect.A = "a",
+              adj.mat = adj.mat, prot.attr = "a",
               quant.method = "noname"),
     "could not find function \"quant.method\""
   )
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = adj.mat, protect.A = "a",
+              adj.mat = adj.mat, prot.attr = "a",
               res.vars = "noname"),
     "not equal to 0"
   )
@@ -64,13 +64,13 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = na.dat, test.data = test,
-              adj.mat = adj.mat, protect.A = "a"),
+              adj.mat = adj.mat, prot.attr = "a"),
     "not greater than 0"
   )
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = na.dat,
-              adj.mat = adj.mat, protect.A = "a"),
+              adj.mat = adj.mat, prot.attr = "a"),
     "not equal to 0"
   )
 
@@ -79,7 +79,7 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = w.dat, test.data = test,
-              adj.mat = adj.mat, protect.A = "a"),
+              adj.mat = adj.mat, prot.attr = "a"),
     "undefined columns selected"
   )
 
@@ -88,8 +88,8 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat, protect.A = "a"),
-    "is not TRUE"
+              adj.mat = tmp.mat, prot.attr = "a"),
+    "not an acyclic matrix"
   )
 
   tmp.mat <- adj.mat
@@ -97,7 +97,7 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat, protect.A = "a"),
+              adj.mat = tmp.mat, prot.attr = "a"),
     "is not TRUE"
   )
 
@@ -106,7 +106,7 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat, protect.A = "a"),
+              adj.mat = tmp.mat, prot.attr = "a"),
     "is not TRUE"
   )
 
@@ -114,7 +114,7 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat, protect.A = "a"),
+              adj.mat = tmp.mat, prot.attr = "a"),
     "is not TRUE"
   )
 
@@ -123,8 +123,8 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat, protect.A = "a"),
-    "is not TRUE"
+              adj.mat = tmp.mat, prot.attr = "a"),
+    "equal column and row names"
   )
 
   tmp.mat <- adj.mat
@@ -132,8 +132,8 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat, protect.A = "a"),
-    "is not TRUE"
+              adj.mat = tmp.mat, prot.attr = "a"),
+    "equal column and row names"
   )
 
   tmp.mat <- adj.mat
@@ -141,7 +141,7 @@ test_that("input verification", {
 
   expect_error(
     fairadapt(y ~ ., train.data = train, test.data = test,
-              adj.mat = tmp.mat[c("x1", "y"), c("x1", "y")], protect.A = "a"),
+              adj.mat = tmp.mat[c("x1", "y"), c("x1", "y")], prot.attr = "a"),
     "is not TRUE"
   )
 })

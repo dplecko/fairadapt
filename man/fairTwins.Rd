@@ -39,7 +39,7 @@ uni.adj.mat["gender", c("edu", "test")] <-
 FA <- fairadapt(score ~ .,
   train.data = uni_admission[1:100, ],
   test.data = uni_admission[101:150, ],
-  adj.mat = uni.adj.mat, protect.A = "gender")
+  adj.mat = uni.adj.mat, prot.attr = "gender")
 
 fairTwins(FA, train.id = 1:5)
 }

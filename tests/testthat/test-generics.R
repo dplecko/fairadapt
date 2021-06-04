@@ -27,7 +27,7 @@ test_that("generics", {
 
   ad.rf <- with_seed(302,
     fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
-              protect.A = "a")
+              prot.attr = "a")
   )
 
   aut.plt <- autoplot(ad.rf)
@@ -37,7 +37,7 @@ test_that("generics", {
   expect_snapshot_plot("auto_rf", print(aut.plt))
   # extra print should not be necessary
   expect_snapshot_plot("plot_rf", print(plot(ad.rf)))
-  expect_snapshot_plot("graph_rf", with_seed(302, plot(ad.rf, graph = TRUE)))
+  expect_snapshot_plot("graph_rf", with_seed(302, visualizeGraph(ad.rf)))
 
   expect_snapshot_csv("ftdef_rf", fairTwins(ad.rf))
   expect_snapshot_csv("fttrn_rf", fairTwins(ad.rf, train.id = NULL,
@@ -48,7 +48,7 @@ test_that("generics", {
 
   ad.lin <- with_seed(303,
     fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
-              protect.A = "a", quant.method = linearQuants)
+              prot.attr = "a", quant.method = linearQuants)
   )
 
   aut.plt <- autoplot(ad.lin)
@@ -58,7 +58,7 @@ test_that("generics", {
   expect_snapshot_plot("auto_lin", print(aut.plt))
   # extra print should not be necessary
   expect_snapshot_plot("plot_lin", print(plot(ad.lin)))
-  expect_snapshot_plot("graph_lin", with_seed(303, plot(ad.lin, graph = TRUE)))
+  expect_snapshot_plot("graph_lin", with_seed(303, visualizeGraph(ad.lin)))
 
   expect_snapshot_csv("ftdef_lin", fairTwins(ad.lin))
   expect_snapshot_csv("fttrn_lin", fairTwins(ad.lin, train.id = NULL,
@@ -68,11 +68,11 @@ test_that("generics", {
   # cts
 
   cts <- with_seed(304, data_gen(100, add_z = TRUE))
-  cts$Y <- cts$X
+  cts$y <- cts$x
 
   ad.cts <- with_seed(304,
     fairadapt(y ~ ., train.data = cts, test.data = cts, adj.mat = adj.mat,
-              protect.A = "a")
+              prot.attr = "a")
   )
 
   aut.plt <- autoplot(ad.cts)
@@ -82,10 +82,19 @@ test_that("generics", {
   expect_snapshot_plot("auto_cts", print(aut.plt))
   # extra print should not be necessary
   expect_snapshot_plot("plot_cts", print(plot(ad.cts)))
-  expect_snapshot_plot("graph_cts", with_seed(304, plot(ad.cts, graph = TRUE)))
+  expect_snapshot_plot("graph_cts", with_seed(304, visualizeGraph(ad.cts)))
 
   expect_snapshot_csv("ftdef_cts", fairTwins(ad.cts))
   expect_snapshot_csv("fttrn_cts", fairTwins(ad.cts, train.id = NULL,
                                              test.id = 1L))
   expect_snapshot_csv("predi_cts", with_seed(304, predict(ad.cts, pred)))
+
+  # check predict function for a discrete variable
+  cts$x <- with_seed(301, rbinom(length(cts$x), size = 1, prob = 0.5))
+  ad.disc <- with_seed(302,
+    fairadapt(y ~ ., train.data = cts, test.data = NULL, adj.mat = adj.mat,
+              prot.attr = "a")
+  )
+  expect_snapshot_csv("predi_disc", with_seed(304, predict(ad.disc, cts)))
+
 })

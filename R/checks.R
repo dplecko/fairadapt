@@ -1,6 +1,6 @@
 
 correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
-  top.ord, protect.A, resolving.variables, quant.method) {
+  top.ord, prot.attr, resolving.variables, quant.method) {
 
   if (is.null(adj.mat)) {
 
@@ -10,22 +10,19 @@ correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
   } else {
 
     assert_that(
-      !is.null(colnames(adj.mat)), !is.null(rownames(adj.mat)),
+      matNames(adj.mat),
       withinRange(adj.mat),
-      setequal(rownames(adj.mat), colnames(adj.mat))
+      isAcyclic(adj.mat)
     )
 
     adj.mat <- adj.mat[colnames(adj.mat), ]
-
-    assert_that(isAcyclic(adj.mat))
 
     ap.nms <- colnames(adj.mat)
   }
 
   assert_that(
-    length(ap.nms) == length(unique(ap.nms)),
     sum(!is.element(resolving.variables, colnames(adj.mat))) == 0,
-    is.element(protect.A, ap.nms)
+    is.element(prot.attr, ap.nms)
   )
 
   train.data <- model.frame(formula, train.data)
@@ -40,13 +37,20 @@ correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
     assert_that(sum(is.na(test.data)) == 0)
   }
 
-  assert_that(sum(!is.element(colnames(train.data), ap.nms)) == 0)
+  assert_that(sum(!is.element(colnames(train.data), ap.nms)) == 0,
+              msg = paste("Train data has columns that do not appear",
+                          "in the adjacency matrix"))
 
   invisible(NULL)
 }
 
 withinRange <- function(mat) {
   sum(!is.element(mat, c(0, 1))) == 0
+}
+
+#' @importFrom assertthat on_failure<-
+on_failure(withinRange) <- function(call, env) {
+  paste0(deparse(call$mat), " has entries that are not in {0, 1}")
 }
 
 isAcyclic <- function(mat) {
@@ -59,3 +63,24 @@ isAcyclic <- function(mat) {
 
   sum(diag(num.walks)) == 0
 }
+
+on_failure(isAcyclic) <- function(call, env) {
+  paste0(deparse(call$mat), " is not an acyclic matrix")
+}
+
+matNames <- function(mat) {
+
+  assert_that(
+    !is.null(colnames(mat)), !is.null(rownames(mat)),
+    !anyDuplicated(colnames(mat)), !anyDuplicated(rownames(mat))
+  )
+
+  setequal(colnames(mat), rownames(mat))
+}
+
+on_failure(matNames) <- function(call, env) {
+  paste0(deparse(call$mat), " does not have equal column and row names")
+}
+
+
+
