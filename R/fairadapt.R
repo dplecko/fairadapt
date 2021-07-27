@@ -45,7 +45,8 @@
 #' @param visualize.graph A \code{logical} indicating whether the causal graph
 #' should be plotted upon calling the \code{fairadapt()} function. Default
 #' value is \code{FALSE}.
-#' @param ... Forwarded to the function passed as `quant.method`.
+#' @param ... Additional arguments forwarded to the function passed as
+#' `quant.method`.
 #'
 #' @return An object of class \code{fairadapt}, containing the original and
 #' adapted training and testing data, together with the causal graph and some

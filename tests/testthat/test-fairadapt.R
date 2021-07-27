@@ -159,7 +159,7 @@ test_that("fairadapt", {
   # w/ top.ord
 
   rto <- with_seed(202,
-    fairadapt(y ~ ., adj.mat = NULL, train.data = train, test.data = test,
+    fairadapt(y ~ ., train.data = train, test.data = test,
               top.ord = c("a", "x", "y"), prot.attr = "a", seed = 202)
   )
 
@@ -175,6 +175,27 @@ test_that("fairadapt", {
   # }
 
   skip_on_cran()
+
+  # character example
+  uni <- uni_admission
+  uni$test <- ifelse(uni$test > 0, "A", "B")
+  adj.mat <- c(
+    0L, 1L, 1L, 1L, # gender
+    0L, 0L, 0L, 1L, # edu
+    0L, 0L, 0L, 1L, # test
+    0L, 0L, 0L, 0L # score
+  )
+
+  adj.mat <- matrix(adj.mat, nrow = length(names(uni)), ncol = length(names(uni)),
+                    byrow = TRUE, dimnames = list(names(uni), names(uni)))
+
+  charmod <- with_seed(
+    203,
+    fairadapt(score ~ ., train.data = uni, adj.mat = adj.mat,
+              prot.attr = "gender", seed = 203)
+  )
+
+  expect_true(is.character(adaptedData(charmod)$test))
 
   # data example
 
