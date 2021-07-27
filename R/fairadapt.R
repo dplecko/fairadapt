@@ -148,9 +148,9 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   q.engine <- list()
 
   # main procedure part
-  var_ind <- seq.int(which(top.ord == prot.attr) + 1L, length(top.ord))
+  var.ind <- seq.int(which(top.ord == prot.attr) + 1L, length(top.ord))
 
-  for (curr.var in top.ord[var_ind]) {
+  for (curr.var in top.ord[var.ind]) {
 
     # check if this variable is skipped
     # must change for topological order approach/also for when A is not root
@@ -185,20 +185,22 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
 
     # check if Discrete
     if (length(unique(org.data[, curr.var])) < 10 |
-        is.factor(org.data[, curr.var])) {
+        is.factor(org.data[, curr.var]) | is.integer(org.data[, curr.var]) |
+        is.character(org.data[, curr.var])) {
 
       discrete <- TRUE
       q.engine[[curr.var]][["discrete"]] <- discrete
 
-      if (is.factor(org.data[, curr.var])) {
+      if (is.character(org.data[, curr.var])) {
+        org.data[, curr.var] <- factor(org.data[, curr.var])
+      }
 
+      if (is.factor(org.data[, curr.var])) {
         org.data[, curr.var] <- factor(
           org.data[, curr.var], levels = catOrder(org.data[row.idx, 1L],
                                                   org.data[row.idx, curr.var])
         )
-
       } else {
-
         org.data[, curr.var] <- factor(org.data[, curr.var])
       }
 

@@ -159,7 +159,7 @@ test_that("fairadapt", {
   # w/ top.ord
 
   rto <- with_seed(202,
-    fairadapt(y ~ ., train.data = train, test.data = test,
+    fairadapt(y ~ ., adj.mat = NULL, train.data = train, test.data = test,
               top.ord = c("a", "x", "y"), prot.attr = "a", seed = 202)
   )
 
