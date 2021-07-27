@@ -77,6 +77,10 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   cfd.mat = NULL, top.ord = NULL, res.vars = NULL, quant.method = rangerQuants,
   visualize.graph = FALSE, ...) {
 
+  if (missing(adj.mat)) {
+    adj.mat <- NULL
+  }
+
   # verify correctness of input
   correctInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
                prot.attr, res.vars, quant.method)
