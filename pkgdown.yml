@@ -1,0 +1,10 @@
+pandoc: 2.7.3
+pkgdown: 1.6.1
+pkgdown_sha: ~
+articles:
+  jss: jss.pdf
+last_built: 2021-07-28T09:39Z
+urls:
+  reference: https://dplecko.github.io/fairadapt/reference
+  article: https://dplecko.github.io/fairadapt/articles
+
