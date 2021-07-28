@@ -1,24 +1,14 @@
 ## Test environments
-* local OS X install, R 3.6.0
+* local OS X install, R 4.1.0
 * win-builder (devel and release)
-* Ubuntu Linux 16.04 LTS, R-release, GCC
-* Fedora Linux, R-devel, clang, gfortran
+* Github Actions: macOS-latest (release), windows-latest (release), windows-latest (3.6), ubuntu-18.04 (oldrel), ubuntu-18.04 (3.5), ubuntu-20.04 (release), ubuntu-20.04 (devel)
 
 ## R CMD check results
-There were no ERRORs or WARNINGs.
+There were no ERRORs, WARNINGs or NOTEs.
 
-There was 1 NOTE:
+## Update
+This is an update. In this version I have:
 
-* checking CRAN incoming feasibility ... NOTE
-Maintainer: 'Drago Plecko <drago.plecko@stat.math.ethz.ch>'
+* changed the ordering of the arguments in the main function.
 
-The note is due to the first submission of the package.
-
-## Resubmission
-This is a resubmission. In this version I have:
-
-* Added the important references that were missing from the description.
-
-* Added some very basic examples that are included in the testing.
-
-* Changed the capitalization of non-names.
+* enabled multiple quantile regression methods that now use S3 dispatch.
