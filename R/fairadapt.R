@@ -15,12 +15,15 @@
 #' @title fairadapt
 #' @param formula Object of class \code{formula} describing the response and
 #' the covariates.
-#' @param train.data,test.data Training data & testing data, both of class
-#' \code{data.frame}. Test data is by default \code{NULL}.
+#' @param prot.attr A value of class \code{character} describing the binary
+#' protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.
 #' @param adj.mat Matrix of class \code{matrix} encoding the relationships in
 #' the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
 #' node i to node j. Must include all the variables appearing in the formula
-#' object.
+#' object. When the \code{adj.mat} argument is set to \code{NULL}, then the
+#' \code{top.ord} argument has to be supplied.
+#' @param train.data,test.data Training data & testing data, both of class
+#' \code{data.frame}. Test data is by default \code{NULL}.
 #' @param cfd.mat Symmetric matrix of class \code{matrix} encoding the
 #' bidirected edges in the causal graph. \code{M[i,j] == M[j, i] == 1L}
 #' implies the existence of a bidirected edge between nodes i and j. Must
@@ -29,19 +32,21 @@
 #' topological ordering of the causal graph. Default value is \code{NULL},
 #' but this argument must be supplied if \code{adj.mat} is not specified.
 #' Also must include all the variables appearing in the formula object.
-#' @param prot.attr A value of class \code{character} describing the binary
-#' protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.
 #' @param res.vars A vector of class \code{character} listing all the resolving
 #' variables, which should not be changed by the adaption procedure. Default
 #' value is \code{NULL}, corresponding to no resolving variables. Resolving
 #' variables should be a subset of the descendants of the protected attribute.
-#' @param quant.method A vector of class \code{character} choosing the method
-#' used for quantile regression. Possible values are "forest", "forest2",
-#' "linear" and "nn".
+#' @param quant.method A function choosing the method used for quantile
+#' regression. Default value is \code{rangerQuants} (using random forest
+#' quantile regression). Other implemented options are \code{linearQuants} and
+#' \code{mcqrnnQuants}. A custom function can be supplied by the user here,
+#' and the associated method for the S3 generic \code{computeQuants} needs to be
+#' added.
 #' @param visualize.graph A \code{logical} indicating whether the causal graph
 #' should be plotted upon calling the \code{fairadapt()} function. Default
 #' value is \code{FALSE}.
-#' @param ... Forwarded to the function passed as `quant.method`.
+#' @param ... Additional arguments forwarded to the function passed as
+#' `quant.method`.
 #'
 #' @return An object of class \code{fairadapt}, containing the original and
 #' adapted training and testing data, together with the causal graph and some
@@ -69,10 +74,13 @@
 #' @import stats
 #' @importFrom assertthat assert_that
 #' @export
-fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
-  adj.mat = NULL, cfd.mat = NULL, top.ord = NULL,
-  res.vars = NULL, quant.method = rangerQuants,
+fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
+  cfd.mat = NULL, top.ord = NULL, res.vars = NULL, quant.method = rangerQuants,
   visualize.graph = FALSE, ...) {
+
+  if (missing(adj.mat)) {
+    adj.mat <- NULL
+  }
 
   # verify correctness of input
   correctInput(formula, train.data, test.data, adj.mat, cfd.mat, top.ord,
@@ -119,8 +127,8 @@ fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
     # Markovian / Semi-Markovian case
 
     top.ord <- topologicalOrdering(adj.mat)
-    A.des <- getDescendants(prot.attr, adj.mat)
-    A.root <- (length(getParents(prot.attr, adj.mat)) == 0L) &&
+    attr.des <- getDescendants(prot.attr, adj.mat)
+    attr.root <- (length(getParents(prot.attr, adj.mat)) == 0L) &&
       (length(confoundedComponent(prot.attr, cfd.mat)) == 1L)
 
     ig <- graphModel(adj.mat, cfd.mat)
@@ -137,29 +145,29 @@ fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
   } else {
 
     # Topological Ordering case
-    A.des <- getDescendants(prot.attr, adj.mat, top.ord)
-    A.root <- top.ord[1L] == prot.attr
+    attr.des <- getDescendants(prot.attr, adj.mat, top.ord)
+    attr.root <- top.ord[1L] == prot.attr
     ig <- NULL
   }
 
   q.engine <- list()
 
   # main procedure part
-  var_ind <- seq.int(which(top.ord == prot.attr) + 1L, length(top.ord))
+  var.ind <- seq.int(which(top.ord == prot.attr) + 1L, length(top.ord))
 
-  for (curr.var in top.ord[var_ind]) {
+  for (curr.var in top.ord[var.ind]) {
 
     # check if this variable is skipped
     # must change for topological order approach/also for when A is not root
 
     changed.parents <- intersect(getParents(curr.var, adj.mat, top.ord),
-                                 union(A.des, prot.attr))
+                                 union(attr.des, prot.attr))
 
     if (sum(!is.element(changed.parents, res.vars)) == 0) {
       res.vars <- c(res.vars, curr.var)
     }
 
-    if (is.element(curr.var, res.vars) | !is.element(curr.var, A.des)) {
+    if (is.element(curr.var, res.vars) | !is.element(curr.var, attr.des)) {
       next
     }
 
@@ -182,20 +190,22 @@ fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
 
     # check if Discrete
     if (length(unique(org.data[, curr.var])) < 10 |
-        is.factor(org.data[, curr.var])) {
+        is.factor(org.data[, curr.var]) | is.integer(org.data[, curr.var]) |
+        is.character(org.data[, curr.var])) {
 
       discrete <- TRUE
       q.engine[[curr.var]][["discrete"]] <- discrete
 
-      if (is.factor(org.data[, curr.var])) {
+      if (is.character(org.data[, curr.var])) {
+        org.data[, curr.var] <- factor(org.data[, curr.var])
+      }
 
+      if (is.factor(org.data[, curr.var])) {
         org.data[, curr.var] <- factor(
           org.data[, curr.var], levels = catOrder(org.data[row.idx, 1L],
                                                   org.data[row.idx, curr.var])
         )
-
       } else {
-
         org.data[, curr.var] <- factor(org.data[, curr.var])
       }
 
@@ -215,7 +225,7 @@ fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
 
     assert_that(ncol(qr.data) == (ncol(cf.parents) + 1L))
 
-    object <- quant.method(qr.data, A.root, base.ind[row.idx], ...)
+    object <- quant.method(qr.data, attr.root, base.ind[row.idx], ...)
     q.engine[[curr.var]][["object"]] <- object
 
     adapt.data[!base.ind & row.idx, curr.var] <-
@@ -226,8 +236,7 @@ fairadapt <- function(formula, prot.attr, train.data, test.data = NULL,
     res.anc <- (sum(is.element(ancestors, res.vars)) > 0)
 
     # enforce Marginal Matching if there is no resolving ancestor & discrete
-    if (discrete & !res.anc & A.root) {
-
+    if (discrete & !res.anc & attr.root) {
       adapt.data[row.idx, curr.var] <-
         marginalMatching(adapt.data[row.idx, curr.var], base.ind[row.idx])
     }
