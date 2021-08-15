@@ -31,13 +31,14 @@ Imports:
     cowplot,
     scales
 Suggests:
-    testthat (>= 2.1.0),
+    testthat (>= 3.0.3),
     knitr,
     rmarkdown,
     markdown,
     data.table,
     rticles,
-    mvtnorm
+    mvtnorm,
+    magick
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3

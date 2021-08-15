@@ -77,8 +77,10 @@ skip_on_r_version <- function(min_version = "3.6.0") {
   }
 }
 
-skip_no_cairo <- function() {
-  skip_if_not(capabilities("cairo"), message = "Cairo not available")
+compare_img_data <- function(old, new) {
+  old <- magick::image_read(old)
+  new <- magick::image_read(new)
+  identical(magick::image_data(new), magick::image_data(old))
 }
 
 expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
@@ -88,10 +90,9 @@ expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
   }
 
   skip_if_not_installed("ggplot2", "3.0.0")
-  skip_on_ci()
 
   path <- save_png(code)
-  expect_snapshot_file(path, paste0(name, ".png"))
+  expect_snapshot_file(path, paste0(name, ".png"), compare = compare_img_data)
 }
 
 expect_snapshot_csv <- function(name, code, mac_only = TRUE) {
