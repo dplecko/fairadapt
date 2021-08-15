@@ -11,7 +11,11 @@ Authors@R: c(
     person(given = "Drago",
            family = "Plecko",
            role = c("aut", "cre"),
-           email = "drago.plecko@stat.math.ethz.ch")
+           email = "drago.plecko@stat.math.ethz.ch"),
+    person(given = "Nicolas",
+           family = "Bennett",
+           role = "cre",
+           email = "nicolas.bennett@stat.math.ethz.ch")
     )
 License: GPL (>= 3)
 Encoding: UTF-8
