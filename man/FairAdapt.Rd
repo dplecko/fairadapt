@@ -7,9 +7,9 @@
 fairadapt(
   formula,
   prot.attr,
+  adj.mat,
   train.data,
   test.data = NULL,
-  adj.mat = NULL,
   cfd.mat = NULL,
   top.ord = NULL,
   res.vars = NULL,
@@ -25,13 +25,14 @@ the covariates.}
 \item{prot.attr}{A value of class \code{character} describing the binary
 protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.}
 
-\item{train.data, test.data}{Training data & testing data, both of class
-\code{data.frame}. Test data is by default \code{NULL}.}
-
 \item{adj.mat}{Matrix of class \code{matrix} encoding the relationships in
 the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
 node i to node j. Must include all the variables appearing in the formula
-object.}
+object. When the \code{adj.mat} argument is set to \code{NULL}, then the
+\code{top.ord} argument has to be supplied.}
+
+\item{train.data, test.data}{Training data & testing data, both of class
+\code{data.frame}. Test data is by default \code{NULL}.}
 
 \item{cfd.mat}{Symmetric matrix of class \code{matrix} encoding the
 bidirected edges in the causal graph. \code{M[i,j] == M[j, i] == 1L}
@@ -48,15 +49,19 @@ variables, which should not be changed by the adaption procedure. Default
 value is \code{NULL}, corresponding to no resolving variables. Resolving
 variables should be a subset of the descendants of the protected attribute.}
 
-\item{quant.method}{A vector of class \code{character} choosing the method
-used for quantile regression. Possible values are "forest", "forest2",
-"linear" and "nn".}
+\item{quant.method}{A function choosing the method used for quantile
+regression. Default value is \code{rangerQuants} (using random forest
+quantile regression). Other implemented options are \code{linearQuants} and
+\code{mcqrnnQuants}. A custom function can be supplied by the user here,
+and the associated method for the S3 generic \code{computeQuants} needs to be
+added.}
 
 \item{visualize.graph}{A \code{logical} indicating whether the causal graph
 should be plotted upon calling the \code{fairadapt()} function. Default
 value is \code{FALSE}.}
 
-\item{...}{Forwarded to the function passed as `quant.method`.}
+\item{...}{Additional arguments forwarded to the function passed as
+`quant.method`.}
 }
 \value{
 An object of class \code{fairadapt}, containing the original and

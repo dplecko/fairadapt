@@ -158,6 +158,7 @@ plot.fairadapt <- function(x, when = "after", ...) {
 #' @param x Object of class \code{fairadapt}, a result of an adaptation
 #' procedure.
 #' @param ... Additional arguments passed to the graph plotting function.
+#' @export
 visualizeGraph <- function(x, ...) {
   UseMethod("visualizeGraph", x)
 }
@@ -171,6 +172,7 @@ visualizeGraph.fairadapt <- function(x, ...) plot(x$graph, ...)
 #' procedure.
 #' @param train A logical indicating whether train data should be returned.
 #' Defaults to \code{TRUE}. If \code{FALSE}, test data is returned.
+#' @export
 adaptedData <- function(x, train = TRUE) {
   UseMethod("adaptedData", x)
 }
