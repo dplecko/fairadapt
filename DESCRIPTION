@@ -14,7 +14,7 @@ Authors@R: c(
            email = "drago.plecko@stat.math.ethz.ch"),
     person(given = "Nicolas",
            family = "Bennett",
-           role = "cre",
+           role = "aut",
            email = "nicolas.bennett@stat.math.ethz.ch")
     )
 License: GPL (>= 3)
