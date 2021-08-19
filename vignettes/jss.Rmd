@@ -1,8 +1,8 @@
 ---
 title:
-  plain:     "fairadapt: Causal Reasoning for Fair Data Pre-processing"
+  plain: "fairadapt: Causal Reasoning for Fair Data Pre-processing"
   formatted: "\\pkg{fairadapt}: Causal Reasoning for Fair Data Pre-processing"
-  short:     "\\pkg{fairadapt}: Fair Data Adaptation"
+  short: "\\pkg{fairadapt}: Fair Data Adaptation"
 author:
   - name: Drago Plecko
     affiliation: ETH Zürich
@@ -29,7 +29,7 @@ abstract: >
   Machine learning algorithms are useful for various predictions tasks, but they can also learn how to discriminate, based on gender, race or some other sensitive attribute. This realization gave rise to the field of fair machine learning, which aims to measure and mitigate such algorithmic bias. This manuscript describes the implementation of the \pkg{fairadapt} \proglang{R}-package, a causal inference pre-processing method, which, using the causal graphical model, answers hypothetical questions of the form "What would my salary have been, had I been of a different gender/race?". Such counterfactual reasoning can help eliminate discrimination and help justify fair decisions.
 keywords:
   formatted: [algorithmic fairness, causal inference, machine learning]
-  plain:     [algorithmic fairness, causal inference, machine learning]
+  plain: [algorithmic fairness, causal inference, machine learning]
 preamble: >
   \usepackage{amsmath}
   \usepackage[ruled]{algorithm2e}
@@ -64,13 +64,20 @@ pkgdown:
   extension: pdf
 ---
 
-```{r setup, include = FALSE}
+```{r, setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
 library(fairadapt)
-library(igraph)
 library(data.table)
 library(ggplot2)
+library(ggraph)
+
+options(
+  prompt = "R> ",
+  continue = "+  ",
+  width = 75,
+  useFancyQuotes = FALSE
+)
 ```
 
 <!-- TODO:
@@ -113,7 +120,7 @@ We start by describing the basic idea of \pkg{fairadapt} in a nutshell, followed
 
 Consider the following example. Variable $A$ is the protected attribute, in this case gender ($A = a$ corresponding to females, $A = a'$ to males). Let $E$ be educational achievement (measured for example by grades achieved in school) and $T$ the result of an admissions test for further education. Let $Y$ be the outcome of interest (final score) upon which admission to further education is decided. Edges in the graph indicate how variables affect each other.
 
-```{tikz, uni-adm, fig.cap = "Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+```{tikz, uni-adm, fig.cap = "TODO: Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
 <<setup-graph>>
 
@@ -154,7 +161,7 @@ where the value $\tilde{e}$ was obtained in the previous step. The step can be v
 <!-- TODO: maybe add axis directions? not sure whether 'tile case' applies to
      objects like 'density' or 'male'/'female' -->
 
-```{tikz, rel-edu, fig.cap = "Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{pgfplots}", "\\pgfplotsset{compat=1.17}"))}
+```{tikz, rel-edu, fig.cap = "TODO: Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{pgfplots}", "\\pgfplotsset{compat=1.17}"))}
 
 \usetikzlibrary{arrows.meta}
 
@@ -259,27 +266,37 @@ The implementation is based on the main function `fairadapt()`, which returns an
 * `train.data`, `test.data` of type `data.frame`
 * `prot.attr` of type `character` is of length one and names the protected attribute.
 
-```{r min-example, include=T}
-uni.adj.mat <- array(0, dim = c(4, 4))
-colnames(uni.adj.mat) <- rownames(uni.adj.mat) <-
-  c("gender", "edu", "test", "score")
+<!-- TODO: for visual reasons, i tried to add a sentence or two here -->
 
-uni.adj.mat["gender", c("edu", "test")] <-
-  uni.adj.mat["edu", c("test", "score")] <-
-  uni.adj.mat["test", "score"] <- 1L
+As a quick demonstration of fair data apaption using the `fairadapt()` function, we load the `uni_admission` dataset provided by \pkg{fairadapt}, consisting of university admission data on `r nrow(data("uni_admission", package = "fairadapt"))` students. We subset this data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$. As protected attribute, we choose `gender`.
 
-nsamp <- 200
+```{r, basic}
+n_samp <- 200
 
-FA.basic <- fairadapt(score ~ .,
-  train.data = uni_admission[1:nsamp, ],
-  test.data = uni_admission[(nsamp+1):(2*nsamp), ],
-  adj.mat = uni.adj.mat, prot.attr = "gender", res.vars = NULL,
-  visualize.graph = F, quant.method = fairadapt:::rangerQuants)
+uni_dat <- data("uni_admission", package = "fairadapt")
+uni_dat <- uni_admission[seq_len(2 * n_samp), ]
 
-FA.basic
+head(uni_dat)
+
+uni_trn <- head(uni_dat, n = n_samp)
+uni_tst <- tail(uni_dat, n = n_samp)
+
+uni_dim <- c(       "gender", "edu", "test", "score")
+uni_adj <- matrix(c(       0,     0,      0,       0,
+                           1,     0,      0,       0,
+                           1,     1,      0,       0,
+                           0,     1,      1,       0),
+                  ncol = length(uni_dim),
+                  dimnames = rep(list(uni_dim), 2))
+
+basic <- fairadapt(score ~ ., train.data = uni_trn,
+                   test.data = uni_tst, adj.mat = uni_adj,
+                   prot.attr = "gender")
+
+basic
 ```
 
-The `"fairadapt"` S3 class has several associated generics and methods. For instance, `print(FA.basic)` shows some information about the object call, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as ($Y$ denoting the outcome variable)
+The `"fairadapt"` S3 class has several associated generics and methods. For instance, `print(basic)` shows some information about the object call, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as ($Y$ denoting the outcome variable)
 
 $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$
 
@@ -287,13 +304,26 @@ respectively. The total variation, in the case of binary $Y$, corresponds to the
 
 ## Specifying the Graphical Model
 
-The \pkg{fairadapt} supposes the underlying graphical model $\mathcal{G}$ is known. The model is specified by the adjacency matrix. For example, suppose we take the causal graph $\mathcal{G}$ of the university admission example above. For such a graph, we construct the adjacency matrix and the graph with the `GraphModel()` convenience function that builds on top of the \pkg{igraph} package.
+The \pkg{fairadapt} supposes the underlying graphical model $\mathcal{G}$ is known. The model is specified by the adjacency matrix. For example, suppose we take the causal graph $\mathcal{G}$ of the university admission example above. For such a graph, we construct the adjacency matrix and the graph with the `GraphModel()` convenience function that builds on top of the \pkg{igraph} package. For plotting purposes, we use the fist two letters to denote vertex labels.
 
-```{r mat, include=T, out.width="200px", out.height="200px"}
-toy.graph <- graphModel(uni.adj.mat)
-plot(toy.graph, vertex.size = 40, vertex.label.cex = 0.5,
-  vertex.label.color = "black")
+```{r, graph-model}
+uni_graph <- graphModel(uni_adj)
 ```
+
+```{r, graph-plot, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "TODO: Add a figure caption.", out.width = "60%"}
+uni_tmp <- `dimnames<-`(uni_adj, lapply(dimnames(uni_adj), substr, 1L, 2L))
+ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
+  geom_edge_link(arrow = arrow(length = unit(4, "mm"), angle = 15,
+                               type = "closed"),
+                 end_cap = circle(6.5, "mm"),
+                 color = "grey20") +
+  geom_node_point(color = "grey80", size = 15) +
+  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
+  theme_blank(plot.margin = margin(30, 30, 30, 30)) +
+  coord_cartesian(clip = "off")
+```
+
+<!-- TODO: add a sentence or two to frame the code block -->
 
 ## Quantile Learning Step
 
@@ -346,9 +376,11 @@ We quickly discuss the quantile learning methods included in the package. Using 
 
 The university admission example presented in Section \ref{methodology} demonstrates how we can compute counterfactual values for an individual while preserving their relative educational achievement. In particular, for a male student with values $(a, e, t, y)$, we compute his "fair-twin" values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$ - the values the student would have obtained, had he been female. To explicitly compare a person to their hypothetical fair-twin, we use the `fairTwins()` function, applied to an object of class `"fairadapt"`:
 
-```{r fairtwin-uni, include = T}
-fairTwins(FA.basic, train.id = seq.int(1L, 5L, 1L))
+```{r, fairtwin-uni, include = T}
+fairTwins(basic, train.id = 1:5)
 ```
+
+<!-- TODO: maybe plot this instead of just showing a bunch of floats -->
 
 In this example, we compute the values in a "female" world. Therefore, for female applicants, the values stay the same, while for male applicants the values are adapted, as can be seen from the output.
 
@@ -356,43 +388,26 @@ In this example, we compute the values in a "female" world. Therefore, for femal
 
 Here we describe an example of a possible real-world use of \pkg{fairadapt}. Suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all female employees, that is the salaries that female employees would obtain, had they been male.
 
-To do this, the government is using the from the 2018 American Community Survey by the US Census Bureau. We load the pre-processed version of the dataset:
+To do this, the government is using the from the 2018 American Community Survey by the US Census Bureau. We load the pre-processed version of the dataset and group the columns into demographic (`dem`), familial (`fam`), educational (`edu`) and occupational (`occ`) categories and finally choose salary as response (`res`) and sex as the protected attribute (`prt`):
 
-```{r load-census, include=T}
-dat <- gov_census
-print(head(dat))
+```{r, load-census}
+gov_dat <- data("gov_census", package = "fairadapt")
+gov_dat <- get(gov_dat)
 
-# group the columns
-prot.attr <- "sex"
-dmgraph <- c("age", "race", "hispanic_origin", "citizenship", "nativity",
-  "economic_region")
+head(gov_dat)
+
+dem <- c("age", "race", "hispanic_origin", "citizenship",
+         "nativity", "economic_region")
 fam <- c("marital", "family_size", "children")
 edu <- c("education_level", "english_level")
-work <- c("hours_worked", "weeks_worked", "occupation", "industry")
-out <- "salary"
+occ <- c("hours_worked", "weeks_worked", "occupation",
+         "industry")
+
+prt <- "sex"
+res <- "salary"
 ```
 
-The hypothesized causal graph for the dataset is given in Figure \ref{fig:census-tikz}. We construct the causal graph and the confounding matrix:
-
-```{r census-graph, include=T, fig.height=5}
-col.names <- c(prot.attr, dmgraph, fam, edu, work, out)
-
-adj.mat <- cfd.mat <- array(0, dim = c(length(col.names), length(col.names)))
-colnames(adj.mat) <- rownames(adj.mat) <-
-  colnames(cfd.mat) <- rownames(cfd.mat) <-
-  col.names
-
-adj.mat[prot.attr, c(fam, edu, work, out)] <-
-  adj.mat[dmgraph, c(fam, edu, work, out)] <-
-  adj.mat[fam, c(edu, work, out)] <-
-  adj.mat[edu, c(work, out)] <-
-  adj.mat[work, out] <-
-  cfd.mat[prot.attr, dmgraph] <- cfd.mat[dmgraph, prot.attr] <- 1L
-
-census.graph <- graphModel(adj.mat, cfd.mat)
-plot(census.graph, vertex.size = 20, vertex.label.cex = 0.5,
-  vertex.label.color = "black")
-```
+The hypothesized causal graph for the dataset is given in Figure \ref{fig:census-tikz}. According to this, we construct the causal graph as an adjacency matrix (`gov_adj`) and the confounding matrix (`gov_adj`):
 
 ```{tikz, census-tikz, fig.cap = "The causal graph for the Government-Census dataset. $D$ are demographic features, $A$ is gender, $F$ is marital and family information, $E$ education, $W$ work-related information, $Y$ the salary, which is also the outcome of interest.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
@@ -429,48 +444,108 @@ plot(census.graph, vertex.size = 20, vertex.label.cex = 0.5,
 \end{tikzpicture}
 ```
 
-Before applying `fairadapt()`, we first log-transform the salaries and look at the densities by gender group
+```{r, census-adj}
+cols <- c(dem, fam, edu, occ, prt, res)
 
-```{r log-and-graph, include=T, fig.height=3}
-# log-transform the salaries
+gov_adj <- matrix(0, nrow = length(cols), ncol = length(cols),
+                  dimnames = rep(list(cols), 2))
+gov_cfd <- gov_adj
+
+gov_adj[dem, c(fam, edu, occ, res)] <- 1
+gov_adj[fam, c(     edu, occ, res)] <- 1
+gov_adj[edu, c(          occ, res)] <- 1
+gov_adj[occ,                  res ] <- 1
+
+gov_adj[prt, c(fam, edu, occ, res)] <- 1
+
+gov_cfd[prt, dem] <- 1
+gov_cfd[dem, prt] <- 1
+
+gov_grph <- graphModel(gov_adj, gov_cfd)
+```
+
+```{r, census-graph, echo = FALSE, fig.height = 9, fig.width = 9, fig.cap = "TODO: Add a figure caption.", out.width = "90%"}
+gov_tmp <- graphModel(
+  `dimnames<-`(gov_adj, lapply(dimnames(gov_adj), substr, 1L, 2L)),
+  `dimnames<-`(gov_cfd, lapply(dimnames(gov_cfd), substr, 1L, 2L))
+)
+
+grp <- list(dem, fam, edu, occ, prt, res)
+grp <- `names<-`(
+  rep(c("demographic", "familial", "educational", "occupational",
+        "protected", "response"), lengths(grp)),
+  substr(unlist(grp), 1L, 2L)
+)
+
+igraph::V(gov_tmp)$color <- grp[names(igraph::V(gov_tmp))]
+
+gov_tmp <- igraph::delete_edges(
+  gov_tmp, which(igraph::E(gov_tmp)$lty == "blank")
+)
+
+ggraph(gov_tmp, "igraph", algorithm = "fr") +
+  geom_edge_fan(aes(edge_linetype = lty),
+                arrow = arrow(length = unit(4, "mm"), angle = 15,
+                              type = "closed"),
+                end_cap = circle(6.5, "mm"),
+                color = "grey20",
+                show.legend = FALSE) +
+  geom_node_point(aes(color = color), size = 15) +
+  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
+  scale_edge_linetype_manual(values = c(dashed = "dashed", solid = "solid")) +
+  scale_color_discrete(name = "Grouping") +
+  theme_blank(plot.margin = margin(30, 30, 30, 30),
+              legend.position = "bottom") +
+  coord_cartesian(clip = "off")
+```
+
+<!-- TODO: i added a bit of explanation as to remove comments in code -->
+
+Before applying `fairadapt()`, we first log-transform the salaries and look at the densities by gender group. We subset the data by using the first `n_samp` samples for training, the subsequent `n_pred` samples for predicting and plot the data before performing the adaption.
+
+```{r, log-sub}
 dat$salary <- log(dat$salary)
 
-# plot density before adaptation
-nsamples <- 2000
+n_samp <- 2000
+n_pred <- 10
 
-ggplot(dat[1:nsamples, ], aes(x = salary, fill = sex)) +
-  geom_density(alpha = 0.4)  + theme_minimal() +
+gov_trn <- head(gov_dat, n = n_samp)
+gov_prd <- tail(gov_dat, n = n_pred)
+```
+
+```{r, before-adapt, echo = FALSE, fig.height = 3}
+ggplot(gov_trn, aes(x = salary, fill = sex)) +
+  geom_density(alpha = 0.4)  +
+  theme_bw() +
   ggtitle("Salary density by gender")
 ```
 
 There is a clear shift between the two genders, meaning that `male` employees are currently treated better than `female` employees. However, there could be differences in `salary` which are not due to gender inequality, but have to do with the economic region in which the employee works. This needs to be accounted for as well, i.e. the difference between economic regions is not to be removed. To solve the problem, the US governemnt applies \pkg{fairadapt}:
 
-```{r census-adapt, include=T}
-FA.govcensus <- fairadapt(salary ~ ., train.data = dat[1:nsamples],
-                          adj.mat = adj.mat, prot.attr = prot.attr,
-                          visualize.graph = F)
+```{r, census-adapt}
+gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
+                     adj.mat = gov_adj, prot.attr = prt)
 ```
 
 After applying the adaptation, we inspect whether the problem has improved. The densities after adaptation can be plotted using the `autoplot()` function:
 
-```{r vis-adapt, include=T, fig.height=3}
-autoplot(FA.govcensus, when = "after") +
-  ggtitle("Adapted salary density by gender")
+```{r, vis-adapt, fig.height = 3}
+autoplot(gov_ada, when = "after") +
+  ggtitle("Adapted salary density by gender") +
+  theme_bw()
 ```
 
 If we obtain additional testing data, and wish to adapt it as well, we can use the `predict()` function:
 
-```{r census-predict, include=T}
-new.test <- dat[seq.int(nsamples + 1L, nsamples + 10L, 1L)]
-adapt.test <- predict(FA.govcensus, newdata = new.test)
-head(adapt.test)
+```{r, census-predict}
+predict(gov_ada, newdata = gov_prd)
 ```
 
 Finally, we can do fair-twin inspection using the `fairTwins()` function, to see how feature values of individual employees have changed:
 
-```{r census-twins, include=T}
-inspect.cols <- c("sex", "age", "education_level", "salary")
-fairTwins(FA.govcensus, train.id = 1:5, cols = inspect.cols)
+```{r, census-twins}
+fairTwins(gov_ada, train.id = 1:5,
+          cols = c("sex", "age", "education_level", "salary"))
 ```
 
 The values are unchanged for the female individuals. Note that `age` does not change for any individual, since it is not a descendant of $A$. However, variables `education_level` and `salary` do change for males, as they are descendants of $A$.
@@ -479,7 +554,7 @@ The variable `hours_worked` is also a descendant of $A$. However, one might argu
 
 # Extensions
 
-<!-- add a sentence to not have titles follow each other directly -->
+<!-- TODO: add a sentence to not have titles follow each other directly -->
 
 ## Adding Resolving Variables
 
@@ -488,24 +563,31 @@ The variable `hours_worked` is also a descendant of $A$. However, one might argu
 (i) $R \in \de(A)$, where $\de(A)$ are the descendants of $A$ in the causal graph $\mathcal{G}$
 (i) the causal effect of $A$ on $R$ is considered to be non-discriminatory
 
-In presence of resolving variables, we compute the counterfactual under a more complicated intervention do$(A = a, R = R(a'))$. The potential outcome value $V(A = a, R = R(a'))$ is obtained by setting $A = a$ and computing the counterfactual while keeping the values of resolving variables to those they *attained naturally*. This is a nested counterfactual and the difference in Algorithm \ref{algo:fairadapt} is simply that resolving variables $R$ are skipped over in the for-loop. We run the following code to compute the fair adaptation with the variable `test` being resolving in the `uni_admission` dataset
+In presence of resolving variables, we compute the counterfactual under a more complicated intervention do$(A = a, R = R(a'))$. The potential outcome value $V(A = a, R = R(a'))$ is obtained by setting $A = a$ and computing the counterfactual while keeping the values of resolving variables to those they *attained naturally*. This is a nested counterfactual and the difference in Algorithm \ref{algo:fairadapt} is simply that resolving variables $R$ are skipped over in the for-loop. We run the following code to compute the fair adaptation with the variable `test` being resolving in the `uni_admission` (named `uni_dat`) dataset
 
-```{r res-uni-admission, include=T}
-FA.resolving <- fairadapt(score ~ .,
-  train.data = uni_admission[1:nsamp, ],
-  test.data = uni_admission[(nsamp+1):(2*nsamp), ],
-  adj.mat = uni.adj.mat, prot.attr = "gender", res.vars = "test",
-  visualize.graph = F)
-
-FA.resolving
+```{r, res-uni}
+fairadapt(score ~ ., train.data = uni_trn,
+          test.data = uni_tst, adj.mat = uni_adj,
+          prot.attr = "gender", res.vars = "test")
 ```
 
-We note that the total variation in this case is larger than in the `FA.basic` example from Section \ref{implementation}, with no resolvers. The intuitive reasoning here is that resolving variables allow for some discrimination, so we expect to see a larger total variation between the groups. Finally, we can visualize the graph
+We note that the total variation in this case is larger than in the `basic` example from Section \ref{implementation}, with no resolvers. The intuitive reasoning here is that resolving variables allow for some discrimination, so we expect to see a larger total variation between the groups. Finally, we can visualize the graph
 
-```{r resolving-graph, include = T, out.width="200px", out.height="200px"}
-plot(graphModel(uni.adj.mat, res.vars = "test"),
-  vertex.size = 40, vertex.label.cex = 0.5,
-  vertex.label.color = "black")
+```{r, res-assign}
+uni_res <- graphModel(uni_adj, res.vars = "test")
+```
+
+```{r, res-graph, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "TODO: Add a figure caption.", out.width = "60%"}
+ggraph(graphModel(uni_tmp, res.vars = "te"), "igraph",
+       algorithm = "sugiyama") +
+  geom_edge_link(arrow = arrow(length = unit(4, "mm"), angle = 15,
+                               type = "closed"),
+                 end_cap = circle(6.5, "mm"),
+                 color = "grey20") +
+  geom_node_point(aes(color = color), size = 15, show.legend = FALSE) +
+  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
+  theme_blank(plot.margin = margin(30, 30, 30, 30)) +
+  coord_cartesian(clip = "off")
 ```
 
 which shows a different color for the resolving variable `test`. The resolving variables are red-colored in order to be distinguished from other variables.
@@ -514,7 +596,7 @@ which shows a different color for the resolving variable `test`. The resolving v
 
 In Section \ref{methodology} we were concerned with the Markovian case, which assumes that all exogeneous variables $U_i$ are mutually independent. However, in practice this need not be the case. If there are mutual dependencies between the $U_i$s, we are dealing with a so-called Semi-Markovian model. These dependencies between latent variables are represented by dashed, bidirected arrows in the causal diagram. In the university admission example, suppose we had that $U_{\text{test}} \not\!\perp\!\!\!\perp U_{\text{score}}$, meaning that latent variables corresponding to variable test and final score are correlated. Then the graphical model would be represented as
 
-```{tikz, semi-markov, fig.cap = "Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+```{tikz, semi-markov, fig.cap = "TODO: Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
 <<setup-graph>>
 
@@ -553,31 +635,49 @@ Alternatively, instead of using the extended parent set $\Pa(V_i)$, we can use t
 
 The following code runs the adaptation in the Semi-Markovian case:
 
-```{r semi-markov-uni, include=T}
-uni.cfd.mat <- array(0, dim = c(4, 4))
-colnames(uni.cfd.mat) <- rownames(uni.cfd.mat) <- colnames(uni.adj.mat)
+```{r, semi-markov-uni}
+uni_cfd <- matrix(0, nrow = nrow(uni_adj), ncol = ncol(uni_adj),
+                  dimnames = dimnames(uni_adj))
 
-uni.cfd.mat["test", "score"] <- uni.cfd.mat["score", "test"] <- 1L
-FA.semimarkov <- fairadapt(score ~ .,
-  train.data = uni_admission[1:nsamp, ],
-  test.data = uni_admission[(nsamp+1):(2*nsamp), ],
-  adj.mat = uni.adj.mat, cfd.mat = uni.cfd.mat, prot.attr = "gender",
-  visualize.graph = F)
+uni_cfd["test", "score"] <- 1
+uni_cfd["score", "test"] <- 1
+
+semi <- fairadapt(score ~ ., train.data = uni_trn,
+                  test.data = uni_tst, adj.mat = uni_adj,
+                  cfd.mat = uni_cfd, prot.attr = "gender")
 ```
 
 We visualize the graph that was used for the adaptation.
 
-```{r graph-semimarkov, include=T, out.width="200px", out.height="200px"}
-plot(FA.semimarkov, graph = T, vertex.size = 40,
-  vertex.label.cex = 0.5, vertex.label.color = "black")
+```{r, semi-graph, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "TODO: Add a figure caption.", out.width = "60%"}
+tmp_grp <- semi$graph
+igraph::V(tmp_grp)$name <- substr(names(igraph::V(tmp_grp)), 1, 2)
+tmp_grp <- igraph::delete_edges(
+  tmp_grp, which(igraph::E(tmp_grp)$lty == "blank")
+)
+ggraph(tmp_grp, "igraph", algorithm = "fr") +
+  geom_edge_fan(aes(edge_linetype = lty),
+                arrow = arrow(length = unit(4, "mm"), angle = 15,
+                               type = "closed"),
+                end_cap = circle(6.5, "mm"),
+                color = "grey20",
+                show.legend = FALSE,
+                strength = 2) +
+  geom_node_point(color = "grey80", size = 15) +
+  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
+  scale_edge_linetype_manual(values = c(dashed = "dashed", solid = "solid")) +
+  theme_blank(plot.margin = margin(30, 30, 30, 30)) +
+  coord_cartesian(clip = "off")
 ```
 
-<!--We can also visualize the difference in the `score` variable, due to the addition of the bidirected edge.
-```{r vis-diff, include=T}
+<!-- TODO: decide whether to include this or remove entirely
+
+We can also visualize the difference in the `score` variable, due to the addition of the bidirected edge.
+```{r, vis-diff}
 plot(
-  FA.basic[["adapt.train"]][["score"]],
-  FA.semimarkov[["adapt.train"]][["score"]], pch = 19,
-  main = "Markovian vs. Semi-Markovian case on uni_admission",
+  basic[["adapt.train"]][["score"]],
+  semi[["adapt.train"]][["score"]], pch = 19,
+  main = "Markovian vs. Semi-Markovian case on uni_dat",
   xlab = "Markov adaptation score",
   ylab = "Semi-Markov adaptation score"
 )

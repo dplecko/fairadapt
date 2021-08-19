@@ -42,7 +42,8 @@ Suggests:
     data.table,
     rticles,
     mvtnorm,
-    magick
+    magick,
+    ggraph
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3
