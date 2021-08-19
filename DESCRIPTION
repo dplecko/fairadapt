@@ -43,7 +43,8 @@ Suggests:
     rticles,
     mvtnorm,
     magick,
-    ggraph
+    ggraph,
+    pdftools
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3
