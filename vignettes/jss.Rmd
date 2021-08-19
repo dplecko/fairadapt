@@ -74,8 +74,8 @@ library(ggraph)
 
 options(
   prompt = "R> ",
-  continue = "+  ",
-  width = 75,
+  continue = "+ ",
+  width = 70,
   useFancyQuotes = FALSE
 )
 ```
@@ -283,9 +283,9 @@ uni_tst <- tail(uni_dat, n = n_samp)
 
 uni_dim <- c(       "gender", "edu", "test", "score")
 uni_adj <- matrix(c(       0,     0,      0,       0,
-                           1,     0,      0,       0,
-                           1,     1,      0,       0,
-                           0,     1,      1,       0),
+                            1,     0,      0,       0,
+                            1,     1,      0,       0,
+                            0,     1,      1,       0),
                   ncol = length(uni_dim),
                   dimnames = rep(list(uni_dim), 2))
 
@@ -318,8 +318,12 @@ ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
                  end_cap = circle(6.5, "mm"),
                  color = "grey20") +
   geom_node_point(color = "grey80", size = 15) +
-  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
-  theme_blank(plot.margin = margin(30, 30, 30, 30)) +
+  geom_node_text(aes(x = x, y = y, label = name), size = 5) +
+  theme_bw() +
+  theme(plot.margin = margin(30, 30, 30, 30), panel.border = element_blank(),
+        panel.background = element_blank(), axis.title = element_blank(),
+        axis.text = element_blank(), axis.line = element_blank(),
+        axis.ticks = element_blank(), panel.grid = element_blank()) +
   coord_cartesian(clip = "off")
 ```
 
@@ -491,11 +495,15 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
                 color = "grey20",
                 show.legend = FALSE) +
   geom_node_point(aes(color = color), size = 15) +
-  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
+  geom_node_text(aes(x = x, y = y, label = name), size = 5) +
   scale_edge_linetype_manual(values = c(dashed = "dashed", solid = "solid")) +
   scale_color_discrete(name = "Grouping") +
-  theme_blank(plot.margin = margin(30, 30, 30, 30),
-              legend.position = "bottom") +
+  theme_bw() +
+  theme(plot.margin = margin(30, 30, 30, 30), legend.position = "bottom",
+        panel.background = element_blank(), axis.title = element_blank(),
+        axis.text = element_blank(), axis.line = element_blank(),
+        axis.ticks = element_blank(), panel.grid = element_blank(),
+        panel.border = element_blank()) +
   coord_cartesian(clip = "off")
 ```
 
@@ -504,7 +512,7 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
 Before applying `fairadapt()`, we first log-transform the salaries and look at the densities by gender group. We subset the data by using the first `n_samp` samples for training, the subsequent `n_pred` samples for predicting and plot the data before performing the adaption.
 
 ```{r, log-sub}
-dat$salary <- log(dat$salary)
+gov_dat$salary <- log(gov_dat$salary)
 
 n_samp <- 2000
 n_pred <- 10
@@ -531,8 +539,8 @@ After applying the adaptation, we inspect whether the problem has improved. The 
 
 ```{r, vis-adapt, fig.height = 3}
 autoplot(gov_ada, when = "after") +
-  ggtitle("Adapted salary density by gender") +
-  theme_bw()
+  theme_bw() +
+  ggtitle("Adapted salary density by gender")
 ```
 
 If we obtain additional testing data, and wish to adapt it as well, we can use the `predict()` function:
@@ -585,8 +593,12 @@ ggraph(graphModel(uni_tmp, res.vars = "te"), "igraph",
                  end_cap = circle(6.5, "mm"),
                  color = "grey20") +
   geom_node_point(aes(color = color), size = 15, show.legend = FALSE) +
-  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
-  theme_blank(plot.margin = margin(30, 30, 30, 30)) +
+  geom_node_text(aes(x = x, y = y, label = name), size = 5) +
+  theme_bw() +
+  theme(plot.margin = margin(30, 30, 30, 30), panel.border = element_blank(),
+        panel.background = element_blank(), axis.title = element_blank(),
+        axis.text = element_blank(), axis.line = element_blank(),
+        axis.ticks = element_blank(), panel.grid = element_blank()) +
   coord_cartesian(clip = "off")
 ```
 
@@ -664,9 +676,13 @@ ggraph(tmp_grp, "igraph", algorithm = "fr") +
                 show.legend = FALSE,
                 strength = 2) +
   geom_node_point(color = "grey80", size = 15) +
-  geom_nodetext(aes(x = x, y = y, label = name), size = 5) +
+  geom_node_text(aes(x = x, y = y, label = name), size = 5) +
   scale_edge_linetype_manual(values = c(dashed = "dashed", solid = "solid")) +
-  theme_blank(plot.margin = margin(30, 30, 30, 30)) +
+  theme_bw() +
+  theme(plot.margin = margin(30, 30, 30, 30), panel.border = element_blank(),
+        panel.background = element_blank(), axis.title = element_blank(),
+        axis.text = element_blank(), axis.line = element_blank(),
+        axis.ticks = element_blank(), panel.grid = element_blank()) +
   coord_cartesian(clip = "off")
 ```
 
