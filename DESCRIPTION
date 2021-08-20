@@ -11,7 +11,11 @@ Authors@R: c(
     person(given = "Drago",
            family = "Plecko",
            role = c("aut", "cre"),
-           email = "drago.plecko@stat.math.ethz.ch")
+           email = "drago.plecko@stat.math.ethz.ch"),
+    person(given = "Nicolas",
+           family = "Bennett",
+           role = "aut",
+           email = "nicolas.bennett@stat.math.ethz.ch")
     )
 License: GPL (>= 3)
 Encoding: UTF-8
@@ -31,13 +35,16 @@ Imports:
     cowplot,
     scales
 Suggests:
-    testthat (>= 2.1.0),
+    testthat (>= 3.0.3),
     knitr,
     rmarkdown,
     markdown,
     data.table,
     rticles,
-    mvtnorm
+    mvtnorm,
+    magick,
+    ggraph,
+    pdftools
 RoxygenNote: 7.1.1
 VignetteBuilder: knitr
 Config/testthat/edition: 3

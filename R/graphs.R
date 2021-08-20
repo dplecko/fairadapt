@@ -191,12 +191,11 @@ graphModel <- function(adj.mat, cfd.mat = NULL, res.vars = NULL) {
 
   cfg <- graph_from_adjacency_matrix(cfd.mat)
 
-  e.list <- as_edgelist(cfg, names = F)
+  e.list <- as_edgelist(cfg, names = FALSE)
   curved <- (e.list[, 1] < e.list[, 2]) - 0.5
 
   lty <- ifelse((e.list[, 1] < e.list[, 2]), "dashed", "blank")
   res <- add_edges(res, as.vector(t(e.list)), curved = curved, lty = lty)
-
 
   E(res)$color <- "black"
   E(res)$arrow.size <- 0.35

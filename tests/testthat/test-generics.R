@@ -36,7 +36,7 @@ test_that("generics", {
 
   expect_snapshot_plot("auto_rf", print(aut.plt))
   # extra print should not be necessary
-  expect_snapshot_plot("plot_rf", print(plot(ad.rf)))
+  expect_snapshot_plot("plot_rf", plot(ad.rf))
   expect_snapshot_plot("graph_rf", with_seed(302, visualizeGraph(ad.rf)))
 
   expect_snapshot_csv("ftdef_rf", fairTwins(ad.rf))
@@ -57,7 +57,7 @@ test_that("generics", {
 
   expect_snapshot_plot("auto_lin", print(aut.plt))
   # extra print should not be necessary
-  expect_snapshot_plot("plot_lin", print(plot(ad.lin)))
+  expect_snapshot_plot("plot_lin", plot(ad.lin))
   expect_snapshot_plot("graph_lin", with_seed(303, visualizeGraph(ad.lin)))
 
   expect_snapshot_csv("ftdef_lin", fairTwins(ad.lin))
@@ -81,7 +81,7 @@ test_that("generics", {
 
   expect_snapshot_plot("auto_cts", print(aut.plt))
   # extra print should not be necessary
-  expect_snapshot_plot("plot_cts", print(plot(ad.cts)))
+  expect_snapshot_plot("plot_cts", plot(ad.cts))
   expect_snapshot_plot("graph_cts", with_seed(304, visualizeGraph(ad.cts)))
 
   expect_snapshot_csv("ftdef_cts", fairTwins(ad.cts))
