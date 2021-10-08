@@ -528,8 +528,6 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
   coord_cartesian(clip = "off")
 ```
 
-<!-- TODO: i added a bit of explanation as to remove comments in code -->
-
 Before applying `fairadapt()`, we first log-transform the salaries and look at the densities by gender group. We subset the data by using the first `n_samp` samples for training, the subsequent `n_pred` samples for predicting and plot the data before performing the adaption.
 
 ```{r, log-sub}
@@ -710,6 +708,7 @@ ggraph(tmp_grp, "igraph", algorithm = "fr") +
 <!-- TODO: decide whether to include this or remove entirely
 
 We can also visualize the difference in the `score` variable, due to the addition of the bidirected edge.
+
 ```{r, vis-diff}
 plot(
   basic[["adapt.train"]][["score"]],
@@ -726,9 +725,6 @@ The red line in the plot represents the $y = x$ line. Note that the two adaptati
 ## Questions of Identifiability
 
 So far, we have not discussed whether it is always possible to do the counterfactual inference described in the paper. In the causal literature, an intervention is *identifiable* if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. The important result by \cite{tian2002general} states that an intervention do$(X = x)$ on a singleton variable $X$ is identifiable if and only if there is no bidirected path between $X$ and $\ch(X)$. Therefore, the intervention is identifiable if
-
-<!-- TODO: for visual reasons, i turned this into 3 top-level bullet points;
-     undo if you feel it was better before -->
 
 * the model is Markovian
 * the model is Semi-Markovian and there is no bidirected path between $A$ and $\ch(A)$
