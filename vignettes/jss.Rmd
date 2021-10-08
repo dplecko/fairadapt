@@ -99,7 +99,7 @@ The discussion on algorithmic fairness is, however, not restricted to the machin
 
 Examples for this include counterfactual reasoning \citep{galles1998axiomatic}, which allows for arguing what might have happened under different circumstances that never actually materialized, thereby providing a tool for understanding and quantifying discrimination. For example, one might ask how a change in sex would affect the probability of a specific candidate being accepted for given job opening. This approach has motivated another notion of fairness, termed *counterfactual fairness* \citep{kusner2017counterfactual}, which states that the decision made, should remain fixed, even if, hypothetically, some parameters such as race or gender were to be changed (this can be written succinctly as $\widehat{Y}(a) = \widehat{Y}(a')$ in the potential outcomes notation). Causal inference can also be used for furthering understanding of demographic parity by decomposition of the parity gap measure, $\pr(\widehat{Y} = 1 \mid A = a) - \pr(\widehat{Y} = 1 \mid A = a')$, into the direct, indirect and spurious components, as well as the introduction of so-called resolving variables \cite{kilbertus2017avoiding}, in order to relax the possibly prohibitively strong notion of demographic parity.
 
-The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as \proglang{R}-package \pkg{fairadapt} from CRAN. Currently there are only few packages being distributed via CRAN, that are related fair machine learning, including \pkg{fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} and \pkg{fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The only causal method, however, is presented by \pkg{fairadapt}. Even though theory in fair machine learning is being expanded at an accelerating pace, good quality implementations of the developed methods are lagging behind.
+The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as \proglang{R}-package \pkg{fairadapt} from CRAN. Currently there are only few packages being distributed via CRAN, that are related fair machine learning, including \pkg{fairml} \citep{fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{fairness} and \pkg{fairmodels} \citep{fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The only causal method, however, is presented by \pkg{fairadapt}. Even though theory in fair machine learning is being expanded at an accelerating pace, good quality implementations of the developed methods are lagging behind.
 
 The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{illustration}, which illustrates the usage of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
 
@@ -136,6 +136,8 @@ Consider the example of university admission based on previous educational achie
 ```
 
 Attribute $A$, gender, has a causal effect on variables $E$, $T$, as well as $Y$, and we wish to eliminate this effect. For each individual with observed values $(a, e, t, y)$ we want to find a mapping
+
+<!-- TODO: later on you use angled brackets for tuples; inconsistency? -->
 
 $$(a, e, t, y) \longrightarrow  (\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y}),$$
 
@@ -247,17 +249,17 @@ $$V_i \mid \pa(V_i), A = a \text{ and } V_i \mid \pa(V_i), A = a',$$
 
 meaning that the distribution of $V_i$ should be indistinguishable for both female and male applicants, for every variable $V_i$. Since each function $f_i$ of the original SCM is reparametrized so that $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$, and also due to variables $U_i$ being uniformly distributed on $[0, 1]$, variables $U_i$ can be seen as the latent *quantiles*.
 
-The algorithm proposed for data adaption proceeds by fixing $A = a$, followed by iterating over descendants of the protected attribute $A$, sorted in topological order. For each $V_i$, the assignment function $f_i$ and the corresponding quantiles are inferred. The transformed values $\tilde{V_i}$ are obtained by evaluating $f_i$, using quantiles $U_i$ and the transformed parents $\tilde{\pa(V_i)}$ (cf., Algorithm \ref{algo:fairadapt}).
+The algorithm proposed for data adaption proceeds by fixing $A = a$, followed by iterating over descendants of the protected attribute $A$, sorted in topological order. For each $V_i$, the assignment function $f_i$ and the corresponding quantiles $U_i$ are inferred. Finally, transformed values $\tilde{V_i}$ are obtained by evaluating $f_i$, using quantiles $U_i$ and the transformed parents $\tilde{\pa(V_i)}$ (cf., Algorithm \ref{algo:fairadapt}).
 
 \begin{algorithm}
 	\DontPrintSemicolon
 	\KwIn{$V$, causal graph $\mathcal{G}$}
 	set $A \gets a$ for everyone\\
 	\For{$V_i \in \de(A)$ in topological order}{
-	  learn the assignment function $V_i \gets f_i(\pa(V_i), U_i)$ \;
-		infer the quantiles $U_i$ associated with the variable $V_i$\;
-		transform the values of $V_i$ by using the quantile and the transformed parents (obtained in previous steps)
-		$\tilde{V_i} \gets f_i (\tilde{\pa(V_i)}, U_i)$ \;
+	  learn function $V_i \gets f_i(\pa(V_i), U_i)$ \;
+		infer quantiles $U_i$ associated with the variable $V_i$\;
+		transform values as $\tilde{V_i} \gets f_i (\tilde{\pa(V_i)}, U_i)$
+		 \;
   }
   \Return{$\tilde{V}$}
 	\caption{Fair Data Adaptation}
@@ -268,16 +270,16 @@ The assignment functions $f_i$ of the SCM are of course unknown, but are learned
 
 # Implementation
 
-The implementation is based on the main function `fairadapt()`, which returns an S3 object of class `"fairadapt"`. We list the most important arguments of the function and then show how these should be specified:
+In order to perform fair data adaption using the \pkg{fairadapt} package, the function `fairadapt()` is exported, which returns an object of class `fairadapt`. Implementations of the base \proglang{R} S3 generics `print()`, `plot()` and `predict()`, as well as the generic `autoplot()`, exported from \pkg{ggplot2} \citep{ggplot2}, are provided for `fairadapt` objects, alongside `fairadapt`-specific implementations of S3 generics `visualizeGraph()`, `adaptedData()` and `fairTwins()`. Finally, an extension mechanism is available via the S3 generic function `computeQuants()`.
 
-* `formula`, argument of type `formula` specifies the dependent and explanatory variables
-* `adj.mat` argument of type `matrix` encodes the adjacency matrix
-* `train.data`, `test.data` of type `data.frame`
-* `prot.attr` of type `character` is of length one and names the protected attribute.
+The following sections show how the listed methods relate to one another alongside their intended use, beginning with constructing a call to `fairadapt()`. The most important arguments of `fairadapt()` include:
 
-<!-- TODO: for visual reasons, i tried to add a sentence or two here -->
+* `formula`: Argument of type `formula`, specifying the dependent and explanatory variables.
+* `adj.mat`: Argument of type `matrix`, encoding the adjacency matrix.
+* `train.data` and `test.data`: Both of type `data.frame`, representing the respective datasets.
+* `prot.attr`: Scalar-valued argument of type `character` identifying the protected attribute.
 
-As a quick demonstration of fair data apaption using the `fairadapt()` function, we load the `uni_admission` dataset provided by \pkg{fairadapt}, consisting of university admission data on `r nrow(data("uni_admission", package = "fairadapt"))` students. We subset this data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$. As protected attribute, we choose `gender`.
+As a quick demonstration of fair data adaption using, we load the `uni_admission` dataset provided by \pkg{fairadapt}, consisting of university admission data on `r nrow(data("uni_admission", package = "fairadapt"))` students. We subset this data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$. As protected attribute, we choose `gender`.
 
 ```{r, basic}
 n_samp <- 200
@@ -299,27 +301,41 @@ uni_adj <- matrix(c(       0,     0,      0,       0,
                   dimnames = rep(list(uni_dim), 2))
 
 basic <- fairadapt(score ~ ., train.data = uni_trn,
-                   test.data = uni_tst, adj.mat = uni_adj,
-                   prot.attr = "gender")
+                    test.data = uni_tst, adj.mat = uni_adj,
+                    prot.attr = "gender")
 
 basic
 ```
 
-The `"fairadapt"` S3 class has several associated generics and methods. For instance, `print(basic)` shows some information about the object call, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as ($Y$ denoting the outcome variable)
+<!-- As a side-remark: you have in your print() output the `Call:` entry,
+     which does not actually print the function call but only the formula;
+     cf. lm(), which actually prints the associated call:
+
+> lm(mpg ~ cyl, data = mtcars)
+
+Call:
+lm(formula = mpg ~ cyl, data = mtcars)
+
+Coefficients:
+(Intercept)          cyl
+     37.885       -2.876
+-->
+
+The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as
 
 $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$
 
-respectively. The total variation, in the case of binary $Y$, corresponds to the parity gap.
+respectively, where $Y$ denotes the outcome variable. Total variation in the case of a binary outcome $Y$, corresponds to the parity gap.
 
 ## Specifying the Graphical Model
 
-The \pkg{fairadapt} supposes the underlying graphical model $\mathcal{G}$ is known. The model is specified by the adjacency matrix. For example, suppose we take the causal graph $\mathcal{G}$ of the university admission example above. For such a graph, we construct the adjacency matrix and the graph with the `GraphModel()` convenience function that builds on top of the \pkg{igraph} package. For plotting purposes, we use the fist two letters to denote vertex labels.
+As the algorithm used for fair data adaption in `fairadapt()` requires access to the underlying graphical causal model $\mathcal{G}$ (cf. Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix can be passed as `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{igraph}. While exported for the user to invoke manually, this function is called as part of the `fairadapt()` routine and the resulting `igraph` object can be visualized by calling the S3 generic `visualizeGraph()`, exported from `fairadapt` on an object of class `fairadapt`.
 
 ```{r, graph-model}
 uni_graph <- graphModel(uni_adj)
 ```
 
-```{r, graph-plot, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "TODO: Add a figure caption.", out.width = "60%"}
+```{r, graph-plot, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "The underlying graphical model in the university admission example (also shown in Figure \\ref{fig:uni-adm}. Vertex labels are abbreviated using the first two letters of the corresponding variable names. The vertex *ge* therefore represents `gender`, etc.", out.width = "60%"}
 uni_tmp <- `dimnames<-`(uni_adj, lapply(dimnames(uni_adj), substr, 1L, 2L))
 ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
   geom_edge_link(arrow = arrow(length = unit(4, "mm"), angle = 15,
@@ -336,7 +352,7 @@ ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
   coord_cartesian(clip = "off")
 ```
 
-<!-- TODO: add a sentence or two to frame the code block -->
+A visualization of the `igraph` object returned by `graphModel()` is available from Figure \ref{fig:graph-plot}. The graph shown is equivalent to that of Figure \ref{fig:uni-adm} as they both represent the same causal model. For plotting purposes, we use the fist two letters to denote vertex labels (i.e., vertex *ge* represents candidate gender and is equivalent to vertex *A* in Figure \ref{fig:uni-adm}, representing the protected attribute.
 
 ## Quantile Learning Step
 
@@ -351,10 +367,6 @@ The quantile learning step in Algorithm \ref{algo:fairadapt} can be done using t
 * Linear Quantile Regression \citep{qr}
 
 The summary of the various differences between the methods is given in Table \ref{tab:qmethods}.
-
-<!-- TODO: tried to make the table visually more appealing; there still are
-     some tweaks to be make; let me know what you think before i further
-     optimize -->
 
 \begin{table}
 \centering
