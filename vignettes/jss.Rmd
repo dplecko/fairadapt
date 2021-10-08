@@ -80,12 +80,6 @@ options(
 )
 ```
 
-<!-- TODO:
-  - remove comments from code blocks
-  - add captions
-  - make plots behave like figures
--->
-
 ```{tikz, setup-graph, eval = FALSE, echo = FALSE}
 \tikzset{
   >=stealth,
@@ -111,16 +105,13 @@ The rest of the manuscript is organized as follows: In Section \ref{methodology}
 
 # Methodology
 
-We start by describing the basic idea of \pkg{fairadapt} in a nutshell, followed by the precise mathematical formulation.
-
-<!-- TODO: i got rid of the ':', revert to 'Example: University Admission' if
-     you disapprove -->
+First, the intuition behind \pkg{fairadapt} is described using an example, followed by a more rigorous mathematical formulation, using Markovian structural causal models (SCMs). Some relevant extensions, such as the Semi-Markovian case and the introduction of so called *resolving variables*, are discussed in Section \ref{extensions}.
 
 ## University Admission Example
 
-Consider the following example. Variable $A$ is the protected attribute, in this case gender ($A = a$ corresponding to females, $A = a'$ to males). Let $E$ be educational achievement (measured for example by grades achieved in school) and $T$ the result of an admissions test for further education. Let $Y$ be the outcome of interest (final score) upon which admission to further education is decided. Edges in the graph indicate how variables affect each other.
+Consider the example of university admission based on previous educational achievement and an admissions test. Variable $A$ is the protected attribute, describing candidate gender, where $A = a$ corresponding to females and $A = a'$ to males. Furthermore, let $E$ be educational achievement (measured for example by grades achieved in school) and $T$ the result of an admissions test for further education. Finally, let $Y$ be the outcome of interest (final score) upon which admission to further education is decided. Edges in the graph indicate how variables affect one another.
 
-```{tikz, uni-adm, fig.cap = "TODO: Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+```{tikz, uni-adm, fig.cap = "University admission based on previous educational achievement $E$ combined with and an admissions test score $T$. The protected attribute $A$, encoding gender, has an unwanted causal effect on  $E$, $T$, as well as $Y$, which represents the final score used for the admission decision.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
 <<setup-graph>>
 
@@ -144,24 +135,36 @@ Consider the following example. Variable $A$ is the protected attribute, in this
 \end{tikzpicture}
 ```
 
-Attribute $A$, gender, has a causal effect on variables $E$, $T$ and $Y$, and we wish to eliminate this effect. For each individual with observed values $(a, e, t, y)$ we want to find a mapping
+Attribute $A$, gender, has a causal effect on variables $E$, $T$, as well as $Y$, and we wish to eliminate this effect. For each individual with observed values $(a, e, t, y)$ we want to find a mapping
 
 $$(a, e, t, y) \longrightarrow  (\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y}),$$
 
-which finds the value the person would have obtained in a world where everyone is female. Explicitly, for a male person with education value $e$, we give it the transformed value $\tilde{e}$ chosen such that
+which represents the value the person would have obtained in an alternative world where everyone was female. Explicitly, to a male person with education value $e$, we assign the transformed value $\tilde{e}$ chosen such that
 
 $$\pr(E \geq e \mid A = a') = \pr(E \geq \tilde{e} \mid A = a).$$
 
-The main idea is that the *relative educational achievement within the subgroup* would stay the same if we changed someone's gender. If you are male and you have a higher educational achievement than 60\% of all males in the dataset, we assume you would be better than 60\% of females had you been female^[This assumption is empirically untestable, since it is impossible to observe both a female and a male version of the same individual.]. After computing everyone's education (in the 'female' world), we continue by computing the transformed test score values $\tilde{T}$. The approach is again similar, but this time we condition on educational achievement. That is, a male with values $(E, T) = (e, t)$ is assigned a test score $\tilde{t}$ such that
+The key idea is that the *relative educational achievement within the subgroup* remains constant if the protected attribute gender is modified. If, for example, a male has a higher educational achievement value than 60\% of males in the dataset, we assume that he would also be better than 60\% of females had he been female^[This assumption of course is not empirically testable, as it is impossible to observe both a female and a male version of the same individual.]. After computing transformed educational achievement values corresponding to the *female* world ($\tilde{E}$), the transformed test score values $\tilde{T}$ can be calculated in a similar fashion, but conditioned on educational achievement. That is, a male with values $(E, T) = (e, t)$ is assigned a test score $\tilde{t}$ such that
 
 $$\pr(T \geq t \mid E = e, A = a') = \pr(T \geq \tilde{t} \mid E = \tilde{e}, A = a),$$
 
-where the value $\tilde{e}$ was obtained in the previous step. The step can be visualized as follows^[In the visualization, the test scores of male applicants have higher values. We emphasize this is in no way a view implied by the authors, simply a currently observed societal bias in certain university admission datasets.]
+where the value $\tilde{e}$ was obtained in the previous step. This step can be visualized as shown in Figure \ref{fig:rel-edu}.
 
-<!-- TODO: maybe add axis directions? not sure whether 'tile case' applies to
-     objects like 'density' or 'male'/'female' -->
+<!--TODO:
+  - explain in words both in text and in the fig caption what you want to
+    express with this figure; something along the lines of "Given a male with
+    a test score corresponding to the 70% quantile..."
+  - add axis directions; v is not defined anywhere, I changed it to t
+  - not sure whether 'tile case' applies to objects like 'density' or
+    'male'/'female', to be safe, I'd change this
+  - I removed the footnote and switched male/female, such that females
+    perform better, I find this is the more elegant solution to not perpetuating
+    societal biases..
+-->
 
-```{tikz, rel-edu, fig.cap = "TODO: Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{pgfplots}", "\\pgfplotsset{compat=1.17}"))}
+```{tikz, rel-edu, fig.cap = "TODO: Add a figure caption.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{bbm}", "\\usepackage{pgfplots}", "\\pgfplotsset{compat=1.17}"))}
+
+\newcommand{\pr}{\mathbbm{P}}
+\renewcommand{\tilde}[1]{ {#1}^{(fp)}}
 
 \usetikzlibrary{arrows.meta}
 
@@ -171,7 +174,9 @@ where the value $\tilde{e}$ was obtained in the previous step. The step can be v
 
   \begin{axis}[
     no markers, domain=0:10, samples=100,
-    axis lines*=left, xlabel=$v$, ylabel=density,
+    axis lines = left,
+    xlabel = $t$,
+    ylabel = $\pr(t)$,
     every axis y label/.style={at=(current axis.above origin),anchor=south},
     every axis x label/.style={at=(current axis.right of origin),anchor=west},
     height=5cm, width=12cm,
@@ -183,62 +188,66 @@ where the value $\tilde{e}$ was obtained in the previous step. The step can be v
     \addplot [very thick,green!50!black] {gauss(4,1)};
     \addplot [very thick,blue!50!black] {gauss(6.5,0.8)};
 
-    \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:5.474,0.219) to[bend left = 30] (axis cs:2.718,0.175);
-    \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:6.919520, 0.4346158) to[bend left = 30] (axis cs:4.524401, 0.3476926);
+    \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:2.718,0.175) to[bend right = 30] (axis cs:5.474,0.219);
+    \draw[-{Latex[length=3mm,width=2mm]}, dashed] (axis cs:4.524, 0.348) to[bend right = 30] (axis cs:6.920, 0.435);
 
-    \node at (axis cs:2.718,0.175) [above, left] {$10\%$ female};
-    \node at (axis cs:5.474,0.219) [right] {$10\%$ male};
-    \node at (axis cs:4.524401, 0.3476926) [above=0.5cm] {$70\%$ female};
-    \node at (axis cs:6.919520, 0.4346158) [right] {$70\%$ male};
-    \node at (axis cs:4,0.5) [below = 0.65cm, left = 0.4cm, green!50!black] {$T \mid E = e, A = a'$};
-    \node at (axis cs:6.5,0.5) [below = 1cm, right = 0.9cm, blue!50!black] {$T \mid E = \tilde{e}, A = a$};
+    \node at (axis cs:2.718,0.175) [above, left]
+      {\shortstack{$10\%$-quantile \\ (Male)}};
+    \node at (axis cs:5.474,0.219) [below = 0.3cm, right = 0cm]
+      {\shortstack{$10\%$-quantile \\ (Female)}};
+    \node at (axis cs:4.524, 0.348) [above = 0.3cm]
+      {\shortstack{$70\%$-quantile \\ (Male)}};
+    \node at (axis cs:6.920, 0.435) [right]
+      {\shortstack{$70\%$-quantile \\ (Female)}};
+    \node at (axis cs:4,0.5) [below = 0.65cm, left = 0.5cm, green!50!black]
+      {$T \mid E = e, A = a'$};
+    \node at (axis cs:6.5,0.5) [below = 1.3cm, right = 1cm, blue!50!black]
+      {$T \mid E = \tilde{e}, A = a$
+    };
 
   \end{axis}
 
 \end{tikzpicture}
 ```
 
-In the last step, the outcome variable $Y$ needs to be adjusted. The adaptation is based on the values of education and the test score. The transformed value $\tilde{y}$ of $Y = y$ would satisfy
+As a final step, the outcome variable $Y$ remains to be adjusted. The adaptation is based on the same principle as above, using transformed values of both education and the test score. The resulting value $\tilde{y}$ of $Y = y$ satisfies
 
 \begin{equation} \label{eq:labeltransform}
 	\pr(Y \geq y \mid E = e, T = t, A = a') = \pr(Y \geq \tilde{y} \mid E = \tilde{e}, T = \tilde{t}, A = a).
 \end{equation}
 
-This way of counterfactual correction is known as *recursive substitution* \citep[Chapter~7]{pearl2009}.
+This form of counterfactual correction is known as *recursive substitution* \citep[Chapter~7]{pearl2009} and is described more formally in the following sections. The reader who is satisfied with the intuitive notion provided by the above example is encouraged to go straight to Section \ref{implementation}.
 
-We next describe the approach from above formally. The reader who is not interested in the mathematical detail is encouraged to go straight to Section \ref{implementation}. We start by introducing an important causal inference concept, related to our discussion, namely the *structural causal model*. A structural causal model (SCM) is a 4-tuple $<V, U, \mathcal{F}, P(u)>$, where
+## Structural Causal Models
 
-* $V = \lbrace V_1, ..., V_n \rbrace$ is the set of observed (endogeneous) variables
-* $U = \lbrace U_1, ..., U_n \rbrace$ are latent (exogeneous) variables
-* $\mathcal{F} = \lbrace f_1, ..., f_n \rbrace$ is the set of functions determining $V$, $v_i \gets f_i(\pa(v_i), u_i)$, where $\pa(V_i) \subset V, U_i \subset U$ are the functional arguments of $f_i$
+In order to describe the causal mechanisms of a system, a *structural causal model* (SCM) can be constructed, which fully encodes the assumed data-generating process. An SCM is represented by a 4-tuple $\langle V, U, \mathcal{F}, P(u) \rangle$, where
+
+<!-- TODO: are you using P() instead of \pr() here on purpose (applies in list
+  below, last point, as well) -->
+
+* $V = \lbrace V_1, \ldots, V_n \rbrace$ is the set of observed (endogeneous) variables.
+* $U = \lbrace U_1, \ldots, U_n \rbrace$ are latent (exogeneous) variables.
+* $\mathcal{F} = \lbrace f_1, \ldots, f_n \rbrace$ is the set of functions determining $V$, $v_i \gets f_i(\pa(v_i), u_i)$, where $\pa(V_i) \subset V, U_i \subset U$ are the functional arguments of $f_i$ and $\pa(V_i)$ denotes the parent vertices of $V_i$.
 * $P(u)$ is a distribution over the exogeneous variables $U$.
 
-We note that any particular SCM is accompanied by a graphical model $\mathcal{G}$ (a directed acyclic graph), which summarizes which functional arguments are necessary for computing the values of each $V_i$ (that it is, how variables affect each other). We assume throughout, without loss of generality, that
+Any particular SCM is accompanied by a graphical model $\mathcal{G}$ (a directed acyclic graph), which summarizes which functional arguments are necessary for computing the values of each $V_i$ and therefore, how variables affect one another. We assume throughout, without loss of generality, that
 
-(i) $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$
-(i) exogeneous variables $U_i$ are uniformly distributed on $[0, 1]$
+(i) $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$.
+(i) Exogeneous variables $U_i$ are uniformly distributed on $[0, 1]$.
 
-We first discuss the so-called Markovian case in which all exogeneous variables $U_i$ are mutually independent. Some relevant extensions, like the Semi-Markovian case (where $U_i$ variables are allowed to have mutual dependencies) and the case of so called *resolving variables*, are discussed in Section \ref{extensions}.
-
-<!-- TODO: i got rid of the '-', revert to 'Basic Formulation - Markovian SCMs'
-     if you like -->
+In the following section, we discuss the Markovian case in which all exogeneous variables $U_i$ are mutually independent. The Semi-Markovian case, where variables $U_i$ are allowed to have a mutual dependency structure, alongside the extension introducing *resolving variables*, are discussed in Section \ref{extensions}.
 
 ## Markovian SCM Formulation
 
-Suppose that $Y$ taking values in $\mathbbm{R}$ is an outcome of interest and $A$ the protected attribute taking two values $a, a'$. Our goal is to describe a pre-processing method which transform the entire data $V$ into its fair version $\tilde{V}$. This is done by computing the counterfactual values $V(A = a)$ which would have been obtained by the individuals, had everyone had the same protected attribute $A = a$.
+Let $Y$ take values in $\mathbbm{R}$ and represent an outcome of interest and $A$ be the protected attribute taking two values $a, a'$. The goal is to describe a pre-processing method which transforms the entire data $V$ into its fair version $\tilde{V}$. This can be achieved by computing the counterfactual values $V(A = a)$, which would have been observed if the protected attribute was fixed to a baseline value $A = a$ for the entire sample.
 
-More precisely, going back to the *university admission* example above, we want to "equate" the distributions
+More formally, going back to the *university admission* example above, we want to align the distributions
 
-$$V_i \mid \pa(V_i), A = a \text{ and } V_i \mid \pa(V_i), A = a'.$$
+$$V_i \mid \pa(V_i), A = a \text{ and } V_i \mid \pa(V_i), A = a',$$
 
-In words, we want the distribution of $V_i$ to be the same for the female and male applicants, for every variable $V_i$. Since each function $f_i$ of the original SCM is reparametrized so that $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$, and also that $U_i$ variables are uniformly distributed on $[0, 1]$. Then the $U_i$ variables can be seen as the latent *quantiles*. Our algorithm proceedes as follows:
+meaning that the distribution of $V_i$ should be indistinguishable for both female and male applicants, for every variable $V_i$. Since each function $f_i$ of the original SCM is reparametrized so that $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$, and also due to variables $U_i$ being uniformly distributed on $[0, 1]$, variables $U_i$ can be seen as the latent *quantiles*.
 
-<!-- TODO: For the caption, i'd drop \sc, you're not using smallcaps anywhere
-     else also maybe make it more in line with tbl/fig captions: left align,
-     not have 'Algorithm 1' in bf and make a full sentence out of it? i
-     couldn't find anything in the jss styleguide on this but as is, this
-     singular caption stands out quite a bit; to not have it as a proper caption, i tried the 'ruled' opt; change it back if you don't like it
--->
+The algorithm proposed for data adaption proceeds by fixing $A = a$, followed by iterating over descendants of the protected attribute $A$, sorted in topological order. For each $V_i$, the assignment function $f_i$ and the corresponding quantiles are inferred. The transformed values $\tilde{V_i}$ are obtained by evaluating $f_i$, using quantiles $U_i$ and the transformed parents $\tilde{\pa(V_i)}$ (cf., Algorithm \ref{algo:fairadapt}).
 
 \begin{algorithm}
 	\DontPrintSemicolon
@@ -255,7 +264,7 @@ In words, we want the distribution of $V_i$ to be the same for the female and ma
 	\label{algo:fairadapt}
 \end{algorithm}
 
-The $f_i$ assignment functions of the SCM are of course unknown, but are learned non-parametrically at each step. Notice that Algorithm \ref{algo:fairadapt} is computing the counterfactual values $V(A = a)$ under the $do(A = a)$ intervention for each individual, while keeping the latent quantiles $U$ fixed. In the case of continuous variables, the latent quantiles $U$ can be determined exactly, while for the discrete case, this is more subtle and described in detail in the original fair data adaptation manuscript \citep[Section~5]{plecko2020fair}.
+The assignment functions $f_i$ of the SCM are of course unknown, but are learned non-parametrically at each step. Algorithm \ref{algo:fairadapt} obtains the counterfactual values $V(A = a)$ under the $do(A = a)$ intervention for each individual, while keeping the latent quantiles $U$ fixed. In the case of continuous variables, the latent quantiles $U$ can be determined exactly, while for the discrete case, this is more subtle and described in \citet[Section~5]{plecko2020fair}.
 
 # Implementation
 
