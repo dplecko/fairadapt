@@ -439,9 +439,9 @@ In this example, we compute the values in a *female* world. Therefore, for *fema
 
 # Illustration
 
-Here we describe an example of a possible real-world use of \pkg{fairadapt}. Suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all female employees, that is the salaries that female employees would obtain, had they been male.
+As a possible real-world use of \pkg{fairadapt}, suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all female employees, that is the salaries that female employees would obtain, had they been male.
 
-To do this, the government is using the from the 2018 American Community Survey by the US Census Bureau. We load the pre-processed version of the dataset and group the columns into demographic (`dem`), familial (`fam`), educational (`edu`) and occupational (`occ`) categories and finally choose salary as response (`res`) and sex as the protected attribute (`prt`):
+To do this, the government is using data from the 2018 American Community Survey by the US Census Bureau, available in pre-processed form as package dataset from \pkg{fairadapt}. Columns are grouped into demographic (`dem`), familial (`fam`), educational (`edu`) and occupational (`occ`) categories and finally, salary is selected as response (`res`) and sex as the protected attribute (`prt`):
 
 ```{r, load-census}
 gov_dat <- data("gov_census", package = "fairadapt")
@@ -460,9 +460,9 @@ prt <- "sex"
 res <- "salary"
 ```
 
-The hypothesized causal graph for the dataset is given in Figure \ref{fig:census-tikz}. According to this, we construct the causal graph as an adjacency matrix (`gov_adj`) and the confounding matrix (`gov_adj`):
+The hypothesized causal graph for the dataset is given in Figure \ref{fig:census-tikz}. According to this, the causal graph can be specified as an adjacency matrix `gov_adj` and as confounding matrix `gov_adj`:
 
-```{tikz, census-tikz, fig.cap = "The causal graph for the Government-Census dataset. $D$ are demographic features, $A$ is gender, $F$ is marital and family information, $E$ education, $W$ work-related information, $Y$ the salary, which is also the outcome of interest.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+```{tikz, census-tikz, fig.cap = "The causal graph for the Government-Census dataset. $D$ are demographic features, $A$ is gender, $F$ represents marital and family information, $E$ education, $W$ work-related information and $Y$ the salary, which is also the outcome of interest.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
 <<setup-graph>>
 
@@ -517,7 +517,7 @@ gov_cfd[dem, prt] <- 1
 gov_grph <- graphModel(gov_adj, gov_cfd)
 ```
 
-```{r, census-graph, echo = FALSE, fig.height = 9, fig.width = 9, fig.cap = "TODO: Add a figure caption.", out.width = "90%"}
+```{r, census-graph, echo = FALSE, fig.height = 9, fig.width = 9, fig.cap = "Full causal graph for the Government-Census dataset, expanding the grouped view presented in Figure \\ref{census-tikz}. \\textit{Demographic} features include age (\\textbf{ag}), race (\\textbf{ra}), whether an employee is of Hispanic origin (\\textbf{hi}), is US citizen (\\textbf{ci}), whether the citizenship is native (\\textbf{na}), alongside the corresponding economic region (\\textbf{ec}). \\textit{Familial} features are marital status (\\textbf{ma}), family size (\\textbf{fa}) and number of children (\\textbf{ch}), \\textit{educational} features include education (\\textbf{ed}) and English language levels (\\textbf{en}), and \\textit{occupational} features, weekly working hours (\\textbf{ho}), yearly working weeks (\\textbf{we}), job (\\textbf{oc}) and industry identifiers (\\textbf{in}). Finally, the yearly salary (\\textbf{sa}) is used as \\textit{response} variable and employee sex (\\textbf{se}) as \\textit{protected} attribute.", out.width = "90%"}
 gov_tmp <- graphModel(
   `dimnames<-`(gov_adj, lapply(dimnames(gov_adj), substr, 1L, 2L)),
   `dimnames<-`(gov_cfd, lapply(dimnames(gov_cfd), substr, 1L, 2L))
@@ -556,56 +556,56 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
   coord_cartesian(clip = "off")
 ```
 
-Before applying `fairadapt()`, we first log-transform the salaries and look at the densities by gender group. We subset the data by using the first `n_samp` samples for training, the subsequent `n_pred` samples for predicting and plot the data before performing the adaption.
+Before applying `fairadapt()`, we first log-transform the salaries and look at respective densities by sex group. We subset the data by using the first `n_samp` samples for training, the subsequent `n_pred` samples for predicting and plot the data before performing the adaption.
 
 ```{r, log-sub}
 gov_dat$salary <- log(gov_dat$salary)
 
 n_samp <- 2000
-n_pred <- 10
+n_pred <- 5
 
 gov_trn <- head(gov_dat, n = n_samp)
 gov_prd <- tail(gov_dat, n = n_pred)
 ```
 
-```{r, before-adapt, echo = FALSE, fig.height = 3}
+```{r, before-adapt, echo = FALSE, fig.height = 3, fig.cap = "TODO: Add a figure caption."}
 ggplot(gov_trn, aes(x = salary, fill = sex)) +
   geom_density(alpha = 0.4)  +
   theme_bw() +
   ggtitle("Salary density by gender")
 ```
 
-There is a clear shift between the two genders, meaning that `male` employees are currently treated better than `female` employees. However, there could be differences in `salary` which are not due to gender inequality, but have to do with the economic region in which the employee works. This needs to be accounted for as well, i.e. the difference between economic regions is not to be removed. To solve the problem, the US governemnt applies \pkg{fairadapt}:
+There is a clear shift between the two sexes, indicating that `male` employees are currently better compensated when compared to `female` employees. However, this differences in `salary` could, in principle, be attributed to factors apart form gender inequality, such as the economic region in which an employee works. This needs to be accounted for as well, i.e. we do not wish to remove differences in salary between economic regions.
 
 ```{r, census-adapt}
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
 
-After applying the adaptation, we inspect whether the problem has improved. The densities after adaptation can be plotted using the `autoplot()` function:
+After performing the adaptation, we can investigate whether the salary-gap has shrunk. The densities after adaptation can be visualized using the \pkg{ggplot2}-exported S3 generic function `autoplot()`:
 
-```{r, vis-adapt, fig.height = 3}
+```{r, vis-adapt, fig.height = 3, fig.cap = "TODO: Add a figure caption."}
 autoplot(gov_ada, when = "after") +
   theme_bw() +
   ggtitle("Adapted salary density by gender")
 ```
 
-If we obtain additional testing data, and wish to adapt it as well, we can use the `predict()` function:
+If we are provided with additional testing data, and wish to adapt this as well, we can use the base \proglang{R} S3 generic function `predict()`:
 
 ```{r, census-predict}
 predict(gov_ada, newdata = gov_prd)
 ```
 
-Finally, we can do fair-twin inspection using the `fairTwins()` function, to see how feature values of individual employees have changed:
+Finally, we can do fair-twin inspection using the `fairTwins()` function of \pkg{fairadapt}, to retrieve counterfactual feature values:
 
 ```{r, census-twins}
 fairTwins(gov_ada, train.id = 1:5,
           cols = c("sex", "age", "education_level", "salary"))
 ```
 
-The values are unchanged for the female individuals. Note that `age` does not change for any individual, since it is not a descendant of $A$. However, variables `education_level` and `salary` do change for males, as they are descendants of $A$.
+Values are unchanged for female individuals (as *female* is used as baseline level), as is the case for `age`, which is not a descendant of the protected attribute $A$ (`sex`, cf., Figure \ref{census-graph}). However, variables `education_level` and `salary` do change for males, as they are descendants of $A$.
 
-The variable `hours_worked` is also a descendant of $A$. However, one might argue that this variable should not be adapted in the procedure, that is, that it should remain the same, even if we hypothetically change the person's gender. This is the idea behind *resolving variables*, introduced in the next section.
+The variable `hours_worked` is also a descendant of $A$ and one might argue that this variable should *not* be adapted in the procedure, i.e., that it remain the same, irrespective of employee sex. This is the idea behind *resolving variables*, discussed in the following section (\ref{adding-resolving-variables}).
 
 # Extensions
 
