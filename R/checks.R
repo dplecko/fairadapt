@@ -16,13 +16,12 @@ correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
     )
 
     adj.mat <- adj.mat[colnames(adj.mat), ]
-
-    ap.nms <- colnames(adj.mat)
+    ap.nms  <- colnames(adj.mat)
   }
 
   assert_that(
-    sum(!is.element(resolving.variables, colnames(adj.mat))) == 0,
-    is.element(prot.attr, ap.nms)
+    all(resolving.variables %in% colnames(adj.mat)),
+    prot.attr %in% ap.nms
   )
 
   train.data <- model.frame(formula, train.data)
@@ -37,16 +36,15 @@ correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
     assert_that(sum(is.na(test.data)) == 0)
   }
 
-  assert_that(sum(!is.element(colnames(train.data), ap.nms)) == 0,
-              msg = paste("Train data has columns that do not appear",
-                          "in the adjacency matrix"))
+  assert_that(
+    all(colnames(train.data) %in% ap.nms),
+    msg = "Train data has columns that do not appear in the adjacency matrix"
+  )
 
   invisible(NULL)
 }
 
-withinRange <- function(mat) {
-  sum(!is.element(mat, c(0, 1))) == 0
-}
+withinRange <- function(mat) all(mat %in% c(0, 1))
 
 #' @importFrom assertthat on_failure<-
 on_failure(withinRange) <- function(call, env) {
