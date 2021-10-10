@@ -307,7 +307,7 @@ basic <- fairadapt(score ~ ., train.data = uni_trn,
 basic
 ```
 
-<!-- As a side-remark: you have in your print() output the `Call:` entry,
+<!-- TODO: As a side-remark: you have in your print() output the `Call:` entry,
      which does not actually print the function call but only the formula;
      cf. lm(), which actually prints the associated call:
 
@@ -335,7 +335,7 @@ As the algorithm used for fair data adaption in `fairadapt()` requires access to
 uni_graph <- graphModel(uni_adj)
 ```
 
-```{r, graph-plot, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "The underlying graphical model in the university admission example (also shown in Figure \\ref{fig:uni-adm}. Vertex labels are abbreviated using the first two letters of the corresponding variable names. The vertex *ge* therefore represents `gender`, etc.", out.width = "60%"}
+```{r, graph-plot, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "The underlying graphical model corresponding to the university admission example (also shown in Figure \\ref{fig:uni-adm}. Vertex labels are abbreviated using the first two letters of the respective variable names. The vertex \\textit{ge} therefore represents \\texttt{gender}, etc.", out.width = "60%"}
 uni_tmp <- `dimnames<-`(uni_adj, lapply(dimnames(uni_adj), substr, 1L, 2L))
 ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
   geom_edge_link(arrow = arrow(length = unit(4, "mm"), angle = 15,
@@ -352,21 +352,28 @@ ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
   coord_cartesian(clip = "off")
 ```
 
-A visualization of the `igraph` object returned by `graphModel()` is available from Figure \ref{fig:graph-plot}. The graph shown is equivalent to that of Figure \ref{fig:uni-adm} as they both represent the same causal model. For plotting purposes, we use the fist two letters to denote vertex labels (i.e., vertex *ge* represents candidate gender and is equivalent to vertex *A* in Figure \ref{fig:uni-adm}, representing the protected attribute.
+A visualization of the `igraph` object returned by `graphModel()` is available from Figure \ref{fig:graph-plot}. The graph shown is equivalent to that of Figure \ref{fig:uni-adm} as they both represent the same causal model. For plotting purposes, we use the fist two letters to denote vertex labels (i.e., vertex *ge* represents candidate gender (the `gender` column of `uni_dat`) and is equivalent to vertex *A* in Figure \ref{fig:uni-adm}, representing the protected attribute.
 
 ## Quantile Learning Step
 
-We describe the training step using the `fairadapt()` function. The `fairadapt()` function can be used in two slightly distinct ways. The first option is by specifying training and testing data at the same time. The data adaptation is then applied to the combination of train and test data, in order to learn the latent quantiles as precisely as possible (with the exception of label $Y$ which is unavailable on the test set). The second option is use only the `train.data` argument when calling `fairadapt()`, after which the `predict()` function can be used to adapt test data at a later stage.
+The training step in `fairadapt()` can be carried out in two slightly distinct ways: Either by specifying training and testing data simultaneously, or by only passing training data (and at a later stage calling `predict()` on the returned `fairadpat` object in order to perform data adaption on new test data).
 
-We note that `train.data` and `test.data` need to have column names which appear in the names of the adjacency matrix `colnames(adj.mat)`. The protected attribute $A$ is given as a character vector `prot.attr` of length one.
+<!-- TODO: is there an advantage of the former option over the latter?
+  - If not, I'd consider removing the `test.data` argument altogether, as it
+    kinda breaks with the usual train/predict R API
+  - I assume there is. Please elaborate on the precise advantages in the above
+    paragraph
+-->
 
-The quantile learning step in Algorithm \ref{algo:fairadapt} can be done using three different methods:
+The two dataframes passed as `train.data` and `test.data` are required to have column names which also appear in the row and column names of the adjacency matrix, alongside the protected attribute $A$, passed as scalar-valued character vector `prot.attr`.
 
-* Quantile Regression Forests \citep{qrf}
-* Non-crossing quantile neural networks \citep{cannon2018non}
-* Linear Quantile Regression \citep{qr}
+The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be carried out by several methods, three of which are implemented in \pkg{fairadapt}:
 
-The summary of the various differences between the methods is given in Table \ref{tab:qmethods}.
+* Quantile Regression Forests \citep{qrf}.
+* Non-crossing quantile neural networks \citep{cannon2018non}.
+* Linear Quantile Regression \citep{qr}.
+
+Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is, substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is implemented, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach might in fact be a superior choice. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
 
 \begin{table}
 \centering
@@ -393,21 +400,42 @@ The summary of the various differences between the methods is given in Table \re
 \end{threeparttable}
 \end{table}
 
-The choice of quantile learning method is done by specifying the `quant.method` argument, which is of class `function` and constructs the quantile regression object. For more details and an example, see `?rangerQuants`. Together with the `quant.method` constructor, S3-dispatch is used for inferring the quantiles. This allows the user to specify their own quantile learning methods easily.
+The above set of methods, is not exhaustive. Further options are conceivable and therefore \pkg{fairadpat} provides an extension mechanism to account for this. The `fairadapt()` argument `quant.method` expects a function to be passed, a call to which will be constructed with three unnamed arguments:
 
-We quickly discuss the quantile learning methods included in the package. Using the linear quantile method is the fastest option. However, it cannot handle the non-parametric case. For a non-parametric approach and mixed data, the RF approach is well-suited. The neural network approach is, comparatively, substantially slower than the forest/linear case and does not scale well to large sample sizes. Generally, we recommend using the forest based approach, because of the non-parametric nature and computational speed. However, we note that for smaller sample sizes, the neural network approach might in fact be the best option.
+1. A `data.frame` containing data to be used for quantile regression. This will either be the `data.frame` passed as `train.data`, or depending on whether `test.data` was specified, a row-bound version of train and test datasets.
+1. A logical flag, indicating whether the protected attribute is the root node of the causal graph. <!-- TODO: Explain why this is relevant for `quant.method`. When would a user coming up with his own `quant.method` function want to split? Why does rf/linear split but not qrnn? -->
+1. A `logical` vector of length `nrow(data)`, indicating which rows in the `data.frame` passed as `data` correspond to samples with baseline values of the protected attribute.
+
+Arguments passed as `...` to `fairadapt()` will be forwarded to the function specified as `quant.method` and passed after the first three fixed arguments listed above. The return value of the function passed as `quant.method` is expected to be an S3-classed object, for which an implementation of the S3 generic function `computeQuants()` is available.
+
+<!-- TODO: elaborate a bit on what goes into inferring quantiles for someone
+     who would like to implement his own `computeQuants()` -->
 
 ## Fair-Twin Inspection
 
-The university admission example presented in Section \ref{methodology} demonstrates how we can compute counterfactual values for an individual while preserving their relative educational achievement. In particular, for a male student with values $(a, e, t, y)$, we compute his "fair-twin" values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$ - the values the student would have obtained, had he been female. To explicitly compare a person to their hypothetical fair-twin, we use the `fairTwins()` function, applied to an object of class `"fairadapt"`:
+The university admission example presented in Section \ref{methodology} demonstrates how to compute counterfactual values for an individual while preserving their relative educational achievement. Setting candidate gender as protected attribute and gender level *female* as baseline value, for a *male* student with values $(a, e, t, y)$, his *fair-twin* values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$, i.e., the values the student would have obtained, had he been *female*, are computed. These values can be retrieved from a `fairadapt` object by calling the S3-generic function `fairTwins()` as:
 
-```{r, fairtwin-uni, include = T}
-fairTwins(basic, train.id = 1:5)
+<!-- TODO: The current API of fairTwins() might be improved a bit:
+  - if both `train.id` and `test.ids` are specified, only train data is
+    returned without this being announced
+  - wouldn't a more useful default of `train.id` be all rows instead of row 1?
+  - maybe also add a column `_adapted` for the protected attribute to the
+    returned data.frame?
+-->
+
+```{r, fairtwin-uni}
+ft_basic <- fairTwins(basic, train.id = seq_len(n_samp))
+head(ft_basic, n = 3)
 ```
 
-<!-- TODO: maybe plot this instead of just showing a bunch of floats -->
+<!-- TODO: maybe plot this instead of just showing a bunch of floats
+``{r, fairtwin-plot, echo = FALSE}
+ggplot(ft_basic) +
 
-In this example, we compute the values in a "female" world. Therefore, for female applicants, the values stay the same, while for male applicants the values are adapted, as can be seen from the output.
+``
+-->
+
+In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output. <!-- TODO: reference \ref{fig:fairtwin-plot} -->
 
 # Illustration
 
