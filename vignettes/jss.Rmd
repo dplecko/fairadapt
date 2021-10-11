@@ -91,15 +91,15 @@ options(
 
 # Introduction
 
-Machine learning algorithms have become prevalent tools for decision-making in socially sensitive situations, such as determining credit-score ratings or predicting recidivism during parole. It has been recognized that algorithms are capable of learning societal biases, for example with respect to race \citep{larson2016compas} or gender \citep{blau2003, lambrecht2019algorithmic}, and this realization seeded an important debate in the machine learning community about fairness of algorithms and their impact on decision-making.
+Machine learning algorithms have become prevalent tools for decision-making in socially sensitive situations, such as determining credit-score ratings or predicting recidivism during parole. It has been recognized that algorithms are capable of learning societal biases, for example with respect to race \citep{larson2016recidivism} or gender \citep{blau2003pay, lambrecht2019algorithmic}, and this realization seeded an important debate in the machine learning community about fairness of algorithms and their impact on decision-making.
 
-In order to define and measure discrimination, existing intuitive notions have been statistically formalized, thereby providing fairness metrics. For example, *demographic parity* \citep{darlington1971} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$. Another notion, termed *equality of odds* \citep{hardt2016}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example), written as $\widehat{Y} \ci A \mid Y$. To this day, various different notions of fairness exist, which are sometimes incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a predictor $\widehat{Y}$ simultaneously. There is no consensus on which notion of fairness is the correct one.
+In order to define and measure discrimination, existing intuitive notions have been statistically formalized, thereby providing fairness metrics. For example, *demographic parity* \citep{darlington1971fairness} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$. Another notion, termed *equality of odds* \citep{hardt2016eosl}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example), written as $\widehat{Y} \ci A \mid Y$. To this day, various different notions of fairness exist, which are sometimes incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a predictor $\widehat{Y}$ simultaneously. There is no consensus on which notion of fairness is the correct one.
 
 The discussion on algorithmic fairness is, however, not restricted to the machine learning domain. There are many legal and philosophical aspects that have arisen. For example, the legal distinction between disparate impact and disparate treatment \citep{mcginley2011ricci} is important for assessing fairness from a judicial point of view. This in turn emphasizes the importance of the interpretation behind the decision-making process, which is often not the case with black-box machine learning algorithms. For this reason, research in fairness through a causal inference lens has gained attention.
 
 Examples for this include counterfactual reasoning \citep{galles1998axiomatic}, which allows for arguing what might have happened under different circumstances that never actually materialized, thereby providing a tool for understanding and quantifying discrimination. For example, one might ask how a change in sex would affect the probability of a specific candidate being accepted for given job opening. This approach has motivated another notion of fairness, termed *counterfactual fairness* \citep{kusner2017counterfactual}, which states that the decision made, should remain fixed, even if, hypothetically, some parameters such as race or gender were to be changed (this can be written succinctly as $\widehat{Y}(a) = \widehat{Y}(a')$ in the potential outcomes notation). Causal inference can also be used for furthering understanding of demographic parity by decomposition of the parity gap measure, $\pr(\widehat{Y} = 1 \mid A = a) - \pr(\widehat{Y} = 1 \mid A = a')$, into the direct, indirect and spurious components, as well as the introduction of so-called resolving variables \cite{kilbertus2017avoiding}, in order to relax the possibly prohibitively strong notion of demographic parity.
 
-The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as \proglang{R}-package \pkg{fairadapt} from CRAN. Currently there are only few packages being distributed via CRAN, that are related fair machine learning, including \pkg{fairml} \citep{fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{fairness} and \pkg{fairmodels} \citep{fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The only causal method, however, is presented by \pkg{fairadapt}. Even though theory in fair machine learning is being expanded at an accelerating pace, good quality implementations of the developed methods are lagging behind.
+The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as \proglang{R}-package \pkg{fairadapt} from CRAN. Currently there are only few packages being distributed via CRAN, that are related fair machine learning, including \pkg{fairml} \citep{scutari2021fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels} \citep{wisniewski2021fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The only causal method, however, is presented by \pkg{fairadapt}. Even though theory in fair machine learning is being expanded at an accelerating pace, good quality implementations of the developed methods are lagging behind.
 
 The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{illustration}, which illustrates the usage of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
 
@@ -219,7 +219,7 @@ As a final step, the outcome variable $Y$ remains to be adjusted. The adaptation
 	\pr(Y \geq y \mid E = e, T = t, A = a') = \pr(Y \geq \tilde{y} \mid E = \tilde{e}, T = \tilde{t}, A = a).
 \end{equation}
 
-This form of counterfactual correction is known as *recursive substitution* \citep[Chapter~7]{pearl2009} and is described more formally in the following sections. The reader who is satisfied with the intuitive notion provided by the above example is encouraged to go straight to Section \ref{implementation}.
+This form of counterfactual correction is known as *recursive substitution* \citep[Chapter~7]{pearl2009causality} and is described more formally in the following sections. The reader who is satisfied with the intuitive notion provided by the above example is encouraged to go straight to Section \ref{implementation}.
 
 ## Structural Causal Models
 
@@ -271,7 +271,7 @@ The assignment functions $f_i$ of the SCM are of course unknown, but are learned
 
 # Implementation
 
-In order to perform fair data adaption using the \pkg{fairadapt} package, the function `fairadapt()` is exported, which returns an object of class `fairadapt`. Implementations of the base \proglang{R} S3 generics `print()`, `plot()` and `predict()`, as well as the generic `autoplot()`, exported from \pkg{ggplot2} \citep{ggplot2}, are provided for `fairadapt` objects, alongside `fairadapt`-specific implementations of S3 generics `visualizeGraph()`, `adaptedData()` and `fairTwins()`. Finally, an extension mechanism is available via the S3 generic function `computeQuants()`.
+In order to perform fair data adaption using the \pkg{fairadapt} package, the function `fairadapt()` is exported, which returns an object of class `fairadapt`. Implementations of the base \proglang{R} S3 generics `print()`, `plot()` and `predict()`, as well as the generic `autoplot()`, exported from \pkg{ggplot2} \citep{wickham2016ggplot2}, are provided for `fairadapt` objects, alongside `fairadapt`-specific implementations of S3 generics `visualizeGraph()`, `adaptedData()` and `fairTwins()`. Finally, an extension mechanism is available via the S3 generic function `computeQuants()`.
 
 The following sections show how the listed methods relate to one another alongside their intended use, beginning with constructing a call to `fairadapt()`. The most important arguments of `fairadapt()` include:
 
@@ -330,7 +330,7 @@ respectively, where $Y$ denotes the outcome variable. Total variation in the cas
 
 ## Specifying the Graphical Model
 
-As the algorithm used for fair data adaption in `fairadapt()` requires access to the underlying graphical causal model $\mathcal{G}$ (cf. Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix can be passed as `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{igraph}. While exported for the user to invoke manually, this function is called as part of the `fairadapt()` routine and the resulting `igraph` object can be visualized by calling the S3 generic `visualizeGraph()`, exported from `fairadapt` on an object of class `fairadapt`.
+As the algorithm used for fair data adaption in `fairadapt()` requires access to the underlying graphical causal model $\mathcal{G}$ (cf. Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix can be passed as `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{csardi2006igraph}. While exported for the user to invoke manually, this function is called as part of the `fairadapt()` routine and the resulting `igraph` object can be visualized by calling the S3 generic `visualizeGraph()`, exported from `fairadapt` on an object of class `fairadapt`.
 
 ```{r, graph-model}
 uni_graph <- graphModel(uni_adj)
@@ -374,9 +374,9 @@ The two dataframes passed as `train.data` and `test.data` are required to have c
 
 The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be carried out by several methods, three of which are implemented in \pkg{fairadapt}:
 
-* Quantile Regression Forests \citep{qrf}.
+* Quantile Regression Forests \citep{meinshausen2006qrf}.
 * Non-crossing quantile neural networks \citep{cannon2018non}.
-* Linear Quantile Regression \citep{qr}.
+* Linear Quantile Regression \citep{koenker2001qr}.
 
 Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is, substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is implemented, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach might in fact be a superior choice. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
 
@@ -718,7 +718,7 @@ semi <- fairadapt(score ~ ., train.data = uni_trn,
 
 ```{r, semi-graph, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "Visualization of the causal graphical model also shown in Figure \\ref{fig:semi-markov}, obtained when passing a confounding matrix indicating a bidirectional edge between vertices \\texttt{test} and \\texttt{score} to \\texttt{fairadapt()}. The resulting Semi-Markovian setting can be handles by \\texttt{fairadapt()}, extending the basic Markovian formulation introduced in Section \\ref{markovian-scm-formulation}.", out.width = "60%"}
 
-set.seed(11)
+set.seed(12)
 
 tmp_grp <- semi$graph
 
@@ -777,7 +777,7 @@ So far, the question whether it is always possible to carry out the counterfactu
 * The model is Semi-Markovian and there is no bidirected path between $A$ and $\ch(A)$.
 * The model is Semi-Markovian and there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
 
-Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009}, but we hope to include this in a future version.
+Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, but we hope to include this in a future version.
 
 <!-- TODO: maybe add a sentence on why front-door identification is relevant
      and what the current limitation of not being able to do this means for a
