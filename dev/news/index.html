@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.1.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.2.0.9000</span>
       </span>
     </div>
 
@@ -128,11 +128,24 @@
 
     <div id="fairadapt-020" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.0">
-<a href="#fairadapt-020" class="anchor"></a>fairadapt 0.2.0<small> Unreleased </small>
+<a href="#fairadapt-020" class="anchor"></a>fairadapt 0.2.0<small> 2021-07-28 </small>
 </h1>
+<p>Breaking changes:</p>
 <ul>
 <li>
-<code>protect.A</code> arguments has been renamed to <code>prot.attr</code> and moved to position number two</li>
+<code>protect.A</code> argument renamed to <code>prot.attr</code>
+</li>
+<li>argument ordering changed; <code>prot.attr</code> moved to position number two, <code>adj.mat</code> argument moved to position three</li>
+</ul>
+<p>Non-breaking changes:</p>
+<ul>
+<li>
+<code>top.ord</code> argument introduced, for running adaptation with topological ordering, without the need for <code>adj.mat</code>
+</li>
+<li>
+<code>quant.method</code> argument now a function, allowing for custom user quantile regression methods (via S3 dispatch)</li>
+<li>
+<code>visualize.graph</code> argument available for plotting the causal diagram</li>
 </ul>
 </div>
   </div>
@@ -148,7 +161,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Drago Plecko.</p>
+  <p>Developed by Drago Plecko, Nicolas Bennett.</p>
 </div>
 
 <div class="pkgdown">

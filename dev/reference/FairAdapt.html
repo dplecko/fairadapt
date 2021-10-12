@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>fairadapt — fairadapt • Fair Data Adaptation</title>
+<title>Fairadapt — fairadapt • Fair Data Adaptation</title>
 
 
 <!-- jquery -->
@@ -39,10 +39,9 @@
 
 
 
-<meta property="og:title" content="fairadapt — fairadapt" />
+<meta property="og:title" content="Fairadapt — fairadapt" />
 <meta property="og:description" content="Implementation of fair data adaptation with quantile preservation
-(Plecko &amp;amp; Meinshausen 2019).
-Uses only plain R." />
+(Plecko &amp;amp; Meinshausen 2019). Uses only plain R." />
 
 
 <meta name="robots" content="noindex">
@@ -74,7 +73,7 @@ Uses only plain R." />
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.1.0.9000</span>
+        <span class="version label label-danger" data-toggle="tooltip" data-placement="bottom" title="In-development version">0.2.0.9000</span>
       </span>
     </div>
 
@@ -125,23 +124,22 @@ Uses only plain R." />
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>fairadapt</h1>
+    <h1>Fairadapt</h1>
     
-    <div class="hidden name"><code>FairAdapt.Rd</code></div>
+    <div class="hidden name"><code>fairadapt.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Implementation of fair data adaptation with quantile preservation
-(Plecko &amp; Meinshausen 2019).
-Uses only plain <code>R</code>.</p>
+(Plecko &amp; Meinshausen 2019). Uses only plain <code>R</code>.</p>
     </div>
 
     <pre class="usage"><span class='fu'>fairadapt</span><span class='op'>(</span>
   <span class='va'>formula</span>,
   <span class='va'>prot.attr</span>,
+  <span class='va'>adj.mat</span>,
   <span class='va'>train.data</span>,
   test.data <span class='op'>=</span> <span class='cn'>NULL</span>,
-  adj.mat <span class='op'>=</span> <span class='cn'>NULL</span>,
   cfd.mat <span class='op'>=</span> <span class='cn'>NULL</span>,
   top.ord <span class='op'>=</span> <span class='cn'>NULL</span>,
   res.vars <span class='op'>=</span> <span class='cn'>NULL</span>,
@@ -164,16 +162,17 @@ the covariates.</p></td>
 protected attribute. Must be one of the entries of <code><a href='https://rdrr.io/r/base/colnames.html'>colnames(adj.mat)</a></code>.</p></td>
     </tr>
     <tr>
-      <th>train.data, test.data</th>
-      <td><p>Training data &amp; testing data, both of class
-<code>data.frame</code>. Test data is by default <code>NULL</code>.</p></td>
-    </tr>
-    <tr>
       <th>adj.mat</th>
       <td><p>Matrix of class <code>matrix</code> encoding the relationships in
 the causal graph. <code>M[i,j] == 1L</code> implies the existence of an edge from
 node i to node j. Must include all the variables appearing in the formula
-object.</p></td>
+object. When the <code>adj.mat</code> argument is set to <code>NULL</code>, then the
+<code>top.ord</code> argument has to be supplied.</p></td>
+    </tr>
+    <tr>
+      <th>train.data, test.data</th>
+      <td><p>Training data &amp; testing data, both of class
+<code>data.frame</code>. Test data is by default <code>NULL</code>.</p></td>
     </tr>
     <tr>
       <th>cfd.mat</th>
@@ -198,9 +197,12 @@ variables should be a subset of the descendants of the protected attribute.</p><
     </tr>
     <tr>
       <th>quant.method</th>
-      <td><p>A vector of class <code>character</code> choosing the method
-used for quantile regression. Possible values are "forest", "forest2",
-"linear" and "nn".</p></td>
+      <td><p>A function choosing the method used for quantile
+regression. Default value is <code>rangerQuants</code> (using random forest
+quantile regression). Other implemented options are <code>linearQuants</code> and
+<code>mcqrnnQuants</code>. A custom function can be supplied by the user here,
+and the associated method for the S3 generic <code>computeQuants</code> needs to be
+added.</p></td>
     </tr>
     <tr>
       <th>visualize.graph</th>
@@ -210,7 +212,8 @@ value is <code>FALSE</code>.</p></td>
     </tr>
     <tr>
       <th>...</th>
-      <td><p>Forwarded to the function passed as `quant.method`.</p></td>
+      <td><p>Additional arguments forwarded to the function passed as
+`quant.method`.</p></td>
     </tr>
     </table>
 
@@ -264,7 +267,7 @@ Fair Data Adaptation with Quantile Preservation <br /></p>
 #&gt; Number of test samples:               50 
 #&gt; Number of independent variables:      3 
 #&gt; Total variation (before adaptation):  -0.573929 
-#&gt; Total variation (after adaptation):   0.06771308 </div><div class='input'>
+#&gt; Total variation (after adaptation):   0.1688061 </div><div class='input'>
 </div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
@@ -277,7 +280,7 @@ Fair Data Adaptation with Quantile Preservation <br /></p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Drago Plecko.</p>
+  <p>Developed by Drago Plecko, Nicolas Bennett.</p>
 </div>
 
 <div class="pkgdown">
