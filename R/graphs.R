@@ -144,7 +144,6 @@ nonId <- function(iv, adj.mat, cfd.mat) {
 
 #' Obtaining the graphical causal model (GCM)
 #'
-#'
 #' @param adj.mat Matrix of class \code{matrix} encoding the relationships in
 #' the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
 #' node i to node j.

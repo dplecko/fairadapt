@@ -10,6 +10,6 @@
 *.bbl
 *.fdb_latexmk
 *.log
-doc
-Meta
-docs
+/docs/
+/doc/
+/Meta/

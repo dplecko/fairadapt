@@ -2,7 +2,7 @@
 % Please edit documentation in R/fairadapt.R
 \name{fairadapt}
 \alias{fairadapt}
-\title{fairadapt}
+\title{Fairadapt}
 \usage{
 fairadapt(
   formula,
@@ -70,8 +70,7 @@ additional meta-information.
 }
 \description{
 Implementation of fair data adaptation with quantile preservation
-(Plecko & Meinshausen 2019).
-Uses only plain \code{R}.
+(Plecko & Meinshausen 2019). Uses only plain \code{R}.
 }
 \details{
 The procedure takes the training and testing data as an input, together with

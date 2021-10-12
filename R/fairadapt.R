@@ -1,6 +1,7 @@
+#' Fairadapt
+#'
 #' Implementation of fair data adaptation with quantile preservation
-#' (Plecko & Meinshausen 2019).
-#' Uses only plain \code{R}.
+#' (Plecko & Meinshausen 2019). Uses only plain \code{R}.
 #'
 #' The procedure takes the training and testing data as an input, together with
 #' the causal graph given by an adjacency matrix and the list of resolving
@@ -12,7 +13,6 @@
 #' original paper. Most of the running time is due to the quantile regression
 #' step using the ranger package.
 #'
-#' @title fairadapt
 #' @param formula Object of class \code{formula} describing the response and
 #' the covariates.
 #' @param prot.attr A value of class \code{character} describing the binary

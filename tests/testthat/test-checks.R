@@ -56,7 +56,7 @@ test_that("input verification", {
     fairadapt(y ~ ., train.data = train, test.data = test,
               adj.mat = adj.mat, prot.attr = "a",
               res.vars = "noname"),
-    "not equal to 0"
+    "are not true"
   )
 
   na.dat   <- with_seed(102, data_gen(100))
