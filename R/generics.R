@@ -58,7 +58,7 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
 print.fairadapt <- function(x, ...) {
 
   cat("Fairadapt result\n\n")
-  cat("Call:\n", deparse(x$formula), "\n\n")
+  cat("Formula:\n", deparse(x$formula), "\n\n")
   cat("Protected attribute:                 ", x$prot.attr, "\n")
   cat("Protected attribute levels:          ",
       paste(sort(unique(x$train[[x$prot.attr]])), collapse = ", "), "\n")
@@ -218,14 +218,20 @@ fairTwins <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
 }
 
 #' @export
-fairTwins.fairadapt <- function(x, train.id = 1L, test.id = NULL,
-                                cols = NULL) {
+fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)), 
+                                test.id = NULL, cols = NULL) {
 
   if (!is.null(cols) && !is.element(x$prot.attr, cols)) {
     cols <- c(x$prot.attr, cols)
   }
 
   if (!is.null(train.id)) {
+    
+    if (!is.null(test.id)) {
+      cat(
+        "Both `train.id` and `test.id` specified. Using `train.id` argument.\n"
+      )
+    }
 
     target.id <- train.id
 
