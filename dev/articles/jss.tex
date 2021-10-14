@@ -189,7 +189,7 @@ in Figure \ref{fig:uni-adm} indicate how variables affect one another.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/uni-adm-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/uni-adm-1} 
 
 }
 
@@ -232,7 +232,7 @@ step can be visualized as shown in Figure \ref{fig:rel-edu}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/rel-edu-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/rel-edu-1} 
 
 }
 
@@ -334,7 +334,7 @@ sorted in topological order. For each \(V_i\), the assignment function
 \(f_i\) and the corresponding quantiles \(U_i\) are inferred. Finally,
 transformed values \( {V_i}^{(fp)}\) are obtained by evaluating \(f_i\),
 using quantiles \(U_i\) and the transformed parents
-\( {\mathrm{pa}(V_i)}^{(fp)}\) (cf., Algorithm \ref{algo:fairadapt}).
+\( {\mathrm{pa}(V_i)}^{(fp)}\) (see Algorithm \ref{algo:fairadapt}).
 
 \begin{algorithm}
     \DontPrintSemicolon
@@ -457,7 +457,7 @@ Number of training samples:           200
 Number of test samples:               200 
 Number of independent variables:      3 
 Total variation (before adaptation):  -0.6757414 
-Total variation (after adaptation):   -0.1169464 
+Total variation (after adaptation):   -0.1551275 
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -477,7 +477,7 @@ Model}\label{specifying-the-graphical-model}}
 
 As the algorithm used for fair data adaption in \texttt{fairadapt()}
 requires access to the underlying graphical causal model \(\mathcal{G}\)
-(cf.~Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix
+(see Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix
 can be passed as \texttt{adj.mat} argument. The convenience function
 \texttt{graphModel()} turns a graph specified as an adjacency matrix
 into an annotated graph using the \pkg{igraph} package
@@ -496,7 +496,7 @@ R> uni_graph <- graphModel(uni_adj)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/graph-plot-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/graph-plot-1} 
 
 }
 
@@ -645,13 +645,13 @@ R> head(ft_basic, n = 3)
 \end{CodeInput}
 \begin{CodeOutput}
   gender      score score_adapted        edu edu_adapted       test
-1      1  1.9501728    1.09841348  1.3499572  0.60686990  1.6177397
+1      1  1.9501728    0.96725357  1.3499572  0.67290529  1.6177397
 2      0 -2.3502495   -2.35024955 -1.9779234 -1.97792341 -3.1217962
-3      1  0.6285619   -0.04234933  0.6263626 -0.05373031  0.5300347
+3      1  0.6285619    0.03824946  0.6263626  0.02188639  0.5300347
   test_adapted
-1    0.6253059
+1    0.9070710
 2   -3.1217962
-3   -0.4099572
+3   -0.2313427
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -729,7 +729,7 @@ matrix \texttt{gov\_cfd}:
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/census-tikz-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/census-tikz-1} 
 
 }
 
@@ -762,7 +762,7 @@ R> gov_grph <- graphModel(gov_adj, gov_cfd)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/census-graph-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/census-graph-1} 
 
 }
 
@@ -791,7 +791,7 @@ R> gov_prd <- tail(gov_dat, n = n_pred)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/before-adapt-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/before-adapt-1} 
 
 }
 
@@ -827,11 +827,11 @@ R> autoplot(gov_ada, when = "after") +
 \end{CodeInput}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/vis-adapt-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/vis-adapt-1} 
 
 }
 
-\caption{The salray-gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (cf., Figure \ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as protected attribute and assuming a causal graph as shown in Figure \ref{fig:census-graph}.}\label{fig:vis-adapt}
+\caption{The salray-gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (see Figure \ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as protected attribute and assuming a causal graph as shown in Figure \ref{fig:census-graph}.}\label{fig:vis-adapt}
 \end{figure}
 \end{CodeChunk}
 
@@ -993,7 +993,7 @@ R> uni_res <- graphModel(uni_adj, res.vars = "test")
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/res-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/res-graph-1} 
 
 }
 
@@ -1025,7 +1025,7 @@ in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/semi-markov-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/semi-markov-1} 
 
 }
 
@@ -1099,7 +1099,7 @@ R> semi <- fairadapt(score ~ ., train.data = uni_trn,
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpkoS1Ro/file11a31fef114c/dev/articles/jss_files/figure-latex/semi-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/semi-graph-1} 
 
 }
 
@@ -1130,21 +1130,22 @@ can be computed uniquely using the data and the assumptions encoded in
 the graphical model \(\mathcal{G}\). An important result by
 \cite{tian2002general} states that an intervention do\((X = x)\) on a
 singleton variable \(X\) is identifiable if there is no bidirected path
-between \(X\) and \(\mathrm{ch}(X)\). Therefore, our intervention the
-intervention is identifiable if:
+between \(X\) and \(\mathrm{ch}(X)\). Therefore, our intervention of
+interest is identifiable if one of the two following conditions are met:
 
 \begin{itemize}
 \tightlist
 \item
   The model is Markovian.
 \item
-  The model is Semi-Markovian and
+  The model is Semi-Markovian and,
 
   \begin{enumerate}
   \def\labelenumi{(\roman{enumi})}
   \tightlist
   \item
-    there is no bidirected path between \(A\) and \(\mathrm{ch}(A)\) and
+    there is no bidirected path between \(A\) and \(\mathrm{ch}(A)\)
+    and,
   \item
     there is no bidirected path between \(R_i\) and \(\mathrm{ch}(R_i)\)
     for any resolving variable \(R_i\).
@@ -1155,8 +1156,9 @@ Based on this, the \texttt{fairadapt()} function may return an error, if
 the specified intervention is not possible to compute. An additional
 limitation is that \pkg{fairadapt} currently does not support
 \emph{front-door identification} \citep[Chapter~3]{pearl2009causality},
-meaning certain special cases which are in principle identifiable are
-not currently handled. We hope to include this case in a future version.
+meaning that certain special cases which are in principle identifiable
+are not currently handled. We hope to include this case in a future
+version.
 
 \bibliography{jss.bib}
 
