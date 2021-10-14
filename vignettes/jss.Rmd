@@ -234,7 +234,7 @@ $$V_i \mid \pa(V_i), A = a \text{ and } V_i \mid \pa(V_i), A = a',$$
 
 meaning that the distribution of $V_i$ should be indistinguishable for both female and male applicants, for every variable $V_i$. Since each function $f_i$ of the original SCM is reparametrized so that $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$, and also due to variables $U_i$ being uniformly distributed on $[0, 1]$, variables $U_i$ can be seen as the latent *quantiles*.
 
-The algorithm proposed for data adaption proceeds by fixing $A = a$, followed by iterating over descendants of the protected attribute $A$, sorted in topological order. For each $V_i$, the assignment function $f_i$ and the corresponding quantiles $U_i$ are inferred. Finally, transformed values $\tilde{V_i}$ are obtained by evaluating $f_i$, using quantiles $U_i$ and the transformed parents $\tilde{\pa(V_i)}$ (cf., Algorithm \ref{algo:fairadapt}).
+The algorithm proposed for data adaption proceeds by fixing $A = a$, followed by iterating over descendants of the protected attribute $A$, sorted in topological order. For each $V_i$, the assignment function $f_i$ and the corresponding quantiles $U_i$ are inferred. Finally, transformed values $\tilde{V_i}$ are obtained by evaluating $f_i$, using quantiles $U_i$ and the transformed parents $\tilde{\pa(V_i)}$ (see Algorithm \ref{algo:fairadapt}).
 
 \begin{algorithm}
 	\DontPrintSemicolon
@@ -300,7 +300,7 @@ respectively, where $Y$ denotes the outcome variable. Total variation in the cas
 
 ## Specifying the Graphical Model
 
-As the algorithm used for fair data adaption in `fairadapt()` requires access to the underlying graphical causal model $\mathcal{G}$ (cf. Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix can be passed as `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as an adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{csardi2006igraph}. While exported for the user to invoke manually, this function is called as part of the `fairadapt()` routine and the resulting `igraph` object can be visualized by calling the S3 generic `visualizeGraph()`, exported from `fairadapt` on an object of class `fairadapt`.
+As the algorithm used for fair data adaption in `fairadapt()` requires access to the underlying graphical causal model $\mathcal{G}$ (see Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix can be passed as `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as an adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{csardi2006igraph}. While exported for the user to invoke manually, this function is called as part of the `fairadapt()` routine and the resulting `igraph` object can be visualized by calling the S3 generic `visualizeGraph()`, exported from `fairadapt` on an object of class `fairadapt`.
 
 ```{r, graph-model}
 uni_graph <- graphModel(uni_adj)
@@ -310,9 +310,7 @@ uni_graph <- graphModel(uni_adj)
 
 set.seed(11)
 
-uni_tmp <- uni_adj # `dimnames<-`(, lapply(dimnames(uni_adj), substr, 1L, 2L))
-
-ggraph(graphModel(uni_tmp), "igraph", algorithm = "sugiyama") +
+ggraph(graphModel(uni_adj), "igraph", algorithm = "sugiyama") +
   geom_edge_link(arrow = arrow(length = unit(4, "mm"), angle = 15,
                                type = "closed"),
                  end_cap = circle(8, "mm"),
@@ -495,13 +493,45 @@ gov_tmp <- igraph::delete_edges(
   gov_tmp, which(igraph::E(gov_tmp)$lty == "blank")
 )
 
+lty_selector <- function(lty) {
+  function(layout) {
+    get_all <- get_edges()
+    edges <- get_all(layout)
+    res <- edges[edges$lty == lty, ]
+    res
+  }
+}
+
+  # geom_edge_arc(data = lty_selector("dashed"),
+  #               arrow = arrow(length = unit(4, "mm"), angle = 15,
+  #                             ends = "both", type = "closed"),
+  #               start_cap = circle(8, "mm"),
+  #               end_cap = circle(8, "mm"),
+  #               strength = 0.25,
+  #               color = "grey20",
+  #               linetype = "dashed") +
+  # geom_edge_link(data = lty_selector("solid"),
+  #                arrow = arrow(length = unit(4, "mm"), angle = 15,
+  #                              type = "closed"),
+  #                end_cap = circle(8, "mm"),
+  #                color = "grey20",
+  #                linetype = "solid")
+
 ggraph(gov_tmp, "igraph", algorithm = "fr") +
-  geom_edge_fan(aes(edge_linetype = lty),
+  geom_edge_arc(data = lty_selector("dashed"),
                 arrow = arrow(length = unit(4, "mm"), angle = 15,
-                              type = "closed"),
+                              ends = "both", type = "closed"),
+                start_cap = circle(6.5, "mm"),
                 end_cap = circle(6.5, "mm"),
+                strength = 0.25,
                 color = "grey20",
-                show.legend = FALSE) +
+                linetype = "dashed") +
+  geom_edge_link(data = lty_selector("solid"),
+                 arrow = arrow(length = unit(4, "mm"), angle = 15,
+                               type = "closed"),
+                 end_cap = circle(6.5, "mm"),
+                 color = "grey20",
+                 linetype = "solid") +
   geom_node_point(aes(color = color), size = 15) +
   geom_node_text(aes(x = x, y = y, label = name), size = 5) +
   scale_edge_linetype_manual(values = c(dashed = "dashed", solid = "solid")) +
@@ -543,7 +573,7 @@ gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
 
 After performing the adaptation, we can investigate whether the salary-gap has shrunk. The densities after adaptation can be visualized using the \pkg{ggplot2}-exported S3 generic function `autoplot()`:
 
-```{r, vis-adapt, fig.height = 3, fig.cap = "The salray-gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (cf., Figure \\ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as protected attribute and assuming a causal graph as shown in Figure \\ref{fig:census-graph}."}
+```{r, vis-adapt, fig.height = 3, fig.cap = "The salray-gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (see Figure \\ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as protected attribute and assuming a causal graph as shown in Figure \\ref{fig:census-graph}."}
 autoplot(gov_ada, when = "after") +
   theme_bw() +
   ggtitle("Adapted salary density by gender")
@@ -594,7 +624,7 @@ uni_res <- graphModel(uni_adj, res.vars = "test")
 
 set.seed(11)
 
-ggraph(graphModel(uni_tmp, res.vars = "te"), "igraph",
+ggraph(graphModel(uni_adj, res.vars = "test"), "igraph",
        algorithm = "sugiyama") +
   geom_edge_link(arrow = arrow(length = unit(4, "mm"), angle = 15,
                                type = "closed"),
@@ -670,15 +700,6 @@ semi <- fairadapt(score ~ ., train.data = uni_trn,
 
 set.seed(17)
 
-lty_selector <- function(lty) {
-  function(layout) {
-    get_all <- get_edges()
-    edges <- get_all(layout)
-    res <- edges[edges$lty == lty, ]
-    res
-  }
-}
-
 ggraph(semi$graph, "igraph", algorithm = "fr") +
   geom_edge_arc(data = lty_selector("dashed"),
                 arrow = arrow(length = unit(4, "mm"), angle = 15,
@@ -708,11 +729,11 @@ Alternatively, instead of using the extended parent set $\Pa(V_i)$, we could als
 
 ## Questions of Identifiability
 
-So far we did not discuss whether it is always possible to carry out the counterfactual inference described in Section \ref{methodology}. In the causal literature, an intervention is termed *identifiable* if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. An important result by \cite{tian2002general} states that an intervention do$(X = x)$ on a singleton variable $X$ is identifiable if there is no bidirected path between $X$ and $\ch(X)$. Therefore, our intervention  the intervention is identifiable if:
+So far we did not discuss whether it is always possible to carry out the counterfactual inference described in Section \ref{methodology}. In the causal literature, an intervention is termed *identifiable* if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. An important result by \cite{tian2002general} states that an intervention do$(X = x)$ on a singleton variable $X$ is identifiable if there is no bidirected path between $X$ and $\ch(X)$. Therefore, our intervention of interest is identifiable if one of the two following conditions are met:
 
 * The model is Markovian.
-* The model is Semi-Markovian and 
-  (i) there is no bidirected path between $A$ and $\ch(A)$ and
+* The model is Semi-Markovian and, 
+  (i) there is no bidirected path between $A$ and $\ch(A)$ and,
   (i) there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
 
-Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning certain special cases which are in principle identifiable are not currently handled. We hope to include this case in a future version.
+Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases which are in principle identifiable are not currently handled. We hope to include this case in a future version.
