@@ -7,11 +7,11 @@
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
 
 \author{
-Drago Plecko\\ETH Zürich \And Nicolas Bennett\\ETH Zürich \And Nicolai Meinshausen\\ETH Zürich
+Drago Plečko\\ETH Zürich \And Nicolas Bennett\\ETH Zürich \And Nicolai Meinshausen\\ETH Zürich
 }
 \title{\pkg{fairadapt}: Causal Reasoning for Fair Data Pre-processing}
 
-\Plainauthor{Drago Plecko, Nicolas Bennett, Nicolai Meinshausen}
+\Plainauthor{Drago Plečko, Nicolas Bennett, Nicolai Meinshausen}
 \Plaintitle{fairadapt: Causal Reasoning for Fair Data Pre-processing}
 \Shorttitle{\pkg{fairadapt}: Fair Data Adaptation}
 
@@ -23,9 +23,9 @@ other sensitive attributes. This realization gave rise to the field of
 fair machine learning, which aims to measure and mitigate such
 algorithmic bias. This manuscript describes the \proglang{R}-package
 \pkg{fairadapt}, which implements a causal inference pre-processing
-method. By making use of the causal graphical model and the observed
-data, the method can be used to address hypothetical questions of the
-form ``What would my salary have been, had I been of a different
+method. By making use of a causal graphical model and the observed data,
+the method can be used to address hypothetical questions of the form
+``What would my salary have been, had I been of a different
 gender/race?''. Such individual level counterfactual reasoning can help
 eliminate discrimination and help justify fair decisions. We also
 discuss appropriate relaxations which assume certain causal pathways
@@ -44,7 +44,7 @@ from the sensitive attribute to the outcome are not discriminatory.
 %% \Acceptdate{2012-06-04}
 
 \Address{
-    Drago Plecko\\
+    Drago Plečko\\
     ETH Zürich\\
     Seminar for Statistics Rämistrasse 101 CH-8092 Zurich\\
   E-mail: \email{drago.plecko@stat.math.ethz.ch}\\
@@ -189,7 +189,7 @@ in Figure \ref{fig:uni-adm} indicate how variables affect one another.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/uni-adm-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/uni-adm-1} 
 
 }
 
@@ -232,7 +232,7 @@ step can be visualized as shown in Figure \ref{fig:rel-edu}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/rel-edu-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/rel-edu-1} 
 
 }
 
@@ -267,9 +267,9 @@ encodes the assumed data-generating process. An SCM is represented by a
 \tightlist
 \item
   \(V = \lbrace V_1, \ldots, V_n \rbrace\) is the set of observed
-  (endogeneous) variables.
+  (endogenous) variables.
 \item
-  \(U = \lbrace U_1, \ldots, U_n \rbrace\) are latent (exogeneous)
+  \(U = \lbrace U_1, \ldots, U_n \rbrace\) are latent (exogenous)
   variables.
 \item
   \(\mathcal{F} = \lbrace f_1, \ldots, f_n \rbrace\) is the set of
@@ -278,7 +278,7 @@ encodes the assumed data-generating process. An SCM is represented by a
   arguments of \(f_i\) and \(\mathrm{pa}(V_i)\) denotes the parent
   vertices of \(V_i\).
 \item
-  \(\mathbbm{P}(u)\) is a distribution over the exogeneous variables
+  \(\mathbbm{P}(u)\) is a distribution over the exogenous variables
   \(U\).
 \end{itemize}
 
@@ -295,14 +295,14 @@ generality, that
   \(f_i(\mathrm{pa}(v_i), u_i)\) is increasing in \(u_i\) for every
   fixed \(\mathrm{pa}(v_i)\).
 \item
-  Exogeneous variables \(U_i\) are uniformly distributed on \([0, 1]\).
+  Exogenous variables \(U_i\) are uniformly distributed on \([0, 1]\).
 \end{enumerate}
 
 In the following section, we discuss the Markovian case in which all
-exogeneous variables \(U_i\) are mutually independent. The
-Semi-Markovian case, where variables \(U_i\) are allowed to have a
-mutual dependency structure, alongside the extension introducing
-\emph{resolving variables}, are discussed in Section \ref{extensions}.
+exogenous variables \(U_i\) are mutually independent. The Semi-Markovian
+case, where variables \(U_i\) are allowed to have a mutual dependency
+structure, alongside the extension introducing \emph{resolving
+variables}, are discussed in Section \ref{extensions}.
 
 \hypertarget{markovian-scm-formulation}{%
 \subsection{Markovian SCM Formulation}\label{markovian-scm-formulation}}
@@ -352,7 +352,7 @@ using quantiles \(U_i\) and the transformed parents
 \end{algorithm}
 
 The assignment functions \(f_i\) of the SCM are of course unknown, but
-are learned non-parametrically at each step. Algorithm
+are non-parametrically inferred at each step. Algorithm
 \ref{algo:fairadapt} obtains the counterfactual values \(V(A = a)\)
 under the \(do(A = a)\) intervention for each individual, while keeping
 the latent quantiles \(U\) fixed. In the case of continuous variables,
@@ -399,14 +399,14 @@ alongside their intended use, beginning with constructing a call to
 
 As a quick demonstration of fair data adaption using, we load the
 \texttt{uni\_admission} dataset provided by \pkg{fairadapt}, consisting
-of synthetic university admission data of students. We subset this data,
-using the first \texttt{n\_samp} rows as training data
+of synthetic university admission data of 1000 students. We subset this
+data, using the first \texttt{n\_samp} rows as training data
 (\texttt{uni\_trn}) and the following \texttt{n\_samp} rows as testing
 data (\texttt{uni\_tst}). Furthermore, we construct an adjacency matrix
 \texttt{uni\_adj} with edges \(\texttt{gender} \to \texttt{edu}\),
 \(\texttt{gender} \to \texttt{test}\),
 \(\texttt{edu} \to \texttt{test}\), \(\texttt{edu} \to \texttt{score}\),
-and \(\texttt{test} \to \texttt{score}\). As protected attribute, we
+and \(\texttt{test} \to \texttt{score}\). As the protected attribute, we
 choose \texttt{gender}.
 
 \begin{CodeChunk}
@@ -457,7 +457,7 @@ Number of training samples:           200
 Number of test samples:               200 
 Number of independent variables:      3 
 Total variation (before adaptation):  -0.6757414 
-Total variation (after adaptation):   -0.1551275 
+Total variation (after adaptation):   -0.08447436 
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -496,7 +496,7 @@ R> uni_graph <- graphModel(uni_adj)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/graph-plot-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/graph-plot-1} 
 
 }
 
@@ -521,7 +521,7 @@ former option is that the quantile regression step is performed on a
 larger sample size, which can lead to more precise inference in
 practice.
 
-The two dataframes passed as \texttt{train.data} and \texttt{test.data}
+The two data frames passed as \texttt{train.data} and \texttt{test.data}
 are required to have column names which also appear in the row and
 column names of the adjacency matrix, alongside the protected attribute
 \(A\), passed as scalar-valued character vector \texttt{prot.attr}.
@@ -533,11 +533,13 @@ implemented in \pkg{fairadapt}:
 \begin{itemize}
 \tightlist
 \item
-  Quantile Regression Forests \citep{meinshausen2006qrf}.
+  Quantile Regression Forests
+  \citep{meinshausen2006qrf, wright2015ranger}.
 \item
-  Non-crossing quantile neural networks \citep{cannon2018non}.
+  Non-crossing quantile neural networks
+  \citep{cannon2018non, cannon2015package}.
 \item
-  Linear Quantile Regression \citep{koenker2001qr}.
+  Linear Quantile Regression \citep{koenker2001qr, koenker2018package}.
 \end{itemize}
 
 Using linear quantile regression is the most efficient option in terms
@@ -548,9 +550,9 @@ compared to linear and random forest estimators and consequently does
 not scale well to large sample sizes. As default, the random forest
 based approach is implemented, due to its non-parametric nature and
 computational speed. However, for smaller sample sizes, the neural
-network approach might in fact be a superior choice. A quick summary
-outlining some differences between the three natively supported methods
-is available from Table \ref{tab:qmethods}.
+network approach can also demonstrate competitive performance. A quick
+summary outlining some differences between the three natively supported
+methods is available from Table \ref{tab:qmethods}.
 
 \begin{table}
 \centering
@@ -559,7 +561,7 @@ is available from Table \ref{tab:qmethods}.
 \toprule
   & Random Forests & Neural Networks & Linear Regression\\
 \midrule
-    \proglang{R}-package & \pkg{ranger} & \pkg{mcqrnn} & \pkg{quantreg} \\
+    \proglang{R}-package & \pkg{ranger} & \pkg{qrnn} & \pkg{quantreg} \\
     \addlinespace[0.3em]
     \texttt{quant.method} & \code{rangerQuants} & \code{mcqrnnQuants} & \code{linearQuants} \\
     \addlinespace[0.3em]
@@ -578,7 +580,7 @@ is available from Table \ref{tab:qmethods}.
 \end{table}
 
 The above set of methods is not exhaustive. Further options are
-conceivable and therefore \pkg{fairadpat} provides an extension
+conceivable and therefore \pkg{fairadapt} provides an extension
 mechanism to account for this. The \texttt{fairadapt()} argument
 \texttt{quant.method} expects a function to be passed, a call to which
 will be constructed with three unnamed arguments:
@@ -630,8 +632,8 @@ argument). For an example, see \texttt{computeQuants.ranger()} method.
 The university admission example presented in Section \ref{methodology}
 demonstrates how to compute counterfactual values for an individual
 while preserving their relative educational achievement. Setting
-candidate gender as protected attribute and gender level \emph{female}
-as baseline value, for a \emph{male} student with values
+candidate gender as the protected attribute and gender level
+\emph{female} as baseline value, for a \emph{male} student with values
 \((a, e, t, y)\), his \emph{fair-twin} values
 \(( {a}^{(fp)},  {e}^{(fp)},  {t}^{(fp)},  {y}^{(fp)})\), i.e., the
 values the student would have obtained, had he been \emph{female}, are
@@ -645,13 +647,13 @@ R> head(ft_basic, n = 3)
 \end{CodeInput}
 \begin{CodeOutput}
   gender      score score_adapted        edu edu_adapted       test
-1      1  1.9501728    0.96725357  1.3499572  0.67290529  1.6177397
-2      0 -2.3502495   -2.35024955 -1.9779234 -1.97792341 -3.1217962
-3      1  0.6285619    0.03824946  0.6263626  0.02188639  0.5300347
+1      1  1.9501728   1.343589997  1.3499572   0.8118170  1.6177397
+2      0 -2.3502495  -2.350249546 -1.9779234  -1.9779234 -3.1217962
+3      1  0.6285619  -0.008966905  0.6263626   0.1408227  0.5300347
   test_adapted
-1    0.9070710
+1    0.8174008
 2   -3.1217962
-3   -0.2313427
+3   -0.2480784
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -663,12 +665,13 @@ the output.
 \hypertarget{illustration}{%
 \section{Illustration}\label{illustration}}
 
-As a possible real-world use of \pkg{fairadapt}, suppose that after a
-legislative change the US government has decided to adjust the salary of
-all of its female employees in order to remove both disparate treatment
-and disparate impact effects. To this end, the government wants to
-compute the counterfactual salary values of all female employees, that
-is the salaries that female employees would obtain, had they been male.
+As a hypothetical real-world use of \pkg{fairadapt}, suppose that after
+a legislative change the US government has decided to adjust the salary
+of all of its female employees in order to remove both disparate
+treatment and disparate impact effects. To this end, the government
+wants to compute the counterfactual salary values of all female
+employees, that is the salaries that female employees would obtain, had
+they been male.
 
 To do this, the government is using data from the 2018 American
 Community Survey by the US Census Bureau, available in pre-processed
@@ -729,7 +732,7 @@ matrix \texttt{gov\_cfd}:
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/census-tikz-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/census-tikz-1} 
 
 }
 
@@ -762,25 +765,24 @@ R> gov_grph <- graphModel(gov_adj, gov_cfd)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/census-graph-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/census-graph-1} 
 
 }
 
-\caption{Full causal graph for the government-census dataset, expanding the grouped view presented in Figure \ref{fig:census-tikz}. \textit{Demographic} features include age (\textbf{ag}), race (\textbf{ra}), whether an employee is of Hispanic origin (\textbf{hi}), is US citizen (\textbf{ci}), whether the citizenship is native (\textbf{na}), alongside the corresponding economic region (\textbf{ec}). \textit{Familial} features are marital status (\textbf{ma}), family size (\textbf{fa}) and number of children (\textbf{ch}), \textit{educational} features include education (\textbf{ed}) and English language levels (\textbf{en}), and \textit{occupational} features, weekly working hours (\textbf{ho}), yearly working weeks (\textbf{we}), job (\textbf{oc}) and industry identifiers (\textbf{in}). Finally, the yearly salary (\textbf{sa}) is used as \textit{response} variable and employee sex (\textbf{se}) as \textit{protected} attribute.}\label{fig:census-graph}
+\caption{Full causal graph for the government census dataset, expanding the grouped view presented in Figure \ref{fig:census-tikz}. \textit{Demographic} features include age (\textbf{ag}), race (\textbf{ra}), whether an employee is of Hispanic origin (\textbf{hi}), is US citizen (\textbf{ci}), whether the citizenship is native (\textbf{na}), alongside the corresponding economic region (\textbf{ec}). \textit{Familial} features are marital status (\textbf{ma}), family size (\textbf{fa}) and number of children (\textbf{ch}), \textit{educational} features include education (\textbf{ed}) and English language levels (\textbf{en}), and \textit{occupational} features, weekly working hours (\textbf{ho}), yearly working weeks (\textbf{we}), job (\textbf{oc}) and industry identifiers (\textbf{in}). Finally, the yearly salary (\textbf{sa}) is used as the \textit{response} variable and employee sex (\textbf{se}) as the \textit{protected} attribute variable.}\label{fig:census-graph}
 \end{figure}
 \end{CodeChunk}
 
 Before applying \texttt{fairadapt()}, we first log-transform the
 salaries and look at respective densities by sex group. We subset the
-data by using the first \texttt{n\_samp} samples for training, the
-subsequent \texttt{n\_pred} samples for predicting and plot the data
-before performing the adaption.
+data by using \texttt{n\_samp} samples for training and \texttt{n\_pred}
+samples for predicting and plot the data before performing the adaption.
 
 \begin{CodeChunk}
 \begin{CodeInput}
 R> gov_dat$salary <- log(gov_dat$salary)
 R> 
-R> n_samp <- 2000
+R> n_samp <- 30000
 R> n_pred <- 5
 R> 
 R> gov_trn <- head(gov_dat, n = n_samp)
@@ -791,7 +793,7 @@ R> gov_prd <- tail(gov_dat, n = n_pred)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/before-adapt-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/before-adapt-1} 
 
 }
 
@@ -814,10 +816,9 @@ R> gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
 \end{CodeInput}
 \end{CodeChunk}
 
-After performing the adaptation, we can investigate whether the
-salary-gap has shrunk. The densities after adaptation can be visualized
-using the \pkg{ggplot2}-exported S3 generic function
-\texttt{autoplot()}:
+After performing the adaptation, we can investigate whether the salary
+gap has shrunk. The densities after adaptation can be visualized using
+the \pkg{ggplot2}-exported S3 generic function \texttt{autoplot()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -827,11 +828,11 @@ R> autoplot(gov_ada, when = "after") +
 \end{CodeInput}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/vis-adapt-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/vis-adapt-1} 
 
 }
 
-\caption{The salray-gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (see Figure \ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as protected attribute and assuming a causal graph as shown in Figure \ref{fig:census-graph}.}\label{fig:vis-adapt}
+\caption{The salary gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (see Figure \ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as the protected attribute and assuming a causal graph as shown in Figure \ref{fig:census-graph}.}\label{fig:vis-adapt}
 \end{figure}
 \end{CodeChunk}
 
@@ -852,14 +853,14 @@ R> predict(gov_ada, newdata = gov_prd)
 5: female  50 white              no           1   native
          marital family_size children education_level english_level
 1: never married           5        2              16             0
-2:       married           2        0              18             0
-3: never married           4        2              19             0
+2:      divorced           2        1              19             0
+3: never married           4        3              16             0
 4: never married           3        2              19             1
 5:       married           2        0              19             0
       salary hours_worked weeks_worked occupation industry
 1:  7.003065           25           49    37-3011       23
-2:  9.667765           40            0    43-6014     52M1
-3: 10.126631           40           49    33-3012     623M
+2:  9.667765           40           26    25-9040     6111
+3: 10.126631           40           49    35-1011     6244
 4:  9.903488           40           26    43-4171   9211MP
 5: 11.472103           40           49    43-5031     92MP
    economic_region
@@ -881,17 +882,17 @@ R> fairTwins(gov_ada, train.id = 1:5,
 \end{CodeInput}
 \begin{CodeOutput}
      sex age age_adapted education_level education_level_adapted
-1   male  64          64              20                      20
+1   male  64          64              20                      21
 2 female  54          54              20                      20
 3   male  38          38              24                      24
 4 female  41          41              24                      24
 5 female  40          40              21                      21
     salary salary_adapted
-1 10.66896       9.998798
-2 10.71442      10.714418
-3 11.50288      11.608236
-4 11.05089      11.050890
-5 10.71885      10.718852
+1 10.66896       10.46310
+2 10.71442       10.71442
+3 11.50288       11.28978
+4 11.05089       11.05089
+5 10.71885       10.71885
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -902,11 +903,15 @@ descendant of the protected attribute \texttt{sex} (see Figure
 and \texttt{salary} do change for males, as they are descendants of the
 protected attribute \texttt{sex}.
 
-The variable \texttt{hours\_worked} is also a descendant of \(A\) and
+The variable \texttt{hours\_worked} is also a descendant of \(A\), and
 one might argue that this variable should \emph{not} be adapted in the
-procedure, i.e., that it remain the same, irrespective of employee sex.
-This is the idea behind \emph{resolving variables}, which we discuss
-next, in Section \ref{adding-resolving-variables}.
+procedure, i.e., it should remain the same, irrespective of employee
+sex. This is the idea behind \emph{resolving variables}, which we
+discuss next, in Section \ref{adding-resolving-variables}. It is worth
+emphasizing that we are not trying to answer the question of which
+choice of resolving variables is the correct one in the above example -
+this choice is left to social scientists deeply familiar with context
+and specifics of the above described dataset.
 
 \hypertarget{extensions}{%
 \section{Extensions}\label{extensions}}
@@ -973,7 +978,7 @@ Number of training samples:           200
 Number of test samples:               200 
 Number of independent variables:      3 
 Total variation (before adaptation):  -0.6757414 
-Total variation (after adaptation):   -0.4160513 
+Total variation (after adaptation):   -0.4101386 
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -993,7 +998,7 @@ R> uni_res <- graphModel(uni_adj, res.vars = "test")
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/res-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/res-graph-1} 
 
 }
 
@@ -1011,7 +1016,7 @@ unchanged from what is shown in Figure \ref{fig:graph-plot}.
 Variant}\label{semi-markovian-and-topological-ordering-variant}}
 
 Section \ref{methodology} focuses on the Markovian case, which assumes
-that all exogeneous variables \(U_i\) are mutually independent. However,
+that all exogenous variables \(U_i\) are mutually independent. However,
 in practice this requirement is often not satisfied. If a mutual
 dependency structure between variables \(U_i\) exists, this is called a
 Semi-Markovian model. In the university admission example, we could, for
@@ -1025,11 +1030,11 @@ in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/semi-markov-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/semi-markov-1} 
 
 }
 
-\caption{Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \ref{implementation}.  and visualized in its basic form in Figures \ref{fig:uni-adm} and \ref{fig:graph-plot}. Here, we allow for the possibility of a mutual dependency between the latent variables corresponding to test and final scores.}\label{fig:semi-markov}
+\caption{Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \ref{implementation}.  and visualized in its basic form in Figures \ref{fig:uni-adm} and \ref{fig:graph-plot}. Here, we allow for the possibility of a mutual dependency between the latent variables corresponding to variables test and final score.}\label{fig:semi-markov}
 \end{figure}
 \end{CodeChunk}
 
@@ -1057,7 +1062,7 @@ that the set of direct parents \(\mathrm{pa}(V_i)\) is replaced by
 
 To include the bidirectional confounding edges in the adaptation, we can
 pass a \texttt{matrix} as \texttt{cfd.mat} argument to
-\texttt{fairadpat()} such that:
+\texttt{fairadapt()} such that:
 
 \begin{itemize}
 \tightlist
@@ -1099,7 +1104,7 @@ R> semi <- fairadapt(score ~ ., train.data = uni_trn,
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpZHeECY/file9ad7d9376c1/dev/articles/jss_files/figure-latex/semi-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpJSStxT/file38e26fa942cf/dev/articles/jss_files/figure-latex/semi-graph-1} 
 
 }
 
