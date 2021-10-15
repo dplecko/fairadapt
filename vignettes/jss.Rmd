@@ -70,7 +70,6 @@ knitr::opts_chunk$set(echo = TRUE)
 library(fairadapt)
 library(data.table)
 library(ggplot2)
-library(tinytex)
 library(ggraph)
 options(tinytex.verbose = TRUE)
 
