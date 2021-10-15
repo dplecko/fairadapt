@@ -1,3 +1,8 @@
+# fairadapt 0.2.1
+Non-breaking changes:
+- `fairTwins()` now has a default `train.id` of `seq_len(nrow(x$train))` (previous default was `1L`)
+- `print.fairadapt()` has been changed to print the "Formula", not the "Call" (previously incorrect)
+
 # fairadapt 0.2.0
 Breaking changes:
 - `protect.A` argument renamed to `prot.attr`

@@ -213,7 +213,8 @@ adaptedData.fairadapt <- function(x, train = TRUE) {
 #'
 #' fairTwins(FA, train.id = 1:5)
 #' @export
-fairTwins <- function(x, train.id = 1L, test.id = NULL, cols = NULL) {
+fairTwins <- function(x, train.id = seq_len(nrow(x$train)), test.id = NULL,
+                      cols = NULL) {
   UseMethod("fairTwins", x)
 }
 

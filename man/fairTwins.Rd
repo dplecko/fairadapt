@@ -4,7 +4,7 @@
 \alias{fairTwins}
 \title{Fair Twin Inspection convenience function.}
 \usage{
-fairTwins(x, train.id = 1L, test.id = NULL, cols = NULL)
+fairTwins(x, train.id = seq_len(nrow(x$train)), test.id = NULL, cols = NULL)
 }
 \arguments{
 \item{x}{Object of class \code{fairadapt}, a result of an adaptation
