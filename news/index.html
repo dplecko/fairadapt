@@ -71,7 +71,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.1</span>
       </span>
     </div>
 
@@ -126,9 +126,21 @@
       
     </div>
 
+    <div id="fairadapt-021" class="section level1">
+<h1 class="page-header" data-toc-text="0.2.1">
+<a href="#fairadapt-021" class="anchor"></a>fairadapt 0.2.1<small> Unreleased </small>
+</h1>
+<p>Non-breaking changes:</p>
+<ul>
+<li>
+<code><a href="../reference/fairTwins.html">fairTwins()</a></code> now has a default <code>train.id</code> of <code><a href="https://rdrr.io/r/base/seq.html">seq_len(nrow(x$train))</a></code> (previous default was <code>1L</code>)</li>
+<li>
+<code>print.fairadapt()</code> has been changed to print the “Formula”, not the “Call” (previously incorrect)</li>
+</ul>
+</div>
     <div id="fairadapt-020" class="section level1">
 <h1 class="page-header" data-toc-text="0.2.0">
-<a href="#fairadapt-020" class="anchor"></a>fairadapt 0.2.0<small> Unreleased </small>
+<a href="#fairadapt-020" class="anchor"></a>fairadapt 0.2.0<small> 2021-07-28 </small>
 </h1>
 <p>Breaking changes:</p>
 <ul>
@@ -161,7 +173,7 @@
 
       <footer>
       <div class="copyright">
-  <p>Developed by Drago Plecko.</p>
+  <p>Developed by Drago Plecko, Nicolas Bennett.</p>
 </div>
 
 <div class="pkgdown">

@@ -72,7 +72,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.1</span>
       </span>
     </div>
 
@@ -132,7 +132,7 @@
     <p>Fair Twin Inspection convenience function.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>fairTwins</span><span class='op'>(</span><span class='va'>x</span>, train.id <span class='op'>=</span> <span class='fl'>1L</span>, test.id <span class='op'>=</span> <span class='cn'>NULL</span>, cols <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>fairTwins</span><span class='op'>(</span><span class='va'>x</span>, train.id <span class='op'>=</span> <span class='fu'><a href='https://rdrr.io/r/base/seq.html'>seq_len</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/nrow.html'>nrow</a></span><span class='op'>(</span><span class='va'>x</span><span class='op'>$</span><span class='va'>train</span><span class='op'>)</span><span class='op'>)</span>, test.id <span class='op'>=</span> <span class='cn'>NULL</span>, cols <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -181,17 +181,17 @@ to their original name.</p>
 
 <span class='fu'>fairTwins</span><span class='op'>(</span><span class='va'>FA</span>, train.id <span class='op'>=</span> <span class='fl'>1</span><span class='op'>:</span><span class='fl'>5</span><span class='op'>)</span>
 </div><div class='output co'>#&gt;   gender      score score_adapted        edu edu_adapted         test
-#&gt; 1      1  1.9501728     0.8214544  1.3499572   0.3162913  1.617739679
-#&gt; 2      0 -2.3502495    -2.3502495 -1.9779234  -1.9779234 -3.121796235
-#&gt; 3      1  0.6285619    -0.3344673  0.6263626  -0.4329106  0.530034686
-#&gt; 4      1  0.7064857     0.1854376  0.8142112  -0.3461600  0.004573003
-#&gt; 5      1  0.3678313     0.0529272  1.8415242   0.9574335  1.193677123
+#&gt; 1      1  1.9501728    1.71311662  1.3499572   0.2432649  1.617739679
+#&gt; 2      0 -2.3502495   -2.35024955 -1.9779234  -1.9779234 -3.121796235
+#&gt; 3      1  0.6285619    0.03824946  0.6263626  -0.3504788  0.530034686
+#&gt; 4      1  0.7064857    0.27709427  0.8142112  -0.2897524  0.004573003
+#&gt; 5      1  0.3678313    0.12026696  1.8415242   0.9380169  1.193677123
 #&gt;   test_adapted
-#&gt; 1    0.6457162
+#&gt; 1    0.5608818
 #&gt; 2   -3.1217962
-#&gt; 3   -0.2879852
-#&gt; 4   -0.9464893
-#&gt; 5   -0.1253915</div></pre>
+#&gt; 3   -0.1876645
+#&gt; 4   -0.9853641
+#&gt; 5    0.1900437</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
@@ -203,7 +203,7 @@ to their original name.</p>
 
       <footer>
       <div class="copyright">
-  <p>Developed by Drago Plecko.</p>
+  <p>Developed by Drago Plecko, Nicolas Bennett.</p>
 </div>
 
 <div class="pkgdown">

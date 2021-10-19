@@ -4,9 +4,6 @@
     <loc>https://dplecko.github.io/fairadapt/index.html</loc>
   </url>
   <url>
-    <loc>https://dplecko.github.io/fairadapt/reference/FairAdapt.html</loc>
-  </url>
-  <url>
     <loc>https://dplecko.github.io/fairadapt/reference/adaptedData.html</loc>
   </url>
   <url>
@@ -14,6 +11,9 @@
   </url>
   <url>
     <loc>https://dplecko.github.io/fairadapt/reference/fairTwins.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/fairadapt.html</loc>
   </url>
   <url>
     <loc>https://dplecko.github.io/fairadapt/reference/gov_census.html</loc>
