@@ -15,21 +15,21 @@ status](https://github.com/dplecko/fairadapt/workflows/pkgdown/badge.svg)](https
 [![covr
 status](https://github.com/dplecko/fairadapt/workflows/coverage/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Acoverage)
 [![Codecov test
-coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://codecov.io/gh/dplecko/fairadapt)
+coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://app.codecov.io/gh/dplecko/fairadapt)
 <!-- badges: end -->
 
 The R package fairadapt is intended for removing bias from machine
 learning algorithms. In particular, it implements the pre-processing
-procedure described in [Plecko &
-Meinshausen, 2019](https://arxiv.org/abs/1911.06685) (all the code used
-for producing the figures in the paper can be found in the `jmlr-paper`
-folder). The main idea is to adapt the training and testing data in a
-way which prevents any further training procedure from learning an
-undesired bias. The package currently offers the pre-processing step,
-after which the user can use the adapted data to train any classifier.
-However, some caution on the training step is still advised, so for more
-involved applications with resolving variables, the user should refer to
-the original paper.
+procedure described in [Plecko & Meinshausen,
+2019](https://arxiv.org/abs/1911.06685) (all the code used for producing
+the figures in the paper can be found in the `jmlr-paper` folder). The
+main idea is to adapt the training and testing data in a way which
+prevents any further training procedure from learning an undesired bias.
+The package currently offers the pre-processing step, after which the
+user can use the adapted data to train any classifier. However, some
+caution on the training step is still advised, so for more involved
+applications with resolving variables, the user should refer to the
+original paper.
 
 ## Installation
 
@@ -43,7 +43,6 @@ install.packages("fairadapt")
 ## Example
 
 <!-- example could be expanded to show bias before correction -->
-
 <!-- add plot of adj.mat? visualization of how data changed? -->
 
 An example of how fairadapt can be used is demonstrated below on the UCI
@@ -80,7 +79,7 @@ adult <- readRDS(
 n <- nrow(adult) / 2
 
 mod <- fairadapt(income ~ ., train.data = head(adult, n = n),
-                 test.data = tail(adult, n = n), protect.A = "sex",
+                 test.data = tail(adult, n = n), prot.attr = "sex",
                  adj.mat = adj.mat, res.vars = "hours_per_week")
 
 adapt.train <- mod[["adapt.train"]]
