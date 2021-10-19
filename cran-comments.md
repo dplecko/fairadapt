@@ -9,6 +9,4 @@ There were no ERRORs, WARNINGs or NOTEs.
 ## Update
 This is an update. In this version I have:
 
-* changed the ordering of the arguments in the main function.
-
-* enabled multiple quantile regression methods that now use S3 dispatch.
+* update some of the associated generics (non-breaking changes)

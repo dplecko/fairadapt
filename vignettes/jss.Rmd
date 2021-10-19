@@ -713,3 +713,8 @@ So far we did not discuss whether it is always possible to carry out the counter
   (i) there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
 
 Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases which are in principle identifiable are not currently handled. We hope to include this case in a future version.
+
+```{r session-info, include = FALSE}
+sessionInfo()
+```
+
