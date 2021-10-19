@@ -27,7 +27,7 @@ A data frame with 204,309 rows and 10 variables:
 }
 }
 \source{
-\url{https://www.census.gov/programs-surveys/acs/technical-documentation/pums/documentation.html}
+\url{https://www.census.gov/programs-surveys/acs/microdata/documentation.html}
 }
 \usage{
 gov_census

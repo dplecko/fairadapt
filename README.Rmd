@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 [![R check status](https://github.com/dplecko/fairadapt/workflows/check/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Acheck)
 [![pkgdown build status](https://github.com/dplecko/fairadapt/workflows/pkgdown/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Apkgdown)
 [![covr status](https://github.com/dplecko/fairadapt/workflows/coverage/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Acoverage)
-[![Codecov test coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://codecov.io/gh/dplecko/fairadapt)
+[![Codecov test coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://app.codecov.io/gh/dplecko/fairadapt)
 <!-- badges: end -->
 
 The R package fairadapt is intended for removing bias from machine learning algorithms. In particular, it implements the pre-processing procedure described in [Plecko & Meinshausen, 2019](https://arxiv.org/abs/1911.06685) (all the code used for producing the figures in the paper can be found in the `jmlr-paper` folder). The main idea is to adapt the training and testing data in a way which prevents any further training procedure from learning an undesired bias. The package currently offers the pre-processing step, after which the user can use the adapted data to train any classifier. However, some caution on the training step is still advised, so for more involved applications with resolving variables, the user should refer to the original paper.

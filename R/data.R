@@ -38,5 +38,5 @@
 #'     \item{ industry }{industry classification}
 #'     \item{ economic_region }{economic region where the person is employed in the US}
 #' }
-#' @source \url{https://www.census.gov/programs-surveys/acs/technical-documentation/pums/documentation.html}
+#' @source \url{https://www.census.gov/programs-surveys/acs/microdata/documentation.html}
 "gov_census"

@@ -150,7 +150,7 @@ $$\pr(T \geq t \mid E = e, A = a') = \pr(T \geq \tilde{t} \mid E = \tilde{e}, A 
 
 where the value $\tilde{e}$ was obtained in the previous step. This step can be visualized as shown in Figure \ref{fig:rel-edu}.
 
-```{tikz, rel-edu, fig.cap = "A graphical visualization of the quantile matching procedure. Given a male with a test score corresponding to the 70\\% quantile, we would hypothesize, that if the gender was changed, the individual would have achieved a test score corresponding to the 70\\% quantile of the female distribution.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{bbm}", "\\usepackage{pgfplots}", "\\pgfplotsset{compat=1.17}"))}
+```{tikz, rel-edu, fig.cap = "A graphical visualization of the quantile matching procedure. Given a male with a test score corresponding to the 70\\% quantile, we would hypothesize, that if the gender was changed, the individual would have achieved a test score corresponding to the 70\\% quantile of the female distribution.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{bbm}", "\\usepackage{pgfplots}", "\\pgfplotsset{compat=newest}"))}
 
 \newcommand{\pr}{\mathbbm{P}}
 \renewcommand{\tilde}[1]{ {#1}^{(fp)}}
