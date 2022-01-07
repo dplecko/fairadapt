@@ -205,6 +205,8 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
           org.data[, curr.var], levels = catOrder(org.data[row.idx, 1L],
                                                   org.data[row.idx, curr.var])
         )
+      } else if (is.integer(org.data[, curr.var])) {
+        q.engine[[curr.var]][["discrete"]] <- discrete <- 1L
       } else {
         org.data[, curr.var] <- factor(org.data[, curr.var])
       }
@@ -243,14 +245,21 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
 
     # if discrete, recode back to discrete or factor
     if (discrete) {
-
-      adapt.data[, curr.var] <-
-        decodeDiscrete(adapt.data[row.idx, curr.var], unique.values, type,
-                      full.len)
-
-      org.data[, curr.var] <-
-        decodeDiscrete(org.data[row.idx, curr.var], unique.values, type,
-                       full.len)
+      
+      if (is.integer(discrete)) {
+        
+        adapt.data[, curr.var] <- as.integer(round(adapt.data[, curr.var]))
+        org.data[, curr.var] <- as.integer((round(org.data[, curr.var])))
+        
+      } else {
+        adapt.data[, curr.var] <-
+          decodeDiscrete(adapt.data[row.idx, curr.var], unique.values, type,
+                         full.len)
+        org.data[, curr.var] <-
+          decodeDiscrete(org.data[row.idx, curr.var], unique.values, type,
+                         full.len)
+      }
+      
     }
 
   }

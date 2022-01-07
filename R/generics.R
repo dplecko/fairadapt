@@ -298,12 +298,15 @@ predict.fairadapt <- function(object, newdata, ...) {
     if (engine[[var]][["discrete"]]) {
 
       assert_that(
-        all(newdata[, var] %in% engine[[var]][["unique.values"]]),
+        all(newdata[, var] %in% engine[[var]][["unique.values"]]) |
+          is.integer(engine[[var]][["discrete"]]),
         msg = paste0("New, unseen values of variable ", var, ". Disallowed.")
       )
-
-      newdata[, var] <- factor(newdata[, var],
-                               levels = engine[[var]][["unique.values"]])
+      
+      if (is.logical(engine[[var]][["discrete"]])) {
+        newdata[, var] <- factor(newdata[, var],
+                                 levels = engine[[var]][["unique.values"]])
+      }
 
       newdata[, var] <- as.integer(newdata[, var]) +
         runif(length(newdata[, var]), -0.5, 0.5)
@@ -322,13 +325,19 @@ predict.fairadapt <- function(object, newdata, ...) {
 
     # iii) decode discrete
     if (engine[[var]][["discrete"]]) {
-
-      newdata[, var] <-
-        decodeDiscrete(newdata[, var], engine[[var]][["unique.values"]],
-                       engine[[var]][["type"]], length(newdata[, var]))
-      adapt[, var] <-
-        decodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
-                       engine[[var]][["type"]], length(adapt[, var]))
+      
+      if (is.integer(engine[[var]][["discrete"]])) {
+        newdata[, var] <- as.integer(round(newdata[, var]))
+        adapt[, var] <- as.integer(round(adapt[, var]))
+      } else {
+        newdata[, var] <-
+          decodeDiscrete(newdata[, var], engine[[var]][["unique.values"]],
+                         engine[[var]][["type"]], length(newdata[, var]))
+        adapt[, var] <-
+          decodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
+                         engine[[var]][["type"]], length(adapt[, var]))
+      }
+      
     }
   }
 
