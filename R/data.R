@@ -1,4 +1,4 @@
-#' Univeristy admission data of 1,000 students.
+#' University admission data of 1,000 students.
 #'
 #' A simulated dataset containing the evaluation of students' abilities.
 #'
@@ -11,6 +11,24 @@
 #' }
 "uni_admission"
 
+#' COMPAS dataset.
+#'
+#' A real dataset from Broward County, Florida. Contains information on individuals
+#' released on parole, and whether they reoffended within two years.
+#'
+#' @format A data frame with 1,000 rows and 4 variables:
+#' \describe{
+#'   \item{sex}{sex of the individual}
+#'   \item{age}{age, measured in years}
+#'   \item{race}{race, binary with values Non-White and White}
+#'   \item{juv_fel_count}{count of juvenile felonies}
+#'   \item{juv_misd_count}{count of juvenile misdemeanors}
+#'   \item{juv_misd_count}{count of other juvenile offenses}
+#'   \item{priors_count}{count of prior offenses}
+#'   \item{c_charge_degree}{degree of charge, with two values, F (felony) and M (misdemeanor)}
+#'   \item{two_year_recid}{a logical TRUE/FALSE indicator of recidivism within two years after parole start}
+#' }
+"compas"
 
 #' Census information of US government employees.
 #'

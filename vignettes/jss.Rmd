@@ -71,6 +71,7 @@ library(fairadapt)
 library(data.table)
 library(ggplot2)
 library(ggraph)
+library(ranger)
 options(tinytex.verbose = TRUE)
 
 options(
@@ -87,6 +88,29 @@ options(
   rv/.style = {circle, draw, thick, minimum size = 6mm},
   rvc/.style = {triangle, draw, thick, minimum size = 10mm},
   node distance = 18mm
+}
+\newcommand{\myx}{2.5}
+\definecolor{colone}{RGB}{164,202,202}
+\definecolor{coltwo}{RGB}{215, 212,193}
+\definecolor{colthree}{RGB}{187,180,160}
+\usetikzlibrary{
+  positioning, shadows, arrows, shapes, shapes.arrows, shapes.geometric,
+  arrows.meta, trees, shapes.misc
+}
+
+\tikzset{
+  every node/.style = {
+    draw = none, align = center, fill = none, text centered,
+    anchor = center, font = \it
+  },
+  every label/.style={circle, draw, fill = yellow},
+  f1/.style = {
+    draw = , fill = gray!15, thick, inner sep = 3pt, minimum width = 7em,
+    minimum height = 2em, align = center, text centered},
+  f2/.style = {
+    draw = none, fill = red!15, thick, inner sep = 3pt, minimum width = 5em,
+    align = center, text centered
+  }
 }
 ```
 
@@ -384,6 +408,331 @@ head(ft_basic, n = 3)
 
 In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output.
 
+# Uncertainty Quantification
+The user might naturally be interested in uncertainty quantification of the procedure performed in `fairadapt()`. Before discussing how this can be achieved, we first give a graphical sketch of the typical workflow when using `fairadapt()`, shown in Figure \ref{fig:workflow-tikz}.
+
+```{tikz, workflow-tikz, fig.cap = "The typical workflow when using \\pkg{fairadapt}. The shaded region represents the fair pre-processing which happens within the \\pkg{fairadapt} package. Often, this is followed by applying a regressor or a classifier to the transformed data, in order to obtain fair predictions. The latter part is up to the user and not included in \\pkg{fairadapt}.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
+
+<<setup-graph>>
+
+\begin{tikzpicture}
+
+  \pgfsetarrows{latex-latex};
+
+  \begin{scope}
+    \fill [colone, label={above left:{Ctf-fair}}] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
+    
+    \draw[] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
+
+    \node (train) at (0, -1) {$\mathcal{D}_{train}$};
+\node (graph) at (0, -2) {graph $\mathcal{G}$};
+    
+    \node[f1] (fairadapt) at (\myx, -1.5) {\texttt{fairadapt()}};
+    
+    \node (traintransform) at (2.25*\myx, -1) {$\widetilde{\mathcal{D}}_{train}$};
+    \node (fairadapts3) at (2.25*\myx, -2) {fairadapt \texttt{S3}};
+    \node (test) at (2.25*\myx, -3) {$\mathcal{D}_{test}$};
+    
+    
+    \node[f1] (predict0) at (3.5*\myx, -2.5) {\texttt{predict()}};
+    
+    \node (testtransform) at (4*\myx, -1) {$\widetilde{\mathcal{D}}_{test}$};
+    
+    \node[f1] (predict1) at (5*\myx, 0) {\texttt{predict()}};
+    
+    \node (yhat) at (6*\myx, 0) {$\widehat{Y}^{fair}_{test}$};
+    
+    \node[f1] (classreg) at (2.5 * \myx, 1.5) {\texttt{classifier()} \\ \texttt{regressor()}};
+    
+    \node (classregs3) at (4*\myx, 1) {predictor \texttt{S3}};
+    
+    \draw[-Stealth] (train) to (fairadapt);
+    \draw[-Stealth] (graph) to (fairadapt);
+    
+    \draw[-Stealth] (fairadapt) to (traintransform);
+    \draw[-Stealth] (fairadapt) to (fairadapts3);
+    
+    \draw[-Stealth] (fairadapts3) to (predict0);
+    \draw[-Stealth] (test) to (predict0);
+    
+    \draw[-Stealth] (predict0) to (testtransform);
+    \draw[-Stealth] (testtransform) to (predict1);
+    \draw[-Stealth] (predict1) to (yhat);
+    
+    \draw[-Stealth] (train) to (classreg);
+    \draw[-Stealth] (traintransform) to (classreg);
+    \draw[-Stealth] (classreg) to (classregs3);
+    \draw[-Stealth] (classregs3) to (predict1);
+  \end{scope}
+
+\end{tikzpicture}
+```
+The figure can be described as follows. We start from the training data $\mathcal{D}_{train}$ and the causal graph $\mathcal{G}$. These two arguments are used as inputs of the `fairadapt()` function, which returns the transformed training data $\widetilde{\mathcal{D}}_{train}$ and the fairadapt S3 object. The S3 fairadapt object and the test data $\mathcal{D}_{test}$ are then used as inputs to the `predict()` function, which returns the transformed test data $\widetilde{\mathcal{D}}_{test}$. Commonly the end goal is to obtain fair predictions on the test data, and to this end we need to train a classifier/regressor. For doing so, either the training data $\mathcal{D}_{train}$ or its transformed counterpart $\widetilde{\mathcal{D}}_{train}$ can be used for building a predictor. The predictor then needs to be applied to the transformed train data $\widetilde{\mathcal{D}}_{test}$. Armed with the graphical visualization in Figure \ref{fig:workflow-tikz}, which serves as a mental map of our workflow, we can now explain the distinct sources of uncertainty that can be considered.
+
+\paragraph{Finite sample uncertainty.} 
+The first, commonly encountered source of uncertainty is that of finite samples. The training data $\mathcal{D}_{train}$ has a finite size, and for this reason inferences made using this data are imperfect. Put differently, we wish to understand how changes in the training data $\mathcal{D}_{train}$ would effect the end result $\widehat{Y}^{fair}_{test}$. As Figure \ref{fig:workflow-tikz} shows, the training data $\mathcal{D}_{train}$ affects the resulting fair predictions in two ways. Firstly, it affects the value of the transformed test data $\widetilde{\mathcal{D}}_{test}$ (mediated by the fairadapt S3 object). Secondly, it affects the predictions $\widehat{Y}^{fair}_{test}$ also through the predictor (since it is the input to the regressor classifier). These finite sample uncertainties can be analyzed using \textit{bootstrap} \citep{efron1994introduction}. This means that we repeat the procedure in Figure \ref{fig:workflow-tikz} many times, each time taking a different bootstrap sample of the training data. Below we will show how this can be done with the `fairadaptBoot()` function. 
+
+\paragraph{Inherent uncertainty in the quantiles.} 
+The second source of uncertainty arises from the uncertainty in quantiles and is specific to \pkg{fairadapt}. As described in Section \ref{methodology} (see also Figure \ref{fig:rel-edu}), the fairadapt procedure aims to preserve the relative quantile of the variable, when computing the $do(A=a)$ intervention. However, when we are working with variables that are not continuous, defining a quantile precisely becomes more difficult\footnote{Think of a case where we have a binary $X \in \lbrace 0, 1 \rbrace$. In such a case, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example).}. Therefore, in presence of discrete variables, due to the imperfect estimation of quantiles, the fairadapt procedure has some inherent randomness. This randomness would still persist even if we had infinite training samples in $\mathcal{D}_{train}$. Importantly, to achieve fair predictions, taking an expectation over this randomness is not feasible. For a detailed discussion of why this is the case, we refer the reader to \citet[Section~5]{plecko2020fair}.
+
+For quantifying uncertainty, we use the `fairadaptBoot()` function, whose most important arguments are:
+  
+  - `formula`, `prot.attr`, `adj.mat`, `train.data` as for the `fairadapt()` function (see Section \ref{implementation})
+  - `test.data`, `data.frame` containing the test data, defaults to `NULL`. Whenever the test data equals `NULL`, then `save.object` must be `TRUE`.
+  - `save.object`, a `logical` scalar, indicating whether all the fairadapt S3 objects built in boostrap repetitions should be saved. Default value is `FALSE`.
+  - `rand.mode`, a `character` scaler, taking values `"finsamp"`, `"quant"` or `"both"`, corresponding to considering finite sample uncertainty, quantile uncertainty or both.
+  
+The function `fairadaptBoot()` returns an S3 object of class `fairadaptBoot`. We emphasize that calling this function can be computationally heavy, both in terms of runtime and memory. Setting the `save.object` argument to be `FALSE` reduces the memory consumption substantially, with the drawback that `test.data` has to be provided in the argument, and also that the resulting `fairadaptBoot` object cannot be reused. Setting the `save.object` to `TRUE` might consume a lot of memory, but then this object can be reused over again for transforming the test data. This can be done by using the `predict()` function on the `fairadaptBoot` S3 object, to which a `test.data` argument is available.
+
+We now compare the finite sample uncertainty and the quantile uncertainty on the COMPAS dataset \citep{larson2016compas}. We begin by loading the COMPAS dataset and constructing its causal graph:
+```{r, compas}
+cmp_dat <- data("compas", package = "fairadapt")
+cmp_dat <- get(cmp_dat)
+
+cmp_mat <- array(0, dim = c(ncol(cmp_dat), ncol(cmp_dat)),
+                 dimnames = list(names(cmp_dat), names(cmp_dat)))
+cmp_mat[c("race", "sex", "age"), 
+        c("juv_fel_count", "juv_misd_count",
+          "juv_other_count", "priors_count",
+          "c_charge_degree", "two_year_recid")] <- 1
+cmp_mat[c("juv_fel_count", "juv_misd_count", "juv_other_count"),
+        c("priors_count", "c_charge_degree", "two_year_recid")] <- 1
+cmp_mat["priors_count", c("c_charge_degree", "two_year_recid")] <- 1
+cmp_mat["c_charge_degree", "two_year_recid"] <- 1
+
+head(cmp_dat)
+```
+The COMPAS dataset contains information on 7214 individuals from Broward County, Florida, who were released on parole. The variables include race, sex, age, juvenile offense counts, priors count and the charge of the degree. The outcome of interest is recidivism within two years and the prottected attribute is race (taking values Non-White and White). A possible causal graph for the COMPAS dataset is given in Figure \ref{fig:compas-graph}.
+
+```{tikz, compas-graph, fig.cap = "The causal graph for the COMPAS dataset. $Z$ are demographic features, $A$ is race, $J$ juvenile offense counts, $P$ priors count, $D$ the degree of charge, and $Y$ two year recidivism.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+
+<<setup-graph>>
+
+\begin{tikzpicture}
+
+  \pgfsetarrows{latex-latex};
+
+  \begin{scope}
+	 	\node[rv] (c) at (0.5,2) {$\pmb{Z}$};
+	 	\node[rv] (a) at (-2,2) {$A$};
+	 	\node[rv] (m) at (-3,0) {$\pmb{J}$};
+	 	\node[rv] (l) at (-1.5,0) {$P$};
+	 	\node[rv] (r) at (0,0) {${D}$};
+	 	\node[rv] (y) at (1.5,0) {$Y$};
+	 	\draw[->] (c) -- (m);
+	 	\draw[->] (c) -- (l);
+	 	\draw[->] (c) -- (r);
+	 	\draw[->] (c) -- (y);
+	 	\draw[->] (a) -- (m);
+	 	\draw[->] (m) -- (l);
+	 	\draw[->] (l) -- (r);
+	 	\draw[->] (r) -- (y);
+	 	\path[->] (a) edge[bend left = 0] (l);
+	 	\path[->] (a) edge[bend left = 0] (r);
+	 	\path[->] (a) edge[bend left = 0] (y);
+	 	\path[->] (m) edge[bend right = 20] (r);
+	 	\path[->] (m) edge[bend right = 30] (y);
+	 	\path[->] (r) edge[bend right = 20] (y);
+		\path[<->,dashed] (a) edge[bend left = 10](c);
+  \end{scope}
+
+\end{tikzpicture}
+```
+
+After loading the dataset, we run the `fairadaptBoot()` function twice, with two different values of the `rand.mode` argument. Firstly, we run a boostrap with only the finite sample uncertainty. To simplify, we also train a random forest classifier on the entire training data and consider the classifier as fixed.
+```{r, compas-boot-finite, cache=TRUE}
+cmp_trn <- tail(cmp_dat, n = 7000L)
+cmp_tst <- head(cmp_dat, n = 100L)
+FA.boot.fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat, cmp_trn, 
+                             cmp_tst, rand.mode = "finsamp", n.boot = 3L)
+```
+Then, we run the bootstrap procedure, but by considering only the inherent quantile uncertainty.
+```{r, compas-boot-quant, cache=TRUE}
+FA.boot.quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat, cmp_trn, 
+                               cmp_tst, rand.mode = "quant", n.boot = 3L)
+```
+The objects we obtained are of class `fairadaptBoot` and contain a list `adapt.test` which contains different replicates of the adapted test data (the length of this list in `n.boot`, the number of bootstrap repetitions). Finally, to obtain predictions, we train a random forest classifier on the original training data and apply it to all of the obtained transformed datasets:
+
+```{r, compas-forest, cache = TRUE}
+cmp_RFs <- lapply(
+  seq_len(FA.boot.fin$n.boot),
+  \(x) {
+    ranger(two_year_recid ~ ., cmp_trn[FA.boot.fin$boot.ind[[x]], ], 
+           probability = TRUE)                
+  }
+)
+
+pred_fin <- Map(\(x, y) predict(x, y)$predictions[, 2],
+                cmp_RFs, FA.boot.fin$adapt.test)
+pred_fin <- Reduce(cbind, pred_fin)
+
+pred_quant <- Map(\(x, y) predict(x, y)$predictions[, 2],
+                  cmp_RFs, FA.boot.quant$adapt.test)
+pred_quant <- Reduce(cbind, pred_quant)
+```
+
+## Analyzing the Uncertainty
+We now have several different sets of predictions $\widehat{Y}^{fair}_{test}$. The important question is how can we analyze these predictions? There two slightly different viewpoints on this problem, and we cover both of them.
+
+### Decision-maker Analysis
+The first way to analyze the uncertainty of the predictions is from the point of view of the decision-maker. By decision-maker, in this context we refer to the person(s) running the analysis and obtaining a set of fair predictions. For a decision-maker, it is important to understand how much does the decision set change under uncertainty. Let $p_A$ be the vector of predicted probabilities on the `test.data`, with length `nrow(test.data)`. Denote `nrow(test.data)` with $n_{test}$. Let $p_B$ be another vector of predicted probabilities (under a different bootstrap repetition). We can consider the following four metrics of uncertainty:
+
+1. For each threshold $t \in [0, 1]$, we compute the decision sets $D_A$, $D_B$, which are obtained by selecting all individuals for whom the value of $p_A \geq t$ (and $p_B$ respectively). We can then compute the Jaccard similarity of decision sets $D_A$, $D_B$, for each threshold $t$. By comparing many pairs of bootstrap repetitions in this way, we can understand what is the average Jaccard similarity for each threshold $t$.
+
+```{r, decision-maker-1}
+jac_frm <- function(res, modes = "single") {
+  
+  jac <- function(a, b) {
+    intersection <- length(intersect(a, b))
+    union <- length(a) + length(b) - intersection
+    return (intersection/union)
+  }
+  
+  L <- lapply(
+    seq(quantile(res[, 1], 0.05), quantile(res[, 1], 0.95), 0.01),
+    function(tsh) {
+      ret <- NULL
+      for (i in seq_len(100)) {
+        col <- sample(ncol(res), 2)
+        ret <- c(
+          ret, jac(which(res[, col[1]] > tsh), which(res[, col[2]] > tsh))
+        )
+      }
+      data.table(cbind(tsh, ret))
+    }       
+  )
+  
+  rtn <- Reduce(rbind, L)
+  rtn <- rtn[complete.cases(rtn)]
+  rtn[, list(y = mean(ret), sd = sd(ret), mode = modes), by = "tsh"]
+}
+
+df <- rbind(jac_frm(pred_fin, "Finite Sample"), jac_frm(pred_quant, "Quantiles"))
+p1 <- ggplot(df, aes(x = tsh, y = y, color = mode)) +
+  geom_point() + geom_line() +
+  geom_ribbon(aes(ymin = y - sd, ymax = y + sd, fill = mode, color = mode), alpha = 0.3) +
+  theme_bw() + xlab("Decision threshold") + ylab("Jaccard similarity") +
+  theme(
+    legend.position = c(0.2, 0.2),
+    legend.box.background = element_rect()
+  ) + ggtitle("Jaccard similarity")
+
+```
+
+2. Consider two indices $i, j$ of the vectors $p_A, p_B$ such that $i \neq j$, corresponding to two distinct individuals. For such pairs of individuals $(i, j)$ we can analyze the probability $P((p_A)_i \geq (p_B)_j)$, where we can consider $i, j$ to be drawn randomly, and $p_A, p_B$ resulting from two random bootstrap repetitions. This probability tells us how likely it is that two randomly selected individuals appear in the same order in two repetitions.
+
+```{r, decision-maker-2}
+ord_ind <- function(res, modes = "single") {
+  
+  if (is.list(res) & length(res) > 1L) return(Reduce(rbind, Map(ord_ind, res, modes)))
+  
+  ret <- NULL
+  for (i in seq_len(5000)) {
+    row <- sample(nrow(res), 2)
+    ord <- mean(res[row[1], ] > res[row[2], ])
+    ret <- c(ret, max(ord, 1 - ord))
+  }
+  
+  return(data.frame(ret = ret, mode = modes))
+  
+}
+
+df <- rbind(ord_ind(pred_fin, "Finite Sample"), ord_ind(pred_quant, "Quantiles"))
+p2 <- ggplot(df, aes(x = ret, color = mode)) +
+  stat_ecdf() + theme_bw() + xlab("Probability of preserving ordering") +
+  ylab("Cumulative proportion") + ggtitle("Order preservation of individuals") +
+  theme(
+    legend.position = c(0.2, 0.8),
+    legend.box.background = element_rect()
+  )
+
+```
+
+3. Another interesting metric is that of inversion number. Notice that $p_A, p_B$ define two permutations of the $n_{test}$ individuals, when we considering sorting them according to their predicted probabilities. We can compute the inversion number of these two permutations $\pi_A, \pi_B$, which is the total number of pairs of individuals whose ordering is not the same in $\pi_A$ and $\pi_B$. Notice that the maximum value of the inversion number is $n_{test} \choose 2$. Hence, we normalize this quantity by $n_{test} \choose 2$.
+
+```{r, decision-maker-3}
+inv_num <- function(sq) {
+  stopifnot(setequal(sq, seq_along(sq)))
+  cnt <- 0
+  for (i in seq_along(sq)) {
+    for (j in (i):length(sq)) {
+      if (sq[i] > sq[j]) cnt <- cnt + 1
+    }
+  }
+  cnt / choose(length(sq), 2)
+}
+
+inv_frm <- function(res, modes = "single") {
+
+  ret <- NULL
+  for (i in seq_len(100)) {
+    col <- sample(ncol(res), 2)
+    prm <- order(res[, col[2]][order(res[, col[1]])])
+    ret <- c(ret, inv_num(prm))
+  }
+  
+  data.frame(ret = ret, mode = modes)
+}
+
+df <- rbind(inv_frm(pred_fin, "Finite Sample"), inv_frm(pred_quant, "Quantiles"))
+p3 <- ggplot(df, aes(x = ret, fill = mode)) +
+  geom_density(alpha = 0.3) + xlim(0, 1) + theme_bw() +
+  xlab("Normalized inversion number") +
+  ylab("Density") + ggtitle("Inversion number") +
+  theme(
+    legend.position = c(0.8, 0.8),
+    legend.box.background = element_rect()
+  )
+
+```
+
+4. For an individual $i$, we can take the 5\% and 95\% quantiles of if its predicted probability in all of the `n.boot` bootstrap repetitions. We analyze the width of this interval across all individuals.
+
+```{r, decision-maker-4}
+prb_frm <- function(res, modes = "single") {
+  
+  qnt <- matrixStats::rowQuantiles(res, probs = c(0.05, 0.95))
+  data.frame(width = qnt[, 2] - qnt[, 1], mode = modes)
+
+}
+
+df <- rbind(prb_frm(pred_fin, "Finite Sample"), prb_frm(pred_quant, "Quantiles"))
+p4 <- ggplot(df, aes(x = -width, color = mode)) +
+  stat_ecdf() + theme_bw() +
+  xlab("95% CI width") + ylab("Cumulative probability") +
+  theme(
+    legend.position = c(0.2, 0.8),
+    legend.box.background = element_rect()
+  ) + ggtitle("Conf. Int. width")
+
+```
+
+The results of these four metric applied to the COMPAS dataset are shown in \ref{fig:compas-dm}.
+
+```{r, compas-dm, echo = FALSE, fig.width = 8, fig.height = 6, fig.cap = "Analyzing uncertainty of predictions in the COMPAS dataset.", out.width = "100%"}
+cowplot::plot_grid(
+  p1, p2, p3, p4, ncol = 2L
+)
+```
+
+### Individual Analysis
+The other point of view we can take in quantifying uncertainty is that of the individual experiencing fair decisions. In this case, we are not so much interested in how much the overall decision set changes (as was the case above), but rather how much variation there is in the estimate for the specific individual. To this end, one might investigate the spread of the predicted values for a specific individual. The spread of the predictions for the first three individuals can be obtained as follows:
+
+```{r, indiv-uncq}
+ind_prb <- data.frame(prob = as.vector(t(pred_fin[1:3, ])), 
+                      individual = rep(c(1, 2, 3), each = FA.boot.fin$n.boot))
+```
+
+and is visualized in Figure \ref{fig:compas-indiv}. 
+
+```{r, compas-indiv, echo = FALSE, fig.width = 8, fig.height = 6, fig.cap = "Analyzing uncertainty of predictions in the COMPAS dataset.", out.width = "100%"}
+ggplot(ind_prb, aes(x = prob, group = individual, fill = "black")) + 
+    geom_density(alpha = 0.2) +
+    xlab("Probability Estimate") + ylab("Density") + theme_bw() +
+    xlim(0, 1)
+```
+
+
 # Illustration
 
 As a hypothetical real-world use of \pkg{fairadapt}, suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all female employees, that is the salaries that female employees would obtain, had they been male.
@@ -533,7 +882,7 @@ gov_trn <- head(gov_dat, n = n_samp)
 gov_prd <- tail(gov_dat, n = n_pred)
 ```
 
-```{r, before-adapt, echo = FALSE, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, indicating a shift to higher values for male employees. This uses the US government-census dataset and shows the situation before applying fair data adaption, while Figure \\ref{fig:vis-adapt} presents transformed salary data."}
+```{r, before-adapt, echo = FALSE, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, indicating a shift to higher values for male employees. This uses the US government-census dataset and shows the situation before applying fair data adaption, while Figure \\ref{fig:vis-adapt} presents transformed salary data.", cache = TRUE}
 ggplot(gov_trn, aes(x = salary, fill = sex)) +
   geom_density(alpha = 0.4)  +
   theme_bw() +
@@ -542,7 +891,7 @@ ggplot(gov_trn, aes(x = salary, fill = sex)) +
 
 There is a clear shift between the two sexes, indicating that `male` employees are currently better compensated when compared to `female` employees. However, this differences in `salary` could, in principle, be attributed to factors apart form gender inequality, such as the economic region in which an employee works. This needs to be accounted for as well, i.e., we do not wish to remove differences in salary between economic regions.
 
-```{r, census-adapt}
+```{r, census-adapt, cache=TRUE}
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
