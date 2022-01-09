@@ -50,36 +50,41 @@ catOrder <- function(outcome, var) {
 }
 
 marginalMatching <- function(x, base.ind) {
+  
+  # round the baseline values
+  x.base <- round(x[base.ind])
+  x.nbas <- x[!base.ind]
+  # compute the proportions
+  fit.val.cnt <- (table(x.base) / length(x.base)) *
+    length(x.nbas)
+  u.val <- sort(unique(x.base))
+  
+  assert_that(length(u.val) == length(fit.val.cnt),
+              msg = "Wrong number of unique values in Marginal Matching")
+  
+  fit.x.base <- NULL
 
-  x.baseline <- round(x[base.ind])
-  x.non.baseline <- x[!base.ind]
-
-  fitted.value.counts <- (tabulate(x.baseline) / length(x.baseline)) *
-    length(x.non.baseline)
-  fitted.x.baseline <- NULL
-
-  for (i in seq_along(fitted.value.counts)) {
-
-    fitted.x.baseline <- c(
-      fitted.x.baseline,
-      rep(i, round(fitted.value.counts[i]))
+  for (i in seq_along(fit.val.cnt)) {
+    fit.x.base <- c(
+      fit.x.base,
+      rep(u.val[i], round(fit.val.cnt[i]))
     )
   }
 
-  fitted.x.baseline <- c(
-    fitted.x.baseline,
+  fit.x.base <- c(
+    fit.x.base,
     rep(
-      length(fitted.value.counts),
-      max(0, length(x.non.baseline) - length(fitted.x.baseline))
+      u.val[length(fit.val.cnt)],
+      max(0, length(x.nbas) - length(fit.x.base))
     )
   )
 
-  fitted.x.baseline <- fitted.x.baseline[seq_along(x.non.baseline)]
+  fit.x.base <- fit.x.base[seq_along(x.nbas)]
 
-  x.non.baseline[order(x.non.baseline)] <- fitted.x.baseline
+  x.nbas[order(x.nbas)] <- fit.x.base
 
-  x[!base.ind] <- x.non.baseline
-  x[base.ind] <- x.baseline
+  x[!base.ind] <- x.nbas
+  x[base.ind] <- x.base
 
   x
 }
