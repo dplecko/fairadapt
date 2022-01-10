@@ -126,6 +126,16 @@ A possible approach to fairness is the use of counterfactual reasoning \citep{ga
 
 The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as \proglang{R}-package \pkg{fairadapt} from CRAN. Currently there are only few packages distributed via CRAN that relate to fair machine learning. These include \pkg{fairml} \citep{scutari2021fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels} \citep{wisniewski2021fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The only causal method, however, is presented by \pkg{fairadapt}. Even though theory in fair machine learning is being expanded at an accelerating pace, good quality implementations of the developed methods are often not available.
 
+## Novelty in the package
+A first version of \pkg{fairadapt} was published with the original manuscript \citep{plecko2020fair}. The novelty in the package presented in this manuscript consists of:
+\begin{itemize}
+  \item extending the method from the Markovian to the Semi-Markovian case (allowing noise variables to be correlated), which generalizes the scope of applications, 
+  \item allowing for backdoor paths into the protected attribute $A$, meaning that the attribute $A$ does not need to be a root node of the causal graph,
+  \item allowing the user to consider uncertainty quantification of the provided estimates,
+  \item introducing an S3 class `fairadapt` and its associated methods,
+  \item allowing for several different algorithms in the quantile learning step, and additionally allowing the possibility of specifying a custom quantile learning function (via S3 dispatch).
+\end{itemize}
+
 The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{illustration}, which illustrates the usage of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
 
 # Methodology
@@ -925,7 +935,8 @@ The variable `hours_worked` is also a descendant of $A$, and one might argue tha
 
 Several extensions to the basic Markovian SCM formulation introduced in Section \ref{markovian-scm-formulation} exist, some of which are available for use in `fairadapt()` and are outlined in the following sections.
 
-## Adding Resolving Variables
+## Adding Resolving Variables 
+\label{sec:resolvers}
 
 \cite{kilbertus2017avoiding} discuss that in some situations the protected attribute $A$ can affect variables in a non-discriminatory way. For instance, in the Berkeley admissions dataset \citep{bickel1975sex} we observe that females often apply for departments with lower admission rates and consequently have a lower admission probability. However, we perhaps would not wish to account for this difference in the adaptation procedure, if we were to argue that applying to a certain department is a choice everybody is free to make. Such examples motivated the idea of *resolving variables* by \citet{kilbertus2017avoiding}. A variable $R$ is called resolving if
 
@@ -1061,7 +1072,14 @@ So far we did not discuss whether it is always possible to carry out the counter
   (i) there is no bidirected path between $A$ and $\ch(A)$ and,
   (i) there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
 
-Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases which are in principle identifiable are not currently handled. We hope to include this case in a future version.
+Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases which are in principle identifiable are not currently handled.
+
+## Future avenues to be explored
+We conclude with a brief look at the possible extensions of the \pkg{fairadapt} package, which we hope to consider in future work:
+
+1. \textit{General identification}: as discussed above, there are certain cases of causal graphs in which our do$(A = a, R = R(a'))$ intervention is identifiable, but the `fairadapt()` function currently does not support doing so. One such example is front-door identification mentioned above. However, this is not the only such example. In a future version of \pkg{fairadapt}, we hope to cover all scenarios in which identification is possible. 
+2. \textit{Path-specific effects}: when using resolving variables (Section \ref{sec:resolvers}), the user decides to label these variables as "non-discriminatory", that is, the algorithm is free to distinguish between groups based on these variables. In full generality, a user might be interested in considering all path-specific effects \citep{avin2005identifiability}. Such an approach would offer even more flexibility in modeling, since for every attribute-outcome path $A \rightarrow ... \rightarrow Y$, the user could decide whether it is fair or not. 
+3. \textit{Selection bias}: A commonly considered problem in causal inference is that of selection bias \citep{hernan2004structural}, when inclusion of individuals into the dataset depends on the observed variables in the dataset. In fairness applications, the presence of selection bias could invalidate our conclusions about discrimination and make our fair predictions biased. Recovering from selection bias algorithmically would therefore be a desirable feature in the \pkg{fairadapt} package.
 
 ```{r session-info, include = FALSE}
 sessionInfo()
