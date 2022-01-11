@@ -16,7 +16,7 @@ fairadaptBoot(
   quant.method = rangerQuants,
   save.object = FALSE,
   n.boot = 100,
-  mode = "finite",
+  rand.mode = "finsamp",
   ...
 )
 }
