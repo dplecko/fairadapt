@@ -40,6 +40,11 @@ correctInput <- function(formula, train.data, test.data, adj.mat, cfd.mat,
     all(colnames(train.data) %in% ap.nms),
     msg = "Train data has columns that do not appear in the adjacency matrix"
   )
+  
+  assert_that(
+    length(unique(train.data[[prot.attr]])) == 2L,
+    msg = "Protected attribute is not binary"
+  )
 
   invisible(NULL)
 }
