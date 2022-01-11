@@ -36,6 +36,7 @@ preamble: >
   \usepackage{bbm}
   \usepackage{array}
   \usepackage{enumerate}
+  \usepackage{enumitem}
   \usepackage{booktabs}
   \usepackage{makecell}
   \usepackage{threeparttablex}
@@ -72,6 +73,7 @@ library(data.table)
 library(ggplot2)
 library(ggraph)
 library(ranger)
+library(microbenchmark)
 options(tinytex.verbose = TRUE)
 
 options(
@@ -118,13 +120,105 @@ options(
 
 Machine learning algorithms have become prevalent tools for decision-making in socially sensitive situations, such as determining credit-score ratings or predicting recidivism during parole. It has been recognized that algorithms are capable of learning societal biases, for example with respect to race \citep{larson2016recidivism} or gender \citep{lambrecht2019algorithmic, blau2003pay}, and this realization seeded an important debate in the machine learning community about fairness of algorithms and their impact on decision-making.
 
-In order to define and measure discrimination, existing intuitive notions have been statistically formalized, thereby providing fairness metrics. For example, *demographic parity* \citep{darlington1971fairness} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as $\widehat{Y} \ci A$. Another notion, termed *equality of odds* \citep{hardt2016eosl}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example), written as $\widehat{Y} \ci A \mid Y$. To this day, various different notions of fairness exist, which are sometimes incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a predictor $\widehat{Y}$ simultaneously. There is still no consensus on which notion of fairness is the correct one.
+## Definitions of Fairness
+In order to define and measure discrimination, existing intuitive notions have been statistically formalized, thereby providing fairness metrics. To this day, various different notions of fairness exist, which are sometimes mutually incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a constructed predictor $\widehat{Y}$ simultaneously. Even though there is no clear consensus on which notion of fairness is the correct one to use, there are three notions that have been discussed widely in the literature:
 
+\begin{enumerate}[label=(\arabic*)]
+  \item *demographic parity* \citep{darlington1971fairness} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as $$\widehat{Y} \ci A,$$
+  \item *equality of odds* \citep{hardt2016eosl}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example) written as $$\widehat{Y} \ci A \mid Y,$$
+  \item *calibration* 
+\end{enumerate}
+
+## Fairness Tasks
+Apart from choosing a notion of fairness most appropriate to the setting that is analyzed, it is also good to separate out two somewhat different tasks in fairness analysis. The first, usually simpler task is that of \textit{bias quantification}, or bias measurement. In this case, we are interested in computing metrics from our dataset that quantify whether a definition is satisfied or not. Concretely, suppose we have a dataset in which $\widehat{Y}$ is the predicted salary and $A$ is sex. If we are interested in demographic parity, $\widehat{Y} \ci A$, we can compute the average difference in salary between the male/female groups, that is $\ex[\widehat{Y} \mid A = \text{male}] - \ex[\widehat{Y} \mid A = \text{female}]$. For other definitions, different metrics would be appropriate.
+
+Sometimes, performing the first step of bias measurement is not the end goal. Suppose that we are analyzing a dataset and compute a metric which shows there might be discrimination in the dataset (say a large salary gap between sexes in the example above). We then might be interested in computing new, more fair predictions (in which, say, the salary gap is lower). This second task is that of \textit{bias removal}, or bias mitigation, in which we want to remove from our predictions the bias that we previously found.
+
+In Figure \ref{fig:software} we give a graphical overview of some of the available software in \proglang{python} and \proglang{R}, which are the languages most commonly used in fairness analysis. The figure might serve as a guide to a new fairness analyst wishing to get started. In particular, we note that bias detection software usually covers a wide range of different metrics, compatible with different fairness definitions. When it comes to bias removal, not all methods are compatible with all the definitions ... . Furthermore, some methods might specifically work in the classification or regression setting. Therefore, in the bias removal task we indicate which methods/software supports which type of definition and prediction problem.
+
+```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} and \\proglang{python}. In the left column, nodes correspond to \\proglang{R}-packages and in the right column to \\proglang{python} modules.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
+
+<<setup-graph>>
+
+\newcommand{\sx}{1.6}
+\newcommand{\sy}{-1.6}
+
+\begin{tikzpicture}
+
+  \begin{scope}
+     \draw[draw=black, very thin] (1*\sx, 7.25*\sy) rectangle ++(8*\sx, -0.5*\sy);
+		
+
+		\draw [very thin] (\sx, 0.5 * \sy) -- (9 * \sx, 0.5 * \sy);
+		\draw [very thin] (\sx, 0 * \sy) -- (9 * \sx, 0 * \sy);
+		\draw [very thin] (\sx, 5.5 * \sy) -- (9 * \sx, 5.5 * \sy);
+		\draw [very thin] (\sx, 6 * \sy) -- (9 * \sx, 6 * \sy);
+		
+
+	    \draw [very thin] (\sx,0) -- (\sx, 6*\sy);
+		\draw [very thin] (5*\sx,0) -- (5*\sx, 6*\sy);
+		\draw [very thin] (9*\sx,0) -- (9*\sx, 6*\sy);
+		
+
+		\draw [very thin] (3*\sx, 5.5*\sy) -- (3*\sx, 6*\sy);
+		\draw [very thin] (7*\sx, 5.5*\sy) -- (7*\sx, 6*\sy);
+
+		\node (ce) at (2*\sx, 5.75*\sy) {class};
+        \node (ce) at (4*\sx, 5.75*\sy) {reg};
+        \node (ce) at (6*\sx, 5.75*\sy) {class};
+        \node (ce) at (8*\sx, 5.75*\sy) {reg};
+		
+
+		\draw [very thin] (9*\sx, 2.5*\sy) -- (9.5*\sx, 2.5*\sy);
+		\draw [very thin] (9*\sx, 3.5*\sy) -- (9.5*\sx, 3.5*\sy);
+		\draw [very thin] (9*\sx, 4.5*\sy) -- (9.5*\sx, 4.5*\sy);
+		\draw [very thin] (9*\sx, 5.5*\sy) -- (9.5*\sx, 5.5*\sy);
+		\draw [very thin] (9.5*\sx, 2.5*\sy) -- (9.5*\sx, 5.5*\sy);
+
+		\node[rotate=-90] () at (9.25*\sx, 3*\sy) {DP};
+        \node[rotate=-90] () at (9.25*\sx, 4*\sy) {calib};
+        \node[rotate=-90] () at (9.25*\sx, 5*\sy) {EO};
+		
+
+		\draw [thin, dotted] (\sx,2.5 * \sy) -- (9 * \sx, 2.5*\sy);
+
+
+		\node [draw=red, rotate=90] at (0.75*\sx, 1.5*\sy)  {Bias Detection};
+  		\node [draw=red, rotate=90] at (0.75*\sx, 4*\sy)  {Bias Removal};
+        
+
+        \node (r) at (3 * \sx, 0.25*\sy) {\texttt{R}};
+        \node (pyhon) at (7 * \sx, 0.25*\sy) {\texttt{Python}};
+        
+
+        \node [f1] () at (8*\sx, 4*\sy) {aif360};
+        \node [f1] () at (6*\sx, 5*\sy) {fairness};
+        \node [f1] () at (8*\sx, \sy) {parity\\fairness};
+        \node [f1] () at (8*\sx, 2*\sy) {fairness\\indicators};
+        \node [f1] () at (6*\sx, 2*\sy) {ethicML};
+        \node [f1] () at (6*\sx, 3*\sy) {fairlearn};
+        
+
+        \node [f1] () at (4*\sx, 2*\sy) {fairadapt};
+        \node [f1] () at (2*\sx, 2*\sy) {fairml};
+        \node [f1] () at (4*\sx, 4*\sy) {fairness};
+        \node [f1] () at (2*\sx, 4*\sy) {fairmodels};
+  \end{scope}
+
+\end{tikzpicture}
+```
+
+Python cosmos
+  - describe fairlearn and aif360 as larger
+R-cosmos
+Currently there are only few packages distributed via CRAN that relate to fair machine learning. These include \pkg{fairml} \citep{scutari2021fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels} \citep{wisniewski2021fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The \pkg{fairadapt} package described in this manuscript is a bias removal method which is able to interpolate between demographic parity and calibration notions, and it works for both regression and classification settings. In particular, \pkg{fairadapt} is the only software in Figure \ref{fig:software} which is \textit{causally aware}, that is, the bias removal performed by it can be mapped to actual mechanisms that caused the discrimination in the first place.
+
+## A Causal Approach
 The discussion on algorithmic fairness is, however, not restricted to the machine learning domain. There are many legal and philosophical aspects that have arisen. For example, the legal distinction between disparate impact and disparate treatment \citep{mcginley2011ricci} is important for assessing fairness from a judicial point of view. This in turn emphasizes the importance of the interpretation behind the decision-making process, which is often not the case with black-box machine learning algorithms. For this reason, research in fairness through a causal inference lens has gained attention.
 
 A possible approach to fairness is the use of counterfactual reasoning \citep{galles1998axiomatic}, which allows for arguing what might have happened under different circumstances that never actually materialized, thereby providing a tool for understanding and quantifying discrimination. For example, one might ask how a change in sex would affect the probability of a specific candidate being accepted for a given job opening. This approach has motivated another notion of fairness, termed *counterfactual fairness* \citep{kusner2017counterfactual}, which states that the decision made, should remain fixed, even if, hypothetically, some parameters such as race or gender were to be changed (this can be written succinctly as $\widehat{Y}(a) = \widehat{Y}(a')$ in the potential outcomes notation). Causal inference can also be used for decomposition of the parity gap measure \citep{zhang2018fairness}, $\pr(\widehat{Y} = 1 \mid A = a) - \pr(\widehat{Y} = 1 \mid A = a')$, into the direct, indirect and spurious components (yielding further insights into the demographic parity as a criterion), as well as the introduction of so-called resolving variables \cite{kilbertus2017avoiding}, in order to relax the possibly prohibitively strong notion of demographic parity.
 
-The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as \proglang{R}-package \pkg{fairadapt} from CRAN. Currently there are only few packages distributed via CRAN that relate to fair machine learning. These include \pkg{fairml} \citep{scutari2021fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels} \citep{wisniewski2021fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The only causal method, however, is presented by \pkg{fairadapt}. Even though theory in fair machine learning is being expanded at an accelerating pace, good quality implementations of the developed methods are often not available.
+The following sections describe an implementation of the fair data adaptation method outlined in \cite{plecko2020fair}, which combines the notions of counterfactual fairness and resolving variables, and explicitly computes counterfactual values for individuals. The implementation is available as the \proglang{R}-package \pkg{fairadapt} from CRAN.
 
 ## Novelty in the package
 A first version of \pkg{fairadapt} was published with the original manuscript \citep{plecko2020fair}. The novelty in the package presented in this manuscript consists of:
@@ -295,9 +389,16 @@ The following sections show how the listed methods relate to one another alongsi
 * `formula`: Argument of type `formula`, specifying the dependent and explanatory variables.
 * `adj.mat`: Argument of type `matrix`, encoding the adjacency matrix.
 * `train.data` and `test.data`: Both of type `data.frame`, representing the respective datasets.
-* `prot.attr`: Scalar-valued argument of type `character` identifying the protected attribute.
+* `prot.attr`: Scalar-valued argument of type `character` identifying the protected attribute. Has to correspond to a column name in the `train.data` argument.
 
-As a quick demonstration of fair data adaption using, we load the `uni_admission` dataset provided by \pkg{fairadapt}, consisting of synthetic university admission data of `r nrow(uni_admission)` students. We subset this data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$. As the protected attribute, we choose `gender`.
+It is worth emphasizing the possible data types that can be used in the `train.data` argument. We note the following:
+\begin{enumerate}[label=(\roman*)]
+  \item \textit{Attribute $A$}: the protected attribute is limited to the binary case. The \code{prot.attr} column in \code{train.data} can be of any data type coercible to a \code{factor}, but can only take two distinct values. Otherwise an error is thrown.
+  \item \textit{Outcome $Y$}: the dependent variable specified on the left hand side of the \code{formula} argument can be either a \code{numeric}, \code{integer}, \code{logical} or ordered \code{factor}. Unordered \code{factor} or \code{character} inputs for the outcome variable will result in an error.
+  \item \textit{Remaining attributes $X$}: all other attributes do not have limitations. Unordered \code{factor} or \code{character} inputs can be used in the \code{train.data} argument.
+\end{enumerate}
+
+As a quick demonstration of performing fair data adaption, we load the `uni_admission` dataset provided by \pkg{fairadapt}, consisting of synthetic university admission data of `r nrow(uni_admission)` students. We subset this data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$. As the protected attribute, we choose `gender`.
 
 ```{r, basic}
 n_samp <- 200
@@ -362,9 +463,9 @@ A visualization of the `igraph` object returned by `graphModel()` is available f
 
 ## Quantile Learning Step
 
-The training step in `fairadapt()` can be carried out in two slightly distinct ways: Either by specifying training and testing data simultaneously, or by only passing training data (and at a later stage calling `predict()` on the returned `fairadapt` object in order to perform data adaption on new test data). The advantage of the former option is that the quantile regression step is performed on a larger sample size, which can lead to more precise inference in practice.
+The training step in `fairadapt()` that follows the typical machine learning workflow would be as follows. We first call the `fairadapt()` function and perform the quantile learning step on the `train.data`. After this, at a later stage we call the `predict()` function on the returned `fairadapt` S3 object in order to perform data adaption on new, test data. We mention here that it is also possible to input both `train.data` and `test.data` arguments directly to `fairadapt()`, which then transforms both of these arguments. The latter option might be considered when the proportion of test samples compared to train samples is large, and when the `train.data` has a relatively small sample size. The benefit of this approach is that, even though the outcome $Y$ is not available, other attributes $X$ of `test.data` can be used for learning the quantiles.
 
-The two data frames passed as `train.data` and `test.data` are required to have column names which also appear in the row and column names of the adjacency matrix, alongside the protected attribute $A$, passed as scalar-valued character vector `prot.attr`.
+The data frames passed as `train.data` and `test.data` are required to have column names which also appear in the row and column names of the adjacency matrix, alongside the protected attribute $A$, passed as scalar-valued character vector `prot.attr`. The `test.data` argument defaults to `NULL`, meaning that `test.data` can also be used at a later stage, to follow more closely a standard machine learning workflow.
 
 The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be carried out by several methods, three of which are implemented in \pkg{fairadapt}:
 
@@ -374,6 +475,27 @@ The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be
 
 Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is, substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is implemented, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach can also demonstrate competitive performance. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
 
+```{r benchmark-quant-methods, echo=FALSE, cache=TRUE}
+bmark <- lapply(
+  c(rangerQuants, mcqrnnQuants, linearQuants),
+  \(quant.method) {
+    nsamps <- c(200L, 500L)
+    res <- lapply(
+      nsamps, \(nsamp) {
+        tim <- microbenchmark(
+          fairadapt(score ~ ., train.data = uni_admission[seq_len(nsamp), ], 
+                    test.data = uni_admission[seq.int(nsamp+ 1 , 2 * nsamp), ],
+                    adj.mat = uni_adj, prot.attr = "gender", 
+                    quant.method = quant.method), times = 5L
+        )$time
+        round(mean(tim) / 10^9, digits = 1L)
+      }
+    )
+    names(res) <- c("200", "500")
+    res
+  }
+)
+```
 \begin{table}
 \centering
 \begin{threeparttable}
@@ -389,9 +511,9 @@ Using linear quantile regression is the most efficient option in terms of runtim
     \addlinespace[0.3em]
     \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{2-layer fully\\connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\
     \addlinespace[0.3em]
-    $T(200, 4)$ & $0.4$ sec & $89$ sec & $0.3$ sec \\
+    $T(200, 4)$ & `r bmark[[1]][["200"]]` sec & `r bmark[[2]][["200"]]` sec & `r bmark[[3]][["200"]]` sec \\
     \addlinespace[0.3em]
-    $T(500, 4)$ & $0.9$ sec & $202$ sec & $0.5$ sec \\
+    $T(500, 4)$ & `r bmark[[1]][["500"]]` sec & `r bmark[[2]][["500"]]` sec & `r bmark[[3]][["500"]]` sec \\
 \bottomrule
 \end{tabular}
 \caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T(n, 4)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and testing samples.}
@@ -1079,7 +1201,8 @@ We conclude with a brief look at the possible extensions of the \pkg{fairadapt} 
 
 1. \textit{General identification}: as discussed above, there are certain cases of causal graphs in which our do$(A = a, R = R(a'))$ intervention is identifiable, but the `fairadapt()` function currently does not support doing so. One such example is front-door identification mentioned above. However, this is not the only such example. In a future version of \pkg{fairadapt}, we hope to cover all scenarios in which identification is possible. 
 2. \textit{Path-specific effects}: when using resolving variables (Section \ref{sec:resolvers}), the user decides to label these variables as "non-discriminatory", that is, the algorithm is free to distinguish between groups based on these variables. In full generality, a user might be interested in considering all path-specific effects \citep{avin2005identifiability}. Such an approach would offer even more flexibility in modeling, since for every attribute-outcome path $A \rightarrow ... \rightarrow Y$, the user could decide whether it is fair or not. 
-3. \textit{Selection bias}: A commonly considered problem in causal inference is that of selection bias \citep{hernan2004structural}, when inclusion of individuals into the dataset depends on the observed variables in the dataset. In fairness applications, the presence of selection bias could invalidate our conclusions about discrimination and make our fair predictions biased. Recovering from selection bias algorithmically would therefore be a desirable feature in the \pkg{fairadapt} package.
+3. \textit{Selection bias}: a commonly considered problem in causal inference is that of selection bias \citep{hernan2004structural}, when inclusion of individuals into the dataset depends on the observed variables in the dataset. In fairness applications, the presence of selection bias could invalidate our conclusions about discrimination and make our fair predictions biased. Recovering from selection bias algorithmically would therefore be a desirable feature in the \pkg{fairadapt} package.
+4. \textit{Non-binary attribute $A$}: one current limitation is that the protected attribute $A$ is binary. When considering 
 
 ```{r session-info, include = FALSE}
 sessionInfo()
