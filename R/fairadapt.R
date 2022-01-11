@@ -117,6 +117,7 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   # construct the initial version of adapted data
   adapt.data <- org.data
   base.lvl <- levels(org.data[, prot.attr])[1L]
+  attr.lvls <- levels(org.data[, prot.attr])
   base.ind <- org.data[, prot.attr] == base.lvl
   adapt.data[, prot.attr] <- factor(base.lvl,
                                     levels = levels(org.data[, prot.attr]))
@@ -261,6 +262,7 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
     train = train.data,
     test = test.data,
     base.lvl = base.lvl,
+    attr.lvls = attr.lvls,
     base.ind = base.ind,
     formula = formula,
     res.vars = res.vars,

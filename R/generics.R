@@ -277,7 +277,7 @@ predict.fairadapt <- function(object, newdata, ...) {
   engine <- object$q.engine
 
   newdata[, object$prot.attr] <- relevel(
-    as.factor(newdata[, object$prot.attr]),
+    factor(newdata[, object$prot.attr], levels = object$attr.lvls),
     ref = object$base.lvl
   )
 
@@ -312,13 +312,15 @@ predict.fairadapt <- function(object, newdata, ...) {
     }
 
     # ii) computeQuants()
-    adapt[!base.ind, var] <-
-      computeQuants(
-        engine[[var]][["object"]],
-        newdata[, c(var, engine[[var]][["parents"]]), drop = FALSE],
-        adapt[!base.ind, engine[[var]][["parents"]], drop = FALSE],
-        base.ind, test = TRUE
-      )
+    if (sum(!base.ind) > 0L) {
+      adapt[!base.ind, var] <-
+        computeQuants(
+          engine[[var]][["object"]],
+          newdata[, c(var, engine[[var]][["parents"]]), drop = FALSE],
+          adapt[!base.ind, engine[[var]][["parents"]], drop = FALSE],
+          base.ind, test = TRUE
+        )
+    }
 
     # iii) decode discrete
     if (engine[[var]][["discrete"]]) {
