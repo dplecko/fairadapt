@@ -57,36 +57,86 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
 #' @export
 print.fairadapt <- function(x, ...) {
 
-  cat("Fairadapt result\n\n")
-  cat("Formula:\n", deparse(x$formula), "\n\n")
-  cat("Protected attribute:                 ", x$prot.attr, "\n")
-  cat("Protected attribute levels:          ",
-      paste(sort(unique(x$train[[x$prot.attr]])), collapse = ", "), "\n")
-
-  if(!is.null(x$res.vars)) {
-    cat("Resolving variables:                 ",
-        paste(x$res.vars, collapse = ", "), "\n")
+  cat("fairadapt S3 object\n")
+  cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"), 
+      "\n\n", sep = "")
+  
+  cat("Adapting variables:\n", 
+      setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars))
+  
+  cat("\n\nBased on protected attribute", x$prot.attr, "\n")
+  
+  cat("\n  AND \n")
+  
+  if (is.null(x$adj.mat)) {
+    cat("\nBased on topological order:\n", x$top.ord)
+  } else {
+    cat("\nBased on causal graph:\n")
+    print(x$adj.mat)
   }
 
-  cat("Number of training samples:          ", nrow(x$adapt.train), "\n")
-  cat("Number of test samples:              ", nrow(x$adapt.test), "\n")
-  cat("Number of independent variables:     ", ncol(x$adapt.train) - 1L, "\n")
-
-  seq_row <- seq_len(nrow(x$train))
-
-  cat("Total variation (before adaptation): ",
-    mean(x$train[[1L]][x$base.ind[seq_row]]) -
-      mean(x$train[[1L]][!x$base.ind[seq_row]]),
-    "\n"
-  )
-
-  cat("Total variation (after adaptation):  ",
-    mean(x$adapt.train[[1L]][x$base.ind[seq_row]]) -
-      mean(x$adapt.train[[1L]][!x$base.ind[seq_row]]),
-    "\n"
-  )
-
   invisible(x)
+}
+
+#' @export
+summary.fairadapt <- function(x, ...) {
+  
+  seq_row <- seq_len(nrow(x$train))
+  
+  tv.start <- mean(x$train[[1L]][x$base.ind[seq_row]]) -
+    mean(x$train[[1L]][!x$base.ind[seq_row]])
+  
+  tv.end <- mean(x$adapt.train[[1L]][x$base.ind[seq_row]]) -
+    mean(x$adapt.train[[1L]][!x$base.ind[seq_row]])
+  
+  adapt.vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+  
+  structure(list(
+    formula = x$formula,
+    prot.attr = x$prot.attr,
+    attr.lvls = x$attr.lvls,
+    res.vars = x$res.vars,
+    train.samp = nrow(x$adapt.train),
+    test.samp = nrow(x$adapt.test),
+    adapt.vars = adapt.vars,
+    tv.start = tv.start,
+    tv.end = tv.end,
+    quant.method = x$quant.method
+  ), class = "summary.fairadapt")
+}
+
+#' @export
+print.summary.fairadapt <- 
+  function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+  
+    cat("fairadapt summary\n\n")
+    cat("Formula:\n", deparse(x$formula), "\n\n")
+    cat("Protected attribute:                 ", x$prot.attr, "\n")
+    cat("Protected attribute levels:          ",
+        paste(sort(x$attr.lvls), collapse = ", "), "\n")
+    
+    if (!is.null(x$adapt.vars)) {
+      cat("Adapted variables:                   ",
+          paste(x$adapt.vars, collapse = ", "), "\n")
+    }
+    if(!is.null(x$res.vars)) {
+      cat("Resolving variables:                 ",
+          paste(x$res.vars, collapse = ", "), "\n")
+    }
+    cat("\n")
+    
+    cat("Number of training samples:          ", x$train.samp, "\n")
+    cat("Number of test samples:              ", x$test.samp, "\n")
+    cat("Quantile method:                     ", x$quant.method, "\n")
+    cat("\n")
+    
+    cat("Total variation (before adaptation): ", 
+        format(x$tv.start, digits = digits), "\n")
+    
+    cat("Total variation (after adaptation):  ", 
+        format(x$tv.end, digits = digits), "\n")
+    
+    invisible(x)
 }
 
 #' @importFrom graphics barplot text

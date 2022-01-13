@@ -268,6 +268,11 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
     res.vars = res.vars,
     prot.attr = prot.attr,
     graph = ig,
+    quant.method = deparse(substitute(quant.method)),
+    adapt.call = match.call(),
+    adj.mat = adj.mat,
+    cfd.mat = cfd.mat,
+    top.ord = top.ord,
     q.engine = q.engine
   ), class = "fairadapt")
 
