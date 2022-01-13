@@ -20,9 +20,10 @@ test_that("fairadapt", {
   adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
                     byrow = TRUE, dimnames = list(vars, vars))
 
-  fa.nms <- c("adapt.train", "adapt.test", "train", "test", "base.lvl",
-              "base.ind", "formula", "res.vars", "prot.attr", "graph",
-              "q.engine")
+  fa.nms <- c("adapt.train", "adapt.test", "train", "test", "base.lvl", 
+              "attr.lvls", "base.ind", "formula", "res.vars", "prot.attr", 
+              "graph", "quant.method", "adapt.call", "adj.mat", "cfd.mat", 
+              "top.ord", "q.engine")
 
   # random forest
 
@@ -228,6 +229,11 @@ test_that("fairadapt", {
     fairadapt(two_year_recid ~ ., train.data = train, test.data = test,
               adj.mat = adj.mat, prot.attr = "race", seed = 203)
   )
+  
+  expect_output(print(mod), regexp = "fairadapt S3 object")
+  mod.sum <- summary(mod)
+  expect_s3_class(mod.sum, "summary.fairadapt")
+  expect_output(print(mod.sum), regexp = "fairadapt summary")
 
   ind <- train[["race"]] == "White"
 

@@ -73,10 +73,16 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
   
   res.lst <- FA.lst <- boot.lst <- list() 
   
+  
+  
   if (!trn.rnd) {
     FA <- fairadapt(formula, prot.attr, adj.mat, train.data, 
                     cfd.mat = cfd.mat, top.ord = top.ord, 
                     res.vars = res.vars, quant.method = quant.method, ...)
+  }
+  
+  if (missing(adj.mat)) {
+    adj.mat <- NULL
   }
 
   for (rep in seq_len(n.boot)) {
@@ -109,7 +115,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     
     # fix test randomness if needed
     if (!tst.rnd) set.seed(2022)
-    res.lst[[rep]] <- predict(FA, test.data)
+    if (!is.null(test.data)) res.lst[[rep]] <- predict(FA, test.data)
     
   }
   
@@ -134,7 +140,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
 }
 
 #' @export
-print.fairadaptBoot <- function(object, ...) {
+print.fairadaptBoot <- function(x, ...) {
   
   cat("fairadaptBoot S3 object\n")
   cat("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"), 
@@ -142,7 +148,7 @@ print.fairadaptBoot <- function(object, ...) {
   
   cat("Bootstrap repetitions:", x$n.boot)
   
-  cat("Adapting variables:\n", 
+  cat("\nAdapting variables:\n", 
       setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars))
   
   cat("\n\nBased on protected attribute", x$prot.attr, "\n")
@@ -172,8 +178,6 @@ summary.fairadaptBoot <- function(x, ...) {
     train.samp = nrow(x$adapt.train),
     test.samp = nrow(x$adapt.test),
     adapt.vars = adapt.vars,
-    tv.start = tv.start,
-    tv.end = tv.end,
     n.boot = x$n.boot,
     save.object = x$save.object,
     rand.mode = x$rand.mode,
@@ -222,7 +226,8 @@ predict.fairadaptBoot <- function(object, newdata, ...) {
                           "Need to run `fairadaptBoot()` with `save.object`",
                           "= TRUE to be able to do so."))
   
-  assert_that(all(names(object$adapt.test[[1]]) %in% names(newdata)),
+  assert_that(all(names(object$fairadapt[[1]]$adapt.train[[1]]) %in% 
+                  names(newdata)),
               msg = "Columns missing in newdata")
   
   lapply(object$fairadapt, predict, newdata = newdata)
