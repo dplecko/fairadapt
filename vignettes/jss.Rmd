@@ -35,6 +35,7 @@ preamble: >
   \usepackage[ruled]{algorithm2e}
   \usepackage{bbm}
   \usepackage{array}
+  \usepackage{pifont}
   \usepackage{enumerate}
   \usepackage{enumitem}
   \usepackage{booktabs}
@@ -112,7 +113,10 @@ options(
   f2/.style = {
     draw = none, fill = red!15, thick, inner sep = 3pt, minimum width = 5em,
     align = center, text centered
-  }
+  },
+  s1/.style = {
+    fill = gray!10, thick, inner sep = 3pt, minimum width = 5em,
+    minimum height = 1.5em, align = center, text centered}
 }
 ```
 
@@ -124,9 +128,9 @@ Machine learning algorithms have become prevalent tools for decision-making in s
 In order to define and measure discrimination, existing intuitive notions have been statistically formalized, thereby providing fairness metrics. To this day, various different notions of fairness exist, which are sometimes mutually incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a constructed predictor $\widehat{Y}$ simultaneously. Even though there is no clear consensus on which notion of fairness is the correct one to use, there are three notions that have been discussed widely in the literature:
 
 \begin{enumerate}[label=(\arabic*)]
-  \item *demographic parity* \citep{darlington1971fairness} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as $$\widehat{Y} \ci A,$$
-  \item *equality of odds* \citep{hardt2016eosl}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example) written as $$\widehat{Y} \ci A \mid Y,$$
-  \item *calibration* 
+  \item \textit{demographic parity} \citep{darlington1971fairness} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as $$\widehat{Y} \ci A,$$
+  \item \textit{equality of odds} \citep{hardt2016eosl}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example) written as $$\widehat{Y} \ci A \mid Y,$$
+  \item \textit{calibration} \citep{chouldechova2017fair} requires the protected attribute to be independent of the actual outcome given the prediction. Intuitively, this means that the protected attribute $A$ does not offer additional information about the outcome $Y$ once we know what the prediction $\widehat{Y}$ is. 
 \end{enumerate}
 
 ## Fairness Tasks
@@ -134,20 +138,17 @@ Apart from choosing a notion of fairness most appropriate to the setting that is
 
 Sometimes, performing the first step of bias measurement is not the end goal. Suppose that we are analyzing a dataset and compute a metric which shows there might be discrimination in the dataset (say a large salary gap between sexes in the example above). We then might be interested in computing new, more fair predictions (in which, say, the salary gap is lower). This second task is that of \textit{bias removal}, or bias mitigation, in which we want to remove from our predictions the bias that we previously found.
 
-In Figure \ref{fig:software} we give a graphical overview of some of the available software in \proglang{python} and \proglang{R}, which are the languages most commonly used in fairness analysis. The figure might serve as a guide to a new fairness analyst wishing to get started. In particular, we note that bias detection software usually covers a wide range of different metrics, compatible with different fairness definitions. When it comes to bias removal, not all methods are compatible with all the definitions ... . Furthermore, some methods might specifically work in the classification or regression setting. Therefore, in the bias removal task we indicate which methods/software supports which type of definition and prediction problem.
+In Figure \ref{fig:software} we give a graphical overview of some of the available software in \proglang{python} and \proglang{R}, which are the languages most commonly used for fairness analysis. The figure might serve as a guide to a new fairness analyst wishing to get started. After deciding which task is to be undertaken, and which outcome / definition of fairness is desired, the user can consult Figure \ref{fig:software} for software options to get started. Since calibration is often satisfied by fitting an unconstrained model, software for satisfying calibration was not included in Figure \ref{fig:software}.
 
-```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} and \\proglang{python}. In the left column, nodes correspond to \\proglang{R}-packages and in the right column to \\proglang{python} modules.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
-
+```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} and \\proglang{python}. In the left column, nodes correspond to \\proglang{R}-packages and in the right column to \\proglang{python} modules. Abbreviations are: class for classification, reg regression, DP demographic parity, EO equality of odds.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "70%"}
 <<setup-graph>>
 
-\newcommand{\sx}{1.6}
-\newcommand{\sy}{-1.6}
+\newcommand{\sx}{1.4}
+\newcommand{\sy}{-1.4}
 
 \begin{tikzpicture}
 
   \begin{scope}
-     \draw[draw=black, very thin] (1*\sx, 7.25*\sy) rectangle ++(8*\sx, -0.5*\sy);
-		
 
 		\draw [very thin] (\sx, 0.5 * \sy) -- (9 * \sx, 0.5 * \sy);
 		\draw [very thin] (\sx, 0 * \sy) -- (9 * \sx, 0 * \sy);
@@ -155,63 +156,83 @@ In Figure \ref{fig:software} we give a graphical overview of some of the availab
 		\draw [very thin] (\sx, 6 * \sy) -- (9 * \sx, 6 * \sy);
 		
 
-	    \draw [very thin] (\sx,0) -- (\sx, 6*\sy);
+	  \draw [very thin] (\sx,0) -- (\sx, 6*\sy);
 		\draw [very thin] (5*\sx,0) -- (5*\sx, 6*\sy);
 		\draw [very thin] (9*\sx,0) -- (9*\sx, 6*\sy);
 		
 
 		\draw [very thin] (3*\sx, 5.5*\sy) -- (3*\sx, 6*\sy);
+    \draw [thin, dotted] (3*\sx, 2*\sy) -- (3*\sx, 5.5*\sy);
 		\draw [very thin] (7*\sx, 5.5*\sy) -- (7*\sx, 6*\sy);
+    \draw [thin, dotted] (7*\sx, 2*\sy) -- (7*\sx, 5.5*\sy);
 
 		\node (ce) at (2*\sx, 5.75*\sy) {class};
-        \node (ce) at (4*\sx, 5.75*\sy) {reg};
-        \node (ce) at (6*\sx, 5.75*\sy) {class};
-        \node (ce) at (8*\sx, 5.75*\sy) {reg};
+    \node (ce) at (4*\sx, 5.75*\sy) {reg};
+    \node (ce) at (6*\sx, 5.75*\sy) {class};
+    \node (ce) at (8*\sx, 5.75*\sy) {reg};
 		
 
-		\draw [very thin] (9*\sx, 2.5*\sy) -- (9.5*\sx, 2.5*\sy);
-		\draw [very thin] (9*\sx, 3.5*\sy) -- (9.5*\sx, 3.5*\sy);
-		\draw [very thin] (9*\sx, 4.5*\sy) -- (9.5*\sx, 4.5*\sy);
+		\draw [very thin] (9*\sx, 2*\sy) -- (9.5*\sx, 2*\sy);
+		\draw [very thin] (9*\sx, 3.75*\sy) -- (9.5*\sx, 3.75*\sy);
+    \draw [thin, dotted] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
 		\draw [very thin] (9*\sx, 5.5*\sy) -- (9.5*\sx, 5.5*\sy);
-		\draw [very thin] (9.5*\sx, 2.5*\sy) -- (9.5*\sx, 5.5*\sy);
+		\draw [very thin] (9.5*\sx, 2*\sy) -- (9.5*\sx, 5.5*\sy);
 
-		\node[rotate=-90] () at (9.25*\sx, 3*\sy) {DP};
-        \node[rotate=-90] () at (9.25*\sx, 4*\sy) {calib};
-        \node[rotate=-90] () at (9.25*\sx, 5*\sy) {EO};
+		\node[rotate=-90] () at (9.25*\sx, 2.875*\sy) {DP};
+    \node[rotate=-90] () at (9.25*\sx, 4.625*\sy) {EO};
 		
 
-		\draw [thin, dotted] (\sx,2.5 * \sy) -- (9 * \sx, 2.5*\sy);
+		\draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
 
 
-		\node [draw=red, rotate=90] at (0.75*\sx, 1.5*\sy)  {Bias Detection};
-  		\node [draw=red, rotate=90] at (0.75*\sx, 4*\sy)  {Bias Removal};
+		\node [draw=red, rotate=90] at (0.75*\sx, 1.25*\sy)  {Bias Detection};
+  	\node [draw=red, rotate=90] at (0.75*\sx, 3.75*\sy)  {Bias Removal};
+        
+    \node (r) at (3 * \sx, 0.25*\sy) {\texttt{R}};
+    \node (pyhon) at (7 * \sx, 0.25*\sy) {\texttt{Python}};
         
 
-        \node (r) at (3 * \sx, 0.25*\sy) {\texttt{R}};
-        \node (pyhon) at (7 * \sx, 0.25*\sy) {\texttt{Python}};
-        
+    \node [s1] () at (6*\sx, 0.75*\sy) {aif360};
+    \node [s1] () at (6*\sx, 1.25*\sy) {fairlearn};
+    \node [s1] () at (6*\sx, 1.75*\sy) {ethicML};
 
-        \node [f1] () at (8*\sx, 4*\sy) {aif360};
-        \node [f1] () at (6*\sx, 5*\sy) {fairness};
-        \node [f1] () at (8*\sx, \sy) {parity\\fairness};
-        \node [f1] () at (8*\sx, 2*\sy) {fairness\\indicators};
-        \node [f1] () at (6*\sx, 2*\sy) {ethicML};
-        \node [f1] () at (6*\sx, 3*\sy) {fairlearn};
-        
+    \node [s1] () at (8*\sx, 1.25*\sy) {fairness\\indicators};
 
-        \node [f1] () at (4*\sx, 2*\sy) {fairadapt};
-        \node [f1] () at (2*\sx, 2*\sy) {fairml};
-        \node [f1] () at (4*\sx, 4*\sy) {fairness};
-        \node [f1] () at (2*\sx, 4*\sy) {fairmodels};
+    \node [s1] () at (6*\sx, 2.375*\sy) {aif360};
+    \node [s1] () at (6*\sx, 2.875*\sy) {fairlearn};
+    \node [s1] () at (6*\sx, 3.375*\sy) {ethicML};
+
+    \node [s1] () at (8*\sx, 2.375*\sy) {aif360};
+    \node [s1] () at (8*\sx, 2.875*\sy) {fairlearn};
+    \node [s1] () at (8*\sx, 3.375*\sy) {ethicML};
+    
+    \node () at (4*\sx, 4.625*\sy) {\Large $\times$};
+    \node () at (8*\sx, 4.625*\sy) {\Large $\times$};
+    \node[rotate=45] () at (2*\sx, 4.625*\sy) {missing};
+
+    \node [s1] () at (6*\sx, 4.125*\sy) {aif360};
+    \node [s1] () at (6*\sx, 4.625*\sy) {fairlearn};
+    \node [s1] () at (6*\sx, 5.125*\sy) {ethicML};
+        
+    \node [s1] () at (2*\sx, 1*\sy) {fairness};
+    \node [s1] () at (4*\sx, 1.5*\sy) {fairmodels};
+
+    \node [s1] () at (2*\sx, 2.625*\sy) {fairmodels};
+    \node [s1] () at (2*\sx, 3.25*\sy) {fairadapt};
+    
+    \node [s1] () at (4*\sx, 2.375*\sy) {fairmodels};
+    \node [s1] () at (4*\sx, 2.875*\sy) {fairml};
+    \node [s1] () at (4*\sx, 3.375*\sy) {fairadapt};
+
+      
   \end{scope}
 
 \end{tikzpicture}
 ```
 
-Python cosmos
-  - describe fairlearn and aif360 as larger
-R-cosmos
-Currently there are only few packages distributed via CRAN that relate to fair machine learning. These include \pkg{fairml} \citep{scutari2021fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels} \citep{wisniewski2021fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The \pkg{fairadapt} package described in this manuscript is a bias removal method which is able to interpolate between demographic parity and calibration notions, and it works for both regression and classification settings. In particular, \pkg{fairadapt} is the only software in Figure \ref{fig:software} which is \textit{causally aware}, that is, the bias removal performed by it can be mapped to actual mechanisms that caused the discrimination in the first place.
+In \proglang{python} the software for fair ML is more abundant. In particular, there are three large modules that contain various fairness metrics and multiple methods for both classification and regression, suitable for satisfying either equality of odds or demographic parity. These repositories are \pkg{aif360} \citep{aif360-oct-2018} maintained by IBM, \pkg{fairlearn} \citep{bird2020fairlearn} maintained by Microsoft and \pkg{EthicML}. Additionally, the user might be interested in \pkg{fairness indicators} module, which is suitable for computing fairness metrics on very large datasets.
+
+Currently there are few packages distributed via CRAN that relate to fair machine learning (for example, as shown in Figure \ref{fig:software}, there are no methods implementing equality of odds). These include \pkg{fairml} \citep{scutari2021fairml}, which implements the non-convex method of \cite{komiyama2018nonconvex}, as well as packages \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels} \citep{wisniewski2021fairmodels}, which serve as diagnostic tools for measuring algorithmic bias and provide several pre- and post-processing methods for bias mitigation. The \pkg{fairadapt} package described in this manuscript is a bias removal method which is able to interpolate between demographic parity and calibration notions, and it works for both regression and classification settings. In particular, \pkg{fairadapt} is the only software in Figure \ref{fig:software} which is \textit{causally aware}, that is, the bias removal performed by it can be mapped to actual mechanisms that caused the discrimination in the first place.
 
 ## A Causal Approach
 The discussion on algorithmic fairness is, however, not restricted to the machine learning domain. There are many legal and philosophical aspects that have arisen. For example, the legal distinction between disparate impact and disparate treatment \citep{mcginley2011ricci} is important for assessing fairness from a judicial point of view. This in turn emphasizes the importance of the interpretation behind the decision-making process, which is often not the case with black-box machine learning algorithms. For this reason, research in fairness through a causal inference lens has gained attention.
@@ -1024,6 +1045,7 @@ ggplot(gov_trn, aes(x = salary, fill = sex)) +
 There is a clear shift between the two sexes, indicating that `male` employees are currently better compensated when compared to `female` employees. However, this differences in `salary` could, in principle, be attributed to factors apart form gender inequality, such as the economic region in which an employee works. This needs to be accounted for as well, i.e., we do not wish to remove differences in salary between economic regions.
 
 ```{r, census-adapt, cache=TRUE}
+
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
