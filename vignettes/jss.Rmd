@@ -488,6 +488,8 @@ The training step in `fairadapt()` that follows the typical machine learning wor
 
 The data frames passed as `train.data` and `test.data` are required to have column names which also appear in the row and column names of the adjacency matrix, alongside the protected attribute $A$, passed as scalar-valued character vector `prot.attr`. The `test.data` argument defaults to `NULL`, meaning that `test.data` can also be used at a later stage, to follow more closely a standard machine learning workflow.
 
+### Quantile Methods
+
 The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be carried out by several methods, three of which are implemented in \pkg{fairadapt}:
 
 * Quantile Regression Forests \citep{meinshausen2006qrf, wright2015ranger}.
@@ -541,6 +543,20 @@ bmark <- lapply(
   \label{tab:qmethods}
 \end{threeparttable}
 \end{table}
+
+### Influencing the Fit
+
+There are two considerations when influencing the fit. Run-time and quality of fit.
+
+#### Computational.
+
+options in ranger / rq / mcqrnn
+
+#### Fit Quality.
+
+introduce an S3 method for extracting the fit; show how it can be done on uni admission example.
+
+### Extending to Custom Methods
 
 The above set of methods is not exhaustive. Further options are conceivable and therefore \pkg{fairadapt} provides an extension mechanism to account for this. The `fairadapt()` argument `quant.method` expects a function to be passed, a call to which will be constructed with three unnamed arguments:
 

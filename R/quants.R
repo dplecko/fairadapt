@@ -129,7 +129,8 @@ computeQuants <- function(x, data, newdata, ind, ...) {
 }
 
 #' @export
-computeQuants.ranger <- function(x, data, newdata, ind, test = FALSE, ...) {
+computeQuants.ranger <- function(x, data, newdata, ind, test = FALSE, 
+                                 emp.only = FALSE, ...) {
 
   # GetQuants
   if (isTRUE(test)) {
@@ -137,6 +138,7 @@ computeQuants.ranger <- function(x, data, newdata, ind, test = FALSE, ...) {
     empirical <- predict(x, data = data[, -1L, drop = FALSE],
                          type = "quantiles", what = identity)
     empirical <- empirical$predictions
+    if (emp.only) return(empirical)
 
   } else {
 
@@ -152,7 +154,7 @@ computeQuants.ranger <- function(x, data, newdata, ind, test = FALSE, ...) {
 
 #' @export
 computeQuants.rangersplit <- function(x, data, newdata, ind, test = FALSE,
-                                      ...) {
+                                      emp.only = FALSE, ...) {
 
   # GetQuants
   if (isTRUE(test)) {
@@ -174,9 +176,10 @@ computeQuants.rangersplit <- function(x, data, newdata, ind, test = FALSE,
 }
 
 #' @export
-computeQuants.rqs <- function(x, data, newdata, ind, ...) {
-
+computeQuants.rqs <- function(x, data, newdata, ind, emp.only = FALSE, ...) {
+  
   empirical <- predict(x, newdata = data[, -1L, drop = FALSE])
+  if (emp.only) return(empirical)
   quantiles <- predict(x, newdata = newdata)
 
   inferQuant(data, empirical, quantiles, ind)
@@ -192,12 +195,14 @@ computeQuants.quantregsplit <- function(x, data, newdata, ind, ...) {
 }
 
 #' @export
-computeQuants.mcqrnnobj <- function(x, data, newdata, ind, ...) {
+computeQuants.mcqrnnobj <- function(x, data, newdata, ind, emp.only = FALSE,
+                                    ...) {
 
   xmat <- matrix(as.numeric(unlist(data[, -1L, drop = FALSE])),
                  nrow = nrow(data))
   empirical <- qrnn::mcqrnn.predict(x = xmat, parms = x)
-
+  if (emp.only) return(empirical)
+  
   newx <- matrix(as.numeric(unlist(newdata)), ncol = ncol(newdata))
   quantiles <- qrnn::mcqrnn.predict(x = newx, parms = x)
 

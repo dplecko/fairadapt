@@ -76,7 +76,7 @@
 #' @export
 fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   cfd.mat = NULL, top.ord = NULL, res.vars = NULL, quant.method = rangerQuants,
-  visualize.graph = FALSE, ...) {
+  visualize.graph = FALSE, eval.qfit = NULL, ...) {
 
   if (missing(adj.mat)) {
     adj.mat <- NULL
@@ -233,6 +233,29 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
 
     adapt.data[!base.ind & row.idx, curr.var] <-
       computeQuants(object, qr.data, cf.parents, base.ind[row.idx])
+    
+    if (!is.null(eval.qfit)) {
+      eval.qfit <- as.integer(eval.qfit)
+      assert_that(eval.qfit > 1L, 
+                  msg = "`eval.qfit` argument must be a positive integer.")
+      # split into folds
+      folds <- as.integer(cut(seq_row(qr.data), breaks = eval.qfit))
+      q.fold <- c()
+      for (fold in seq_len(eval.qfit)) {
+        fold.ind <- folds == fold
+        obj <- quant.method(qr.data[!fold.ind, ], A.root = FALSE, ind = NULL, 
+                            ...)
+
+        q.fold <- rbind(
+          q.fold, computeQuants(obj, qr.data[fold.ind, ], newdata = NULL, 
+                                ind = NULL, test = TRUE, emp.only = TRUE)
+        )
+        
+      }
+      
+      q.engine[[curr.var]][["qfit.score"]] <- qfitScore(qr.data[[curr.var]], 
+                                                        q.fold)
+    }
 
     # check if there exists a resolving ancestor
     ancestors <- getAncestors(curr.var, adj.mat, top.ord)
