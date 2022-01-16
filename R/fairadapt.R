@@ -45,6 +45,10 @@
 #' @param visualize.graph A \code{logical} indicating whether the causal graph
 #' should be plotted upon calling the \code{fairadapt()} function. Default
 #' value is \code{FALSE}.
+#' @param eval.qfit Argument indicating whether the quality of the quantile
+#' regression fit should be computed using cross-validation. Default value is 
+#' \code{NULL}, but whenever a positive integer value is specified, then it is 
+#' interpreted as the number of folds using in the cross-validation procedure.
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'

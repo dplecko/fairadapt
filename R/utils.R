@@ -118,8 +118,6 @@ decodeDiscrete <- function(var, u.val, type, full.len) {
 
 qfitScore <- function(x, quants, probs = c(0.25, 0.5, 0.75)) {
   
-  #'* check if tau has correct sign; check if the loss is good *
-  
   tauLoss <- function(x, tau) ifelse(x > 0, tau * x, -(1-tau) * x)  
   
   qtarg <- lapply(seq_along(x), function(row) quantile(quants[row, ], 

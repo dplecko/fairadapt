@@ -70,6 +70,9 @@ test_that("fairadapt", {
       names(which(adj.mat[, i] == 1L))
     )
   }
+  
+  # quantFit()
+  expect_error(quantFit(ran), regexp = "eval.qfit")
 
   # linear
 
@@ -193,7 +196,7 @@ test_that("fairadapt", {
   charmod <- with_seed(
     203,
     fairadapt(score ~ ., train.data = uni, adj.mat = adj.mat,
-              prot.attr = "gender", seed = 203)
+              prot.attr = "gender", seed = 203, eval.qfit = 3L)
   )
 
   expect_true(is.character(adaptedData(charmod)$test))

@@ -395,3 +395,43 @@ predict.fairadapt <- function(object, newdata, ...) {
 
   adapt
 }
+
+#' Quality of quantile fit statistics.
+#'
+#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' procedure.
+#' @param ... Ignored in this case.
+#' @return A \code{numeric} vector, containing the average empirical loss for
+#' of the 25%, 50% and 75% quantile loss functions, for each variable. 
+#' @examples
+#' uni.adj.mat <- array(0, dim = c(4, 4))
+#' colnames(uni.adj.mat) <- rownames(uni.adj.mat) <-
+#'   c("gender", "edu", "test", "score")
+#'
+#' uni.adj.mat["gender", c("edu", "test")] <-
+#'   uni.adj.mat["edu", c("test", "score")] <-
+#'   uni.adj.mat["test", "score"] <- 1L
+#'
+#' FA <- fairadapt(score ~ .,
+#'   train.data = uni_admission[1:100, ],
+#'   test.data = uni_admission[101:150, ],
+#'   adj.mat = uni.adj.mat, prot.attr = "gender", eval.qfit = 3L)
+#'
+#' quantFit(FA)
+#' @export
+quantFit <- function(x, ...) {
+  UseMethod("quantFit", x)
+}
+
+#' @export
+quantFit.fairadapt <- function(x, ...) {
+  
+  qfit <- lapply(x$q.engine, `[[`, "qfit.score")
+  assert_that(
+    !is.null(qfit[[1L]]),
+    msg = paste("Run `fairadapt()` with `eval.qfit` equal to a positive integer", 
+                "to inspect quality of the fit.")
+  )
+  vapply(x$q.engine, `[[`, numeric(1L), "qfit.score")
+  
+}
