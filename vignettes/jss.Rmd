@@ -128,7 +128,7 @@ Machine learning algorithms have become prevalent tools for decision-making in s
 In order to define and measure discrimination, existing intuitive notions have been statistically formalized, thereby providing fairness metrics. To this day, various different notions of fairness exist, which are sometimes mutually incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a constructed predictor $\widehat{Y}$ simultaneously. Even though there is no clear consensus on which notion of fairness is the correct one to use, there are three notions that have been discussed widely in the literature:
 
 \begin{enumerate}[label=(\arabic*)]
-  \item \textit{demographic parity} \citep{darlington1971fairness} requires the protected attribute $A$ (gender/race/religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as $$\widehat{Y} \ci A,$$
+  \item \textit{demographic parity} \citep{darlington1971fairness} requires the protected attribute $A$ (gender, race, religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as $$\widehat{Y} \ci A,$$
   \item \textit{equality of odds} \citep{hardt2016eosl}, requires equal false positive and false negative rates of classifier $\widehat{Y}$ between different groups (females and males for example) written as $$\widehat{Y} \ci A \mid Y,$$
   \item \textit{calibration} \citep{chouldechova2017fair} requires the protected attribute to be independent of the actual outcome given the prediction $$Y \ci A \mid \widehat{Y}.$$. Intuitively, this means that the protected attribute $A$ does not offer additional information about the outcome $Y$ once we know what the prediction $\widehat{Y}$ is. 
 \end{enumerate}
@@ -532,7 +532,7 @@ bmark <- lapply(
     \addlinespace[0.3em]
     complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\
     \addlinespace[0.3em]
-    \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1-hidenn layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\
+    \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1 hidden layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\
     \addlinespace[0.3em]
     $T(200, 4)$ & `r bmark[[1]][["200"]]` sec & `r bmark[[2]][["200"]]` sec & `r bmark[[3]][["200"]]` sec \\
     \addlinespace[0.3em]
@@ -549,26 +549,26 @@ bmark <- lapply(
 The quantile methods shown in Table \ref{tab:qmethods} make calls to specific functions that perform quantile regression. These functions take a number of parameters and the user might be interested in changing these parameters (additional arguments to these functions can be specified using ellipsis). 
 
 #### Computational Speed.
-The first consideration in choosing the additional parameters of specific quantile regression functions is computational speed. For example, `rangerQuants()` internally calls the `ranger()` function (from \pkg{ranger}), which has a number of flexible arguments. With respect to computational speed, the most important argument is `num.trees` - the number of trees used when building the quantile regression forest. Clearly, choosing a smaller number of trees will be faster, but at the same time will result in a poorer fit with a larger variance.
+The first consideration in choosing the additional parameters of specific quantile regression functions is computational speed. For example, `rangerQuants()` internally calls the `ranger()` function (from \pkg{ranger}), which has a number of flexible arguments. With respect to computational speed, the most important argument is `num.trees`, the number of trees used when building the quantile regression forest. Clearly, choosing a smaller number of trees will be faster, but at the same time will result in a poorer fit with a larger variance.
 
-Similarly, `mcqrnnQuants()` internally calls `mcqrnn.fit()` (from \pkg{qrnn}), which has a number of arguments that can be used for adapting the underlying neural network. In terms of computational speed, the most important arguments are `n.trials` (number of repeated initializations used to avoid local minima) and `iter.max` (maximum number of iterations of the optimization). Choosing lower values will reduce the runtime. Lastly, function `linearQuants()` internally calls `rq()` (from \pkg{quantreg}). This function is less flexible, since the model is linear. However, its `method` argument can be used when the number of samples becomes large (using `method` equal to `"fn"` or `"pfn"` utilizes the Frisch-Newton interior point method, which might be preferable for large samples).
+Similarly, `mcqrnnQuants()` internally calls `mcqrnn.fit()` (from \pkg{qrnn}), which has a number of arguments that can be used for adapting the underlying neural network. In terms of computational speed, the most important arguments are `n.trials` (number of repeated initializations used to avoid local minima) and `iter.max` (maximum number of iterations of the optimization). Choosing smaller values will reduce the runtime. Lastly, function `linearQuants()` internally calls `rq()` (from \pkg{quantreg}). This function is less flexible, since the model is linear. However, its `method` argument can be used when the number of samples becomes large (using `method` equal to `"fn"` or `"pfn"` utilizes the Frisch-Newton interior point method, which might be preferable for large samples).
 
 #### Fit Quality.
 
-Using `rangerQuants()` and `mcqrnnQuants()` utilizes very flexible machine learning tools. These algorithms have a number of tuning parameters, and it is possible to optimize the fitting procedure using these parameters. However, when doing so, we need a way of assessing the quality of our fit. In the context of quantile regression we can compute 
+Using `rangerQuants()` and `mcqrnnQuants()` utilizes flexible machine learning tools that have a number of parameters. It is possible to optimize the fitting procedure by tuning these parameters. However, when doing so, we need a way of assessing the quality of our fit. In the context of quantile regression we can estimate the expected $\tau$-quantile loss function, 
 \begin{equation} \label{eq:quantloss}
-  \ex[\ro_{\tau}(V_i, \mu_{\tau}(\pa(V_i))],
+  \ex[\rho_{\tau}(V_i, \mu_{\tau}(\pa(V_i)))],
 \end{equation}
-where $\mu_{\tau}(\pa(V_i))$ is the function predicting the $\tau$-quantile of variable $V_i$ using the parents $\pa(V_i)$. The $\ro_{\tau}$ function is the asymmetric L1 loss function whose minimizer is the $\tau$-quantile:
+where $\mu_{\tau}(\pa(V_i))$ is the function predicting the $\tau$-quantile of variable $V_i$ using the parents $\pa(V_i)$ and $\rho_{\tau}$ is the asymmetric L1 loss function whose minimizer is the $\tau$-quantile. The function $\rho_{\tau}$ is given by
 \begin{equation}
-  \ro_{\tau}(x, y) = \begin{cases}
-                        \tau(x-y), \text{     for } x \geq y\\
-                        (1-\tau)(y-x), \text{ for } x < y.
+  \rho_{\tau}(x, y) = \begin{cases}
+                        \phantom{( )}\tau(x-y), & \text{ for } x \geq y\\
+                        (1-\tau)(y-x), & \text{ for } x < y.
                      \end{cases}
 \end{equation}
 The smaller the empirical loss based on Equation \eqref{eq:quantloss} is, the better is the quality of our fit. Therefore, we need to perform cross-validation (fitting the quantile regression on separate folds) in order to estimate the expected empirical loss. Based on this loss, we can then do hyperparameter tuning.
 
-This cross-validation procedure is implemented within the `fairadapt()` function. The argument `eval.qfit` has a default value `NULL`, but if this argument is given a positive integer value, then it is used as the number of folds for performing cross-validation. Within `fairadapt()` we compute the average empirical loss $\widehat{\ex} [\ro_{\tau} (V_i, \pa(V_i))]$ for each variable $V_i$ and $\tau = 0.25, 0.5, 0.75$ (corresponding to 25\%, 50\% and 75\% quantiles). The average of these three values is reported at the end, and can be extracted from the resulting `fairadapt` object using the `quantFit()` method:
+This cross-validation procedure is implemented within the `fairadapt()` function. The argument `eval.qfit` has a default value `NULL`, but if this argument is given a positive integer value, then it is used as the number of folds for performing cross-validation. Within `fairadapt()` we compute the average empirical loss $\widehat{\ex} [\rho_{\tau} (V_i, \mu_{\tau}(\pa(V_i)))]$ for each variable $V_i$ and $\tau = 0.25, 0.5, 0.75$ (corresponding to 25\%, 50\% and 75\% quantiles). The average of these three values is reported at the end, and can be extracted from the resulting `fairadapt` object using the `quantFit()` method:
 
 ```{r, quantFit}
 fit.qual <- fairadapt(score ~ ., train.data = uni_trn,
@@ -578,12 +578,12 @@ fit.qual <- fairadapt(score ~ ., train.data = uni_trn,
 quantFit(fit.qual)
 ```
 
-The function returns the quality of the quantile fit for each variable. A very reasonable objective to optimize is the average of these values. The interesting parameters to optimize for the two methods include:
-\begin{enumerate}[(\roman*)]
-  \item for \texttt{ranger()}: parameters \texttt{mtry}, \texttt{min.node.size} and \texttt{max.depth},
+The function returns the quality of the quantile fit for each variable. A very reasonable objective to minimize is the average of these values, by iterating over a grid of possible values of the tuning parameters. The interesting parameters to optimize for the two methods include:
+\begin{enumerate}[label=(\roman*)]
+  \item for \texttt{ranger()}: parameters \texttt{mtry} (number of candidate variables in each split), \texttt{min.node.size} (size of leaf nodes after which splitting ) and \texttt{max.depth} (maximum depth of each tree),
   \item for \texttt{mcqrnn()}: parameters \texttt{n.hidden}, \texttt{n.hidden2} (number of nodes in the first and second hidden layers), \texttt{Th} (activation function), \texttt{method} (optimizer to be used), and a range of other parameters that are fed to the chosen optimizer via ellipsis.
 \end{enumerate}
-Optimizing the quantile fit should be of interest mostly to advanced users. The basic user is strongly advised to work with default values, which are often a good starting point.
+Optimizing the quantile fit should be of interest mostly to advanced users (and hence we do not perform parameter tuning explicitly here). The basic user is strongly advised to work with default values, which are often a good starting point.
 
 ### Extending to Custom Methods
 
@@ -597,14 +597,14 @@ Arguments passed as `...` to `fairadapt()` will be forwarded to the function spe
 
 ## Fair-Twin Inspection
 
-The university admission example presented in Section \ref{methodology} demonstrates how to compute counterfactual values for an individual while preserving their relative educational achievement. Setting candidate gender as the protected attribute and gender level *female* as baseline value, for a *male* student with values $(a, e, t, y)$, his *fair-twin* values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$, i.e., the values the student would have obtained, had he been *female*, are computed. These values can be retrieved from a `fairadapt` object by calling the S3-generic function `fairTwins()` as:
+We now turn to a useful property of \pkg{fairadapt} with respect to exploring decisions for different individuals in the dataset. The university admission example presented in Section \ref{methodology} demonstrates how to compute counterfactual values for an individual while preserving their relative educational achievement. Setting candidate gender as the protected attribute and gender level *female* as baseline value, for a *male* student with values $(a, e, t, y)$, his *fair-twin* values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$, i.e., the values the student would have obtained, had he been *female*, are computed. These values can be retrieved from a `fairadapt` object by calling the S3-generic function `fairTwins()` as:
 
 ```{r, fairtwin-uni}
 ft_basic <- fairTwins(basic, train.id = seq_len(n_samp))
 head(ft_basic, n = 3)
 ```
 
-In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output.
+In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output. Having access to explicit counterfactual instances as above might help justify fair decisions in practice.
 
 # Uncertainty Quantification
 \label{uncq}

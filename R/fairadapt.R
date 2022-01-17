@@ -48,7 +48,7 @@
 #' @param eval.qfit Argument indicating whether the quality of the quantile
 #' regression fit should be computed using cross-validation. Default value is 
 #' \code{NULL}, but whenever a positive integer value is specified, then it is 
-#' interpreted as the number of folds using in the cross-validation procedure.
+#' interpreted as the number of folds used in the cross-validation procedure.
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'
