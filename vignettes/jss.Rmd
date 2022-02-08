@@ -251,11 +251,11 @@ A first version of \pkg{fairadapt} was published with the original manuscript \c
   \item allowing for several different algorithms in the quantile learning step, and additionally allowing the possibility of specifying a custom quantile learning function (via S3 dispatch).
 \end{itemize}
 
-The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{uncq} in which we discuss how to perform uncertainty quantification with \pkg{fairadapt}. Section \ref{illustration}, which illustrates the usage of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
+The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{sec:uncq} in which we discuss how to perform uncertainty quantification with \pkg{fairadapt}. Section \ref{illustration}, which illustrates the usage of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{sec:extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
 
 # Methodology
 
-First, the intuition behind \pkg{fairadapt} is described using an example, followed by a more rigorous mathematical formulation, using Markovian structural causal models (SCMs). Some relevant extensions, such as the Semi-Markovian case and the introduction of so called *resolving variables*, are discussed in Section \ref{extensions}.
+First, the intuition behind \pkg{fairadapt} is described using an example, followed by a more rigorous mathematical formulation, using Markovian structural causal models (SCMs). Some relevant extensions, such as the Semi-Markovian case and the introduction of so called *resolving variables*, are discussed in Section \ref{sec:extensions}.
 
 ## University Admission Example
 
@@ -370,7 +370,7 @@ Any particular SCM is accompanied by a graphical model $\mathcal{G}$ (a directed
 (i) $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$.
 (ii) Exogenous variables $U_i$ are uniformly distributed on $[0, 1]$.
 
-In the following section, we discuss the Markovian case in which all exogenous variables $U_i$ are mutually independent. The Semi-Markovian case, where variables $U_i$ are allowed to have a mutual dependency structure, alongside the extension introducing *resolving variables*, are discussed in Section \ref{extensions}.
+In the following section, we discuss the Markovian case in which all exogenous variables $U_i$ are mutually independent. The Semi-Markovian case, where variables $U_i$ are allowed to have a mutual dependency structure, alongside the extension introducing *resolving variables*, are discussed in Section \ref{sec:extensions}.
 
 ## Markovian SCM Formulation
 
@@ -604,10 +604,10 @@ ft_basic <- fairTwins(basic, train.id = seq_len(n_samp))
 head(ft_basic, n = 3)
 ```
 
-In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output. Having access to explicit counterfactual instances as above might help justify fair decisions in practice or help guide the choice of the assumed causal model and resolving variables (see Section \ref{extensions} for resolving variables).
+In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output. Having access to explicit counterfactual instances as above might help justify fair decisions in practice or help guide the choice of the assumed causal model and resolving variables (see Section \ref{sec:extensions} for resolving variables).
 
-# Uncertainty Quantification
-\label{uncq}
+# Uncertainty Quantification {#sec:uncq}
+
 The user might naturally be interested in uncertainty quantification of the procedure performed in `fairadapt()`. Before discussing how this can be achieved, we first give a graphical sketch of the typical workflow when using `fairadapt()`, shown in Figure \ref{fig:workflow-tikz}.
 
 ```{tikz, workflow-tikz, fig.cap = "The typical workflow when using \\pkg{fairadapt}. The shaded region represents the fair pre-processing which happens within the \\pkg{fairadapt} package. Often, this is followed by applying a regressor or a classifier to the transformed data, in order to obtain fair predictions. The latter part is up to the user and not included in \\pkg{fairadapt}.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
@@ -826,7 +826,7 @@ ord_df <- rbind(ord_ind(pred_fin, "Finite Sample"),
                 ord_ind(pred_quant, "Quantiles"))
 ```
 
-3. Another interesting metric is the inversion number. Notice that $p_A, p_B$ define two permutations of the $n_{test}$ individuals, when we consider a ranking of individuals according to their predicted probabilities. We can compute the inversion number of these two permutations $\pi_A, \pi_B$, which is the total number of pairs of individuals whose ordering is not the same in $\pi_A$ and $\pi_B$. Notice that the maximum value of the inversion number is $n_{test} \choose 2$. Hence, we normalize this quantity by $n_{test} \choose 2$.
+3. Another interesting metric is the inversion number. Notice that $p_A, p_B$ define two permutations of the $n_{test}$ individuals, when we consider a ranking of individuals according to their predicted probabilities. We can compute the inversion number of these two permutations $\pi_A, \pi_B$, which is the total number of pairs of individuals whose ordering is not the same in $\pi_A$ and $\pi_B$. Notice that the maximum value of the inversion number is $\binom{n_{test}}{2}$. Hence, we normalize this quantity by $\binom{n_{test}}{2}$.
 ```{r, decision-maker-3}
 inv_num <- function(sq) {
   stopifnot(setequal(sq, seq_along(sq)))
@@ -1135,14 +1135,13 @@ fairTwins(gov_ada, train.id = 1:5,
 
 Values are unchanged for female individuals (as *female* is used as baseline level), as is the case for `age`, which is not a descendant of the protected attribute `sex` (see Figure \ref{fig:census-graph}). However, variables `education_level` and `salary` do change for males, as they are descendants of the protected attribute `sex`.
 
-The variable `hours_worked` is also a descendant of $A$, and one might argue that this variable should *not* be adapted in the procedure, i.e., it should remain the same, irrespective of employee sex. This is the idea behind *resolving variables*, which we discuss next, in Section \ref{adding-resolving-variables}. It is worth emphasizing that we are not trying to answer the question of which choice of resolving variables is the correct one in the above example - this choice is left to social scientists deeply familiar with context and specifics of the above described dataset.
+The variable `hours_worked` is also a descendant of $A$, and one might argue that this variable should *not* be adapted in the procedure, i.e., it should remain the same, irrespective of employee sex. This is the idea behind *resolving variables*, which we discuss next, in Section \ref{sec:resolvers}. It is worth emphasizing that we are not trying to answer the question of which choice of resolving variables is the correct one in the above example - this choice is left to social scientists deeply familiar with context and specifics of the above described dataset.
 
-# Extensions
-\label{extensions}
+# Extensions {#sec:extensions}
+
 Several extensions to the basic Markovian SCM formulation introduced in Section \ref{markovian-scm-formulation} exist, some of which are available for use in `fairadapt()` and are outlined in the following sections.
 
-## Adding Resolving Variables 
-\label{sec:resolvers}
+## Adding Resolving Variables {#sec:resolvers}
 
 \cite{kilbertus2017avoiding} discuss that in some situations the protected attribute $A$ can affect variables in a non-discriminatory way. For instance, in the Berkeley admissions dataset \citep{bickel1975sex} we observe that females often apply for departments with lower admission rates and consequently have a lower admission probability. However, we perhaps would not wish to account for this difference in the adaptation procedure, if we were to argue that applying to a certain department is a choice everybody is free to make. Such examples motivated the idea of *resolving variables* by \citet{kilbertus2017avoiding}. A variable $R$ is called resolving if
 

@@ -44,7 +44,8 @@ Suggests:
     mvtnorm,
     magick,
     ggraph,
-    pdftools
+    pdftools,
+    microbenchmark
 RoxygenNote: 7.1.2
 VignetteBuilder: knitr
 Config/testthat/edition: 3
