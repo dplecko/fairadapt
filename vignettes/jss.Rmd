@@ -498,26 +498,40 @@ The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be
 
 Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is, substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is implemented, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach can also demonstrate competitive performance. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
 
-```{r benchmark-quant-methods, echo=FALSE, cache=TRUE}
-bmark <- lapply(
-  c(rangerQuants, mcqrnnQuants, linearQuants),
-  \(quant.method) {
-    nsamps <- c(200L, 500L)
-    res <- lapply(
-      nsamps, \(nsamp) {
-        tim <- microbenchmark(
-          fairadapt(score ~ ., train.data = uni_admission[seq_len(nsamp), ], 
-                    test.data = uni_admission[seq.int(nsamp+ 1 , 2 * nsamp), ],
-                    adj.mat = uni_adj, prot.attr = "gender", 
-                    quant.method = quant.method), times = 5L
-        )$time
-        round(mean(tim) / 10^9, digits = 1L)
-      }
-    )
-    names(res) <- c("200", "500")
-    res
-  }
-)
+```{r benchmark-quant-methods, echo = FALSE}
+
+bm_cache <- system.file("extdata", "bm_quant.rds", package = "fairadapt")
+
+if (identical(bm_cache, "")) {
+
+  bmark <- lapply(
+    c(rangerQuants, mcqrnnQuants, linearQuants),
+    \(quant.method) {
+      nsamps <- c(200L, 500L)
+      res <- lapply(
+        nsamps, \(nsamp) {
+          tim <- microbenchmark(
+            fairadapt(score ~ ., train.data = uni_admission[seq_len(nsamp), ],
+                      test.data = uni_admission[seq.int(nsamp + 1 , 2 * nsamp), ],
+                      adj.mat = uni_adj, prot.attr = "gender",
+                      quant.method = quant.method), times = 5L
+          )$time
+          round(mean(tim) / 10^9, digits = 1L)
+        }
+      )
+      names(res) <- as.character(nsamps)
+      res
+    }
+  )
+
+  names(bmark) <- c("rangerQuants", "mcqrnnQuants", "linearQuants")
+
+  saveRDS(bmark, file.path("..", "inst", "extdata", "bm_quant.rds"))
+
+} else{
+
+  bmark <- readRDS(bm_cache)
+}
 ```
 \begin{table}
 \centering
@@ -534,9 +548,9 @@ bmark <- lapply(
     \addlinespace[0.3em]
     \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1 hidden layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\
     \addlinespace[0.3em]
-    $T(200, 4)$ & `r bmark[[1]][["200"]]` sec & `r bmark[[2]][["200"]]` sec & `r bmark[[3]][["200"]]` sec \\
+    $T(200, 4)$ & `r bmark[["rangerQuants"]][["200"]]` sec & `r bmark[["mcqrnnQuants"]][["200"]]` sec & `r bmark[["linearQuants"]][["200"]]` sec \\
     \addlinespace[0.3em]
-    $T(500, 4)$ & `r bmark[[1]][["500"]]` sec & `r bmark[[2]][["500"]]` sec & `r bmark[[3]][["500"]]` sec \\
+    $T(500, 4)$ & `r bmark[["rangerQuants"]][["500"]]` sec & `r bmark[["mcqrnnQuants"]][["500"]]` sec & `r bmark[["linearQuants"]][["500"]]` sec \\
 \bottomrule
 \end{tabular}
 \caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T(n, 4)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and testing samples.}
