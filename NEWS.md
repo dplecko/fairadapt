@@ -1,3 +1,6 @@
+# fairadapt 0.2.2
+- arg `save.object` for `fairadaptBoot()` might be renamed, as "saving" for me intuitively means something like "write to disk"; maybe `keep.objects`? idk..
+
 # fairadapt 0.2.1
 Non-breaking changes:
 - `fairTwins()` now has a default `train.id` of `seq_len(nrow(x$train))` (previous default was `1L`)
