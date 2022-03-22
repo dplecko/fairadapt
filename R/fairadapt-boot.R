@@ -68,11 +68,13 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
                           test.data = NULL, cfd.mat = NULL, top.ord = NULL, 
                           res.vars = NULL, quant.method = rangerQuants,
                           save.object = FALSE, n.boot = 100, 
-                          rand.mode = "finsamp", 
+                          rand.mode = c("finsamp", "quant", "both"),
                           ...) {
+
+  rand.mode <- match.arg(rand.mode)
   
-  trn.rnd <- ifelse(rand.mode %in% c("finsamp", "both"), TRUE, FALSE)
-  tst.rnd <- ifelse(rand.mode %in% c("quant", "both"), TRUE, FALSE)
+  trn.rnd <- rand.mode %in% c("finsamp", "both")
+  tst.rnd <- rand.mode %in% c("quant", "both")
   
   res.lst <- FA.lst <- boot.lst <- list() 
   
