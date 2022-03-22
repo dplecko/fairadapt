@@ -79,29 +79,32 @@ print.fairadapt <- function(x, ...) {
 }
 
 #' @export
-summary.fairadapt <- function(x, ...) {
+summary.fairadapt <- function(object, ...) {
   
-  seq_row <- seq_len(nrow(x$train))
+  seq_row <- seq_len(nrow(object$train))
   
-  tv.start <- mean(x$train[[1L]][x$base.ind[seq_row]]) -
-    mean(x$train[[1L]][!x$base.ind[seq_row]])
+  tv.start <- mean(object$train[[1L]][object$base.ind[seq_row]]) -
+    mean(object$train[[1L]][!object$base.ind[seq_row]])
   
-  tv.end <- mean(x$adapt.train[[1L]][x$base.ind[seq_row]]) -
-    mean(x$adapt.train[[1L]][!x$base.ind[seq_row]])
+  tv.end <- mean(object$adapt.train[[1L]][object$base.ind[seq_row]]) -
+    mean(object$adapt.train[[1L]][!object$base.ind[seq_row]])
   
-  adapt.vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+  adapt.vars <- setdiff(
+    getDescendants(object$prot.attr, object$adj.mat),
+    object$res.vars
+  )
   
   structure(list(
-    formula = x$formula,
-    prot.attr = x$prot.attr,
-    attr.lvls = x$attr.lvls,
-    res.vars = x$res.vars,
-    train.samp = nrow(x$adapt.train),
-    test.samp = nrow(x$adapt.test),
+    formula = object$formula,
+    prot.attr = object$prot.attr,
+    attr.lvls = object$attr.lvls,
+    res.vars = object$res.vars,
+    train.samp = nrow(object$adapt.train),
+    test.samp = nrow(object$adapt.test),
     adapt.vars = adapt.vars,
     tv.start = tv.start,
     tv.end = tv.end,
-    quant.method = x$quant.method
+    quant.method = object$quant.method
   ), class = "summary.fairadapt")
 }
 

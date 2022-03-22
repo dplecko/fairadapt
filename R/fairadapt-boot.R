@@ -166,22 +166,25 @@ print.fairadaptBoot <- function(x, ...) {
 }
 
 #' @export
-summary.fairadaptBoot <- function(x, ...) {
+summary.fairadaptBoot <- function(object, ...) {
   
-  adapt.vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+  adapt.vars <- setdiff(
+    getDescendants(object$prot.attr, object$adj.mat),
+    object$res.vars
+  )
   
   structure(list(
-    formula = x$formula,
-    prot.attr = x$prot.attr,
-    attr.lvls = x$attr.lvls,
-    res.vars = x$res.vars,
-    train.samp = nrow(x$adapt.train),
-    test.samp = nrow(x$adapt.test),
+    formula = object$formula,
+    prot.attr = object$prot.attr,
+    attr.lvls = object$attr.lvls,
+    res.vars = object$res.vars,
+    train.samp = nrow(object$adapt.train),
+    test.samp = nrow(object$adapt.test),
     adapt.vars = adapt.vars,
-    n.boot = x$n.boot,
-    save.object = x$save.object,
-    rand.mode = x$rand.mode,
-    quant.method = x$quant.method
+    n.boot = object$n.boot,
+    save.object = object$save.object,
+    rand.mode = object$rand.mode,
+    quant.method = object$quant.method
   ), class = "summary.fairadaptBoot")
 }
 
