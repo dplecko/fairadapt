@@ -6,7 +6,7 @@ Description: An implementation of the fair data adaptation with quantile
     given training and testing data in such a way to remove the bias caused by
     the protected attribute. The procedure uses tree ensembles for quantile
     regression.
-Version: 0.2.1
+Version: 0.2.1.9000
 Authors@R: c(
     person(given = "Drago",
            family = "Plecko",
