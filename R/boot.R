@@ -173,7 +173,7 @@ print.fairadaptBoot <- function(x, ...) {
   cat("Bootstrap repetitions:", x$n.boot, "\n")
 
   if (!is.null(x$adj.mat)) {
-    # FIXME: determine from top.ord
+    # FIXME: determine from top.ord?
     vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
     cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
         sep = "")

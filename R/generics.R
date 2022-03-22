@@ -59,6 +59,7 @@ print.fairadapt <- function(x, ...) {
   cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
+  # FIXME: determine from top.ord?
   vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
 
   cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
@@ -97,6 +98,7 @@ summary.fairadapt <- function(object, ...) {
   tv.end <- mean(object$adapt.train[[1L]][object$base.ind[seq_row]]) -
     mean(object$adapt.train[[1L]][!object$base.ind[seq_row]])
   
+  # FIXME: determine from top.ord?
   adapt.vars <- setdiff(
     getDescendants(object$prot.attr, object$adj.mat),
     object$res.vars

@@ -30,6 +30,9 @@ test_that("generics", {
               prot.attr = "a")
   )
 
+  expect_snapshot(print(ad.rf))
+  expect_snapshot(summary(ad.rf))
+
   aut.plt <- autoplot(ad.rf)
 
   expect_s3_class(aut.plt, "ggplot")
@@ -50,6 +53,9 @@ test_that("generics", {
     fairadapt(y ~ ., train.data = train, test.data = test, adj.mat = adj.mat,
               prot.attr = "a", quant.method = linearQuants)
   )
+
+  expect_snapshot(print(ad.lin))
+  expect_snapshot(summary(ad.lin))
 
   aut.plt <- autoplot(ad.lin)
 
@@ -75,6 +81,9 @@ test_that("generics", {
               prot.attr = "a")
   )
 
+  expect_snapshot(print(ad.cts))
+  expect_snapshot(summary(ad.cts))
+
   aut.plt <- autoplot(ad.cts)
 
   expect_s3_class(aut.plt, "ggplot")
@@ -91,10 +100,15 @@ test_that("generics", {
 
   # check predict function for a discrete variable
   cts$x <- with_seed(301, rbinom(length(cts$x), size = 1, prob = 0.5))
+
   ad.disc <- with_seed(302,
     fairadapt(y ~ ., train.data = cts, test.data = NULL, adj.mat = adj.mat,
               prot.attr = "a")
   )
+
+  expect_snapshot(print(ad.disc))
+  expect_snapshot(summary(ad.disc))
+
   expect_snapshot_csv("predi_disc", with_seed(304, predict(ad.disc, cts)))
 
 })
