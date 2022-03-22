@@ -15,14 +15,14 @@ mcqrnnQuants(
 )
 }
 \arguments{
-\item{data}{A \code{data.frame} with data to be used for quantile
+\item{data}{A `data.frame` with data to be used for quantile
 regression.}
 
-\item{A.root}{A \code{logical(1L)} indicating whether the protected
+\item{A.root}{A `logical(1L)` indicating whether the protected
 attribute `A` is a root node of the causal graph. Used for splitting the
 quantile regression.}
 
-\item{ind}{A \code{logical} vector of length `nrow(data)`, indicating which
+\item{ind}{A `logical` vector of length `nrow(data)`, indicating which
 samples have the baseline value of the protected attribute.}
 
 \item{tau, iter.max, ...}{Forwarded to [qrnn::mcqrnn.fit()].}

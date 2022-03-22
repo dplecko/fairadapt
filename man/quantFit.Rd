@@ -7,13 +7,13 @@
 quantFit(x, ...)
 }
 \arguments{
-\item{x}{Object of class \code{fairadapt}, a result of an adaptation
+\item{x}{Object of class `fairadapt`, a result of an adaptation
 procedure.}
 
 \item{...}{Ignored in this case.}
 }
 \value{
-A \code{numeric} vector, containing the average empirical loss for
+A `numeric` vector, containing the average empirical loss for
 of the 25%, 50% and 75% quantile loss functions, for each variable.
 }
 \description{

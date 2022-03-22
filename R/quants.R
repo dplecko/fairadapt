@@ -1,12 +1,12 @@
 #' Compute Quantiles using random forests (`ranger` package) in the Quantile
 #' Learning step.
 #'
-#' @param data A \code{data.frame} with data to be used for quantile
+#' @param data A `data.frame` with data to be used for quantile
 #' regression.
-#' @param A.root A \code{logical(1L)} indicating whether the protected
+#' @param A.root A `logical(1L)` indicating whether the protected
 #' attribute `A` is a root node of the causal graph. Used for splitting the
 #' quantile regression.
-#' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
+#' @param ind A `logical` vector of length `nrow(data)`, indicating which
 #' samples have the baseline value of the protected attribute.
 #' @param min.node.size,... Forwarded to [ranger::ranger()].
 #'
@@ -36,13 +36,7 @@ rangerQuants <- function(data, A.root, ind, min.node.size = 20, ...) {
 #' Compute Quantiles using linear quantile regression (`quantreg` package) in
 #' the Quantile Learning step.
 #'
-#' @param data A \code{data.frame} with data to be used for quantile
-#' regression.
-#' @param A.root A \code{logical(1L)} indicating whether the protected
-#' attribute `A` is a root node of the causal graph. Used for splitting the
-#' quantile regression.
-#' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
-#' samples have the baseline value of the protected attribute.
+#' @inheritParams rangerQuants
 #' @param tau,... Forwarded to [quantreg::rq()].
 #'
 #' @return A `rqs` or a `quantregsplit` `S3` object, depending on the value of
@@ -83,13 +77,7 @@ linearQuants <- function(data, A.root, ind,
 #' Compute Quantiles using monotone quantile regression neural networks
 #' (`mcqrnn` package) in the Quantile Learning step.
 #'
-#' @param data A \code{data.frame} with data to be used for quantile
-#' regression.
-#' @param A.root A \code{logical(1L)} indicating whether the protected
-#' attribute `A` is a root node of the causal graph. Used for splitting the
-#' quantile regression.
-#' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
-#' samples have the baseline value of the protected attribute.
+#' @inheritParams rangerQuants
 #' @param tau,iter.max,... Forwarded to [qrnn::mcqrnn.fit()].
 #'
 #' @return An `mcqrnn` `S3` object.
@@ -112,11 +100,11 @@ mcqrnnQuants <- function(data, A.root, ind, tau = seq(0.005, 0.995, by = 0.01),
 #'
 #' @param x Object with an associated `computeQuants()` method, to be used for
 #' inferring quantiles.
-#' @param data \code{data.frame} containing samples used in the quantile
+#' @param data `data.frame` containing samples used in the quantile
 #' regression.
-#' @param newdata \code{data.frame} containing counterfactual values for which
+#' @param newdata `data.frame` containing counterfactual values for which
 #' the quantiles need to be inferred.
-#' @param ind A \code{logical} vector of length `nrow(data)`, indicating which
+#' @param ind A `logical` vector of length `nrow(data)`, indicating which
 #' samples have the baseline value of the protected attribute.
 #' @param ... Additional arguments to be passed down to respective method
 #' functions.

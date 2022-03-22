@@ -208,7 +208,7 @@ plot.fairadapt <- function(x, when = "after", ...) {
 
 #' Visualize Graphical Causal Model
 #'
-#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.
 #' @param ... Additional arguments passed to the graph plotting function.
 #' @export
@@ -221,10 +221,10 @@ visualizeGraph.fairadapt <- function(x, ...) plot(x$graph, ...)
 
 #' Convenience function for returning adapted data
 #'
-#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.
 #' @param train A logical indicating whether train data should be returned.
-#' Defaults to \code{TRUE}. If \code{FALSE}, test data is returned.
+#' Defaults to `TRUE`. If `FALSE`, test data is returned.
 #' @export
 adaptedData <- function(x, train = TRUE) {
   UseMethod("adaptedData", x)
@@ -239,16 +239,16 @@ adaptedData.fairadapt <- function(x, train = TRUE) {
 
 #' Fair Twin Inspection convenience function.
 #'
-#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.
 #' @param train.id A vector of indices specifying which rows of the training
 #' data should be displayed.
 #' @param test.id A vector of indices specifying which rows of the test
 #' data should be displayed.
-#' @param cols A \code{character} vector, subset of \code{names(train.data)},
+#' @param cols A `character` vector, subset of `names(train.data)`,
 #' which specifies which subset of columns is to be displayed in the result.
-#' @return A \code{data.frame}, containing the original and adapted values
-#' of the requested individuals. Adapted columns have \code{_adapted} appended
+#' @return A `data.frame`, containing the original and adapted values
+#' of the requested individuals. Adapted columns have `_adapted` appended
 #' to their original name.
 #' @examples
 #' uni.adj.mat <- array(0, dim = c(4, 4))
@@ -401,10 +401,10 @@ predict.fairadapt <- function(object, newdata, ...) {
 
 #' Quality of quantile fit statistics.
 #'
-#' @param x Object of class \code{fairadapt}, a result of an adaptation
+#' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.
 #' @param ... Ignored in this case.
-#' @return A \code{numeric} vector, containing the average empirical loss for
+#' @return A `numeric` vector, containing the average empirical loss for
 #' of the 25%, 50% and 75% quantile loss functions, for each variable. 
 #' @examples
 #' uni.adj.mat <- array(0, dim = c(4, 4))

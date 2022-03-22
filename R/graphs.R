@@ -144,19 +144,19 @@ nonId <- function(iv, adj.mat, cfd.mat) {
 
 #' Obtaining the graphical causal model (GCM)
 #'
-#' @param adj.mat Matrix of class \code{matrix} encoding the relationships in
-#' the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
+#' @param adj.mat Matrix of class `matrix` encoding the relationships in
+#' the causal graph. `M[i,j] == 1L` implies the existence of an edge from
 #' node i to node j.
-#' @param cfd.mat Symmetric matrix of class \code{matrix} encoding the
-#' bidirected edges in the causal graph. \code{M[i,j] == M[j, i] == 1L}
+#' @param cfd.mat Symmetric matrix of class `matrix` encoding the
+#' bidirected edges in the causal graph. `M[i,j] == M[j, i] == 1L`
 #' implies the existence of a bidirected edge between nodes i and j.
-#' @param res.vars A vector of class \code{character} listing all the resolving
+#' @param res.vars A vector of class `character` listing all the resolving
 #' variables, which should not be changed by the adaption procedure. Default
-#' value is \code{NULL}, corresponding to no resolving variables. Resolving
-#' variables should be a subset of \code{colnames(adj.mat)}. Resolving
+#' value is `NULL`, corresponding to no resolving variables. Resolving
+#' variables should be a subset of `colnames(adj.mat)`. Resolving
 #' variables are marked with a different color in the output.
 #'
-#' @return An object of class \code{igraph}, containing the causal graphical,
+#' @return An object of class `igraph`, containing the causal graphical,
 #' with directed and bidirected edges.
 #'
 #' @examples

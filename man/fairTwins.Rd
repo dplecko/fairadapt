@@ -7,7 +7,7 @@
 fairTwins(x, train.id = seq_len(nrow(x$train)), test.id = NULL, cols = NULL)
 }
 \arguments{
-\item{x}{Object of class \code{fairadapt}, a result of an adaptation
+\item{x}{Object of class `fairadapt`, a result of an adaptation
 procedure.}
 
 \item{train.id}{A vector of indices specifying which rows of the training
@@ -16,12 +16,12 @@ data should be displayed.}
 \item{test.id}{A vector of indices specifying which rows of the test
 data should be displayed.}
 
-\item{cols}{A \code{character} vector, subset of \code{names(train.data)},
+\item{cols}{A `character` vector, subset of `names(train.data)`,
 which specifies which subset of columns is to be displayed in the result.}
 }
 \value{
-A \code{data.frame}, containing the original and adapted values
-of the requested individuals. Adapted columns have \code{_adapted} appended
+A `data.frame`, containing the original and adapted values
+of the requested individuals. Adapted columns have `_adapted` appended
 to their original name.
 }
 \description{

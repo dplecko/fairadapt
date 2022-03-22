@@ -8,7 +8,7 @@
 #' Fairadapt
 #'
 #' Implementation of fair data adaptation with quantile preservation
-#' (Plecko & Meinshausen 2019). Uses only plain \code{R}.
+#' (Plecko & Meinshausen 2019). Uses only plain `R`.
 #'
 #' The procedure takes the training and testing data as an input, together with
 #' the causal graph given by an adjacency matrix and the list of resolving
@@ -20,46 +20,46 @@
 #' original paper. Most of the running time is due to the quantile regression
 #' step using the ranger package.
 #'
-#' @param formula Object of class \code{formula} describing the response and
+#' @param formula Object of class `formula` describing the response and
 #' the covariates.
-#' @param prot.attr A value of class \code{character} describing the binary
-#' protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.
-#' @param adj.mat Matrix of class \code{matrix} encoding the relationships in
-#' the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
+#' @param prot.attr A value of class `character` describing the binary
+#' protected attribute. Must be one of the entries of `colnames(adj.mat)`.
+#' @param adj.mat Matrix of class `matrix` encoding the relationships in
+#' the causal graph. `M[i,j] == 1L` implies the existence of an edge from
 #' node i to node j. Must include all the variables appearing in the formula
-#' object. When the \code{adj.mat} argument is set to \code{NULL}, then the
-#' \code{top.ord} argument has to be supplied.
+#' object. When the `adj.mat` argument is set to `NULL`, then the
+#' `top.ord` argument has to be supplied.
 #' @param train.data,test.data Training data & testing data, both of class
-#' \code{data.frame}. Test data is by default \code{NULL}.
-#' @param cfd.mat Symmetric matrix of class \code{matrix} encoding the
-#' bidirected edges in the causal graph. \code{M[i,j] == M[j, i] == 1L}
+#' `data.frame`. Test data is by default `NULL`.
+#' @param cfd.mat Symmetric matrix of class `matrix` encoding the
+#' bidirected edges in the causal graph. `M[i,j] == M[j, i] == 1L`
 #' implies the existence of a bidirected edge between nodes i and j. Must
 #' include all the variables appearing in the formula object.
-#' @param top.ord A vector of class \code{character} describing the
-#' topological ordering of the causal graph. Default value is \code{NULL},
-#' but this argument must be supplied if \code{adj.mat} is not specified.
+#' @param top.ord A vector of class `character` describing the
+#' topological ordering of the causal graph. Default value is `NULL`,
+#' but this argument must be supplied if `adj.mat` is not specified.
 #' Also must include all the variables appearing in the formula object.
-#' @param res.vars A vector of class \code{character} listing all the resolving
+#' @param res.vars A vector of class `character` listing all the resolving
 #' variables, which should not be changed by the adaption procedure. Default
-#' value is \code{NULL}, corresponding to no resolving variables. Resolving
+#' value is `NULL`, corresponding to no resolving variables. Resolving
 #' variables should be a subset of the descendants of the protected attribute.
 #' @param quant.method A function choosing the method used for quantile
-#' regression. Default value is \code{rangerQuants} (using random forest
-#' quantile regression). Other implemented options are \code{linearQuants} and
-#' \code{mcqrnnQuants}. A custom function can be supplied by the user here,
-#' and the associated method for the S3 generic \code{computeQuants} needs to be
+#' regression. Default value is `rangerQuants` (using random forest
+#' quantile regression). Other implemented options are `linearQuants` and
+#' `mcqrnnQuants`. A custom function can be supplied by the user here,
+#' and the associated method for the S3 generic `computeQuants` needs to be
 #' added.
-#' @param visualize.graph A \code{logical} indicating whether the causal graph
-#' should be plotted upon calling the \code{fairadapt()} function. Default
-#' value is \code{FALSE}.
+#' @param visualize.graph A `logical` indicating whether the causal graph
+#' should be plotted upon calling the `fairadapt()` function. Default
+#' value is `FALSE`.
 #' @param eval.qfit Argument indicating whether the quality of the quantile
 #' regression fit should be computed using cross-validation. Default value is 
-#' \code{NULL}, but whenever a positive integer value is specified, then it is 
+#' `NULL`, but whenever a positive integer value is specified, then it is
 #' interpreted as the number of folds used in the cross-validation procedure.
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'
-#' @return An object of class \code{fairadapt}, containing the original and
+#' @return An object of class `fairadapt`, containing the original and
 #' adapted training and testing data, together with the causal graph and some
 #' additional meta-information.
 #' @examples
@@ -80,7 +80,7 @@
 #'
 #' @references
 #' Plecko, D. & Meinshausen, N. (2019).
-#' Fair Data Adaptation with Quantile Preservation \cr
+#' Fair Data Adaptation with Quantile Preservation
 #' @export
 fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   cfd.mat = NULL, top.ord = NULL, res.vars = NULL, quant.method = rangerQuants,
