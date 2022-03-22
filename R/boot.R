@@ -172,10 +172,12 @@ print.fairadaptBoot <- function(x, ...) {
   
   cat("Bootstrap repetitions:", x$n.boot, "\n")
 
-  vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
-  
-  cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
-      sep = "")
+  if (!is.null(x$adj.mat)) {
+    # FIXME: determine from top.ord
+    vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+    cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
+        sep = "")
+  }
   
   cat("\nBased on protected attribute", x$prot.attr, "\n")
   
@@ -201,11 +203,16 @@ print.fairadaptBoot <- function(x, ...) {
 
 #' @export
 summary.fairadaptBoot <- function(object, ...) {
-  
-  adapt.vars <- setdiff(
-    getDescendants(object$prot.attr, object$adj.mat),
-    object$res.vars
-  )
+
+  # FIXME: determine from top.ord?
+  if (is.null(object$adj.mat)) {
+    adapt.vars <- NULL
+  } else {
+    adapt.vars <- setdiff(
+      getDescendants(object$prot.attr, object$adj.mat),
+      object$res.vars
+    )
+  }
 
   mod <- object$last.mod
   

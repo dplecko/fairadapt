@@ -31,9 +31,7 @@ test_that("fairadaptBoot", {
                                  adj.mat = adj.mat, prot.attr = "a", seed = 202,
                                  n.boot = 3L, save.object = TRUE)
   )
-  
-  # both print() and str() throw
-  
+
   expect_type(ran, "list")
   expect_named(ran, fa.nms, ignore.order = TRUE)
   
@@ -43,8 +41,8 @@ test_that("fairadaptBoot", {
   
   expect_identical(ran[["prot.attr"]], "a")
   
-  # expect_snapshot_json(tot_var(ran, "train", "y"))
-  # expect_snapshot_json(tot_var(ran, "adapt.train", "y"))
+  expect_snapshot_json(tot_var(ran$last.mod, "train", "y"))
+  expect_snapshot_json(tot_var(ran$last.mod, "adapt.train", "y"))
   
   ran.eng <- ran[["fairadapt"]][[1]][["q.engine"]]
   
@@ -70,7 +68,10 @@ test_that("fairadaptBoot", {
       names(which(adj.mat[, i] == 1L))
     )
   }
-  
+
+  expect_snapshot(print(ran))
+  expect_snapshot(summary(ran))
+
   # w/ top.ord
   
   rto <- with_seed(202,
@@ -82,7 +83,10 @@ test_that("fairadaptBoot", {
   expect_type(rto, "list")
   expect_named(rto, fa.nms, ignore.order = TRUE)
   expect_s3_class(rto, "fairadaptBoot")
-  
+
+  expect_snapshot(print(rto))
+  expect_snapshot(summary(rto))
+
   skip_on_cran()
   
   # character example
@@ -95,8 +99,9 @@ test_that("fairadaptBoot", {
     0L, 0L, 0L, 0L # score
   )
   
-  adj.mat <- matrix(adj.mat, nrow = length(names(uni)), ncol = length(names(uni)),
-                    byrow = TRUE, dimnames = list(names(uni), names(uni)))
+  adj.mat <- matrix(adj.mat, nrow = length(names(uni)),
+                    ncol = length(names(uni)), byrow = TRUE,
+                    dimnames = list(names(uni), names(uni)))
   
   charmod <- with_seed(
     203,
@@ -107,7 +112,10 @@ test_that("fairadaptBoot", {
   
   charmod.pred <- predict(charmod, uni)
   expect_type(charmod.pred, "list")
-  
+
+  expect_snapshot(print(charmod))
+  expect_snapshot(summary(charmod))
+
   # data example
   
   data <- system.file("testdata", "compas-scores-two-years.rds",
@@ -141,10 +149,7 @@ test_that("fairadaptBoot", {
                                  prot.attr = "race", seed = 203,
                                  n.boot = 3)
   )
-  
-  expect_output(print(mod), regexp = "Call:")
-  mod.sum <- summary(mod)
-  expect_s3_class(mod.sum, "summary.fairadaptBoot")
-  expect_output(print(mod.sum), regexp = "Call:")
-  
+
+  expect_snapshot(print(mod))
+  expect_snapshot(summary(mod))
 })

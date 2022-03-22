@@ -102,18 +102,21 @@ summary.fairadapt <- function(object, ...) {
     object$res.vars
   )
   
-  structure(list(
-    formula = object$formula,
-    prot.attr = object$prot.attr,
-    attr.lvls = object$attr.lvls,
-    res.vars = object$res.vars,
-    train.samp = nrow(object$adapt.train),
-    test.samp = nrow(object$adapt.test),
-    adapt.vars = adapt.vars,
-    tv.start = tv.start,
-    tv.end = tv.end,
-    quant.method = object$quant.method
-  ), class = "summary.fairadapt")
+  structure(
+    list(
+      formula = object$formula,
+      prot.attr = object$prot.attr,
+      attr.lvls = object$attr.lvls,
+      res.vars = object$res.vars,
+      train.samp = nrow(object$adapt.train),
+      test.samp = nrow(object$adapt.test),
+      adapt.vars = adapt.vars,
+      tv.start = tv.start,
+      tv.end = tv.end,
+      quant.method = object$quant.method
+    ),
+    class = "summary.fairadapt"
+  )
 }
 
 #' @export
