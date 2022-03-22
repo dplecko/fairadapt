@@ -83,6 +83,8 @@ options(
   width = 70,
   useFancyQuotes = FALSE
 )
+
+quick_build <- TRUE
 ```
 
 ```{tikz, setup-graph, eval = FALSE, echo = FALSE}
@@ -502,7 +504,11 @@ Using linear quantile regression is the most efficient option in terms of runtim
 
 bm_cache <- system.file("extdata", "bm_quant.rds", package = "fairadapt")
 
-if (identical(bm_cache, "")) {
+if (quick_build && file.exists(bm_cache)) {
+
+  bmark <- readRDS(bm_cache)
+
+} else{
 
   bmark <- lapply(
     c(rangerQuants, mcqrnnQuants, linearQuants),
@@ -527,12 +533,9 @@ if (identical(bm_cache, "")) {
   names(bmark) <- c("rangerQuants", "mcqrnnQuants", "linearQuants")
 
   saveRDS(bmark, file.path("..", "inst", "extdata", "bm_quant.rds"))
-
-} else{
-
-  bmark <- readRDS(bm_cache)
 }
 ```
+
 \begin{table}
 \centering
 \begin{threeparttable}
@@ -753,19 +756,36 @@ The COMPAS dataset contains information on 7214 individuals from Broward County,
 ```
 
 After loading the dataset, we run the `fairadaptBoot()` function twice, with two different values of the `rand.mode` argument. Firstly, we consider only the finite sample uncertainty.
-```{r, compas-boot-finite, cache=TRUE}
+
+```{r, compas-boot-quick, eval = quick_build, echo = quick_build}
+cmp_trn <- tail(cmp_dat, n = 700L)
+cmp_tst <- head(cmp_dat, n = 100L)
+
+n_itr <- 5L
+```
+
+```{r, compas-boot-slow, eval = !quick_build, echo = !quick_build}
 cmp_trn <- tail(cmp_dat, n = 7000L)
 cmp_tst <- head(cmp_dat, n = 1000L)
-FA.boot.fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat, cmp_trn, 
-                             cmp_tst, rand.mode = "finsamp", n.boot = 50L)
+
+n_itr <- 50L
 ```
+
+```{r, compas-boot-finite}
+FA.boot.fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat, cmp_trn,
+                             cmp_tst, rand.mode = "finsamp", n.boot = n_itr)
+```
+
 Then, we re-run the bootstrap procedure, but by considering only the inherent quantile uncertainty, by setting the `rand.mode` argument to `"quant"`.
-```{r, compas-boot-quant, cache=TRUE}
-FA.boot.quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat, cmp_trn, 
-                               cmp_tst, rand.mode = "quant", n.boot = 50L)
+
+```{r, compas-boot-quant, eval = quick_build, echo = quick_build}
+FA.boot.quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat, cmp_trn,
+                               cmp_tst, rand.mode = "quant", n.boot = n_itr)
 ```
+
 The objects we obtained are of class `fairadaptBoot` and contain a list `adapt.test` which contains different replicates of the adapted test data (the length of this list is `n.boot`, the number of bootstrap repetitions). Finally, to obtain predictions, we train a random forest classifier on the different bootstrap samples of `train.data` and apply it to all of the obtained transformed datasets. In doing so, we make use of the `boot.ind` list, contained in `fairadaptBoot` object, which contains all the row indices of different bootstrap repetitions.
-```{r, compas-forest, cache = TRUE}
+
+```{r, compas-forest}
 cmp_RFs <- lapply(
   seq_len(FA.boot.fin$n.boot),
   \(x) {
@@ -1101,11 +1121,18 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
 
 Before applying `fairadapt()`, we first log-transform the salaries and look at respective densities by sex group. We subset the data by using `n_samp` samples for training and `n_pred` samples for predicting and plot the data before performing the adaption.
 
-```{r, log-sub}
-gov_dat$salary <- log(gov_dat$salary)
+```{r, log-sub-quick, eval = quick_build, echo = quick_build}
+n_samp <- 3000
+n_pred <- 5
+```
 
+```{r, log-sub-slow, eval = !quick_build, echo = !quick_build}
 n_samp <- 30000
 n_pred <- 5
+```
+
+```{r, log-sub}
+gov_dat$salary <- log(gov_dat$salary)
 
 gov_trn <- head(gov_dat, n = n_samp)
 gov_prd <- tail(gov_dat, n = n_pred)
@@ -1120,8 +1147,7 @@ ggplot(gov_trn, aes(x = salary, fill = sex)) +
 
 There is a clear shift between the two sexes, indicating that `male` employees are currently better compensated when compared to `female` employees. However, this differences in `salary` could, in principle, be attributed to factors apart form gender inequality, such as the economic region in which an employee works. This needs to be accounted for as well, i.e., we do not wish to remove differences in salary between economic regions.
 
-```{r, census-adapt, cache=TRUE}
-
+```{r, census-adapt}
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
