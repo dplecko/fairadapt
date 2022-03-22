@@ -58,8 +58,9 @@
 #' uni_ada <- fairadaptBoot(score ~ .,
 #'   train.data = head(uni_admission, n = n_samp),
 #'   test.data = tail(uni_admission, n = n_samp),
-#'   adj.mat = uni.adj.mat,
-#'   prot.attr = "gender"
+#'   adj.mat = uni_adj,
+#'   prot.attr = "gender",
+#'   n.boot = 10
 #' )
 #'
 #' uni_ada
@@ -80,10 +81,10 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
   trn.rnd <- rand.mode %in% c("finsamp", "both")
   tst.rnd <- rand.mode %in% c("quant", "both")
   
-  res.lst <- FA.lst <- boot.lst <- list() 
-  
-  
-  
+  res.lst <- list()
+  FA.lst <- list()
+  boot.lst <- list()
+
   if (!trn.rnd) {
     FA <- fairadapt(formula, prot.attr, adj.mat, train.data, 
                     cfd.mat = cfd.mat, top.ord = top.ord, 
@@ -97,17 +98,21 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
   for (rep in seq_len(n.boot)) {
     # retrain if needed
     boot.smp <- seq_len(nrow(train.data))
+
     if (trn.rnd) {
       
       bad <- TRUE
       cnt <- 1L
+
       if (!is.null(test.data)) {
         while (any(bad)) {
           boot.smp <- sample(nrow(train.data), replace = TRUE)
           bad <- vapply(
-            which(vapply(train.data, \(x) is.factor(x) | is.character(x), 
+            which(vapply(train.data, function(x) is.factor(x) | is.character(x),
                          logical(1L))),
-            \(i) length(setdiff(test.data[, i], train.data[boot.smp, i])) > 0,
+            function(i) {
+              length(setdiff(test.data[, i], train.data[boot.smp, i])) > 0
+            },
             logical(1L)
           )
         }
@@ -119,56 +124,76 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
                       cfd.mat = cfd.mat, top.ord = top.ord, res.vars = res.vars,
                       quant.method = quant.method, ...)
       
-      if (save.object) FA.lst[[rep]] <- FA
+      if (save.object) {
+        FA.lst[[rep]] <- FA
+      }
     }
     
     # fix test randomness if needed
-    if (!tst.rnd) set.seed(2022)
-    if (!is.null(test.data)) res.lst[[rep]] <- predict(FA, test.data)
-    
+    if (!tst.rnd) {
+      set.seed(2022)
+    }
+
+    if (!is.null(test.data)) {
+      res.lst[[rep]] <- predict(FA, test.data)
+    }
   }
   
-  if (!save.object) FA.lst <- NULL
+  if (!save.object) {
+    FA.lst <- NULL
+  }
   
-  structure(list(
-    rand.mode = rand.mode,
-    n.boot = n.boot,
-    save.object = save.object,
-    prot.attr = prot.attr,
-    adj.mat = adj.mat,
-    res.vars = res.vars,
-    cfd.mat = cfd.mat,
-    top.ord = top.ord,
-    adapt.test = res.lst,
-    boot.ind = boot.lst,
-    fairadapt = FA.lst,
-    boot.call = match.call(),
-    formula = formula
-  ), class = "fairadaptBoot")
-  
+  structure(
+    list(
+      rand.mode = rand.mode,
+      n.boot = n.boot,
+      save.object = save.object,
+      prot.attr = prot.attr,
+      adj.mat = adj.mat,
+      res.vars = res.vars,
+      cfd.mat = cfd.mat,
+      top.ord = top.ord,
+      adapt.test = res.lst,
+      boot.ind = boot.lst,
+      fairadapt = FA.lst,
+      boot.call = match.call(),
+      formula = formula,
+      last.mod = FA
+    ),
+    class = "fairadaptBoot"
+  )
 }
 
 #' @export
 print.fairadaptBoot <- function(x, ...) {
   
-  cat("fairadaptBoot S3 object\n")
   cat("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
-  cat("Bootstrap repetitions:", x$n.boot)
+  cat("Bootstrap repetitions:", x$n.boot, "\n")
+
+  vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
   
-  cat("\nAdapting variables:\n", 
-      setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars))
+  cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
+      sep = "")
   
-  cat("\n\nBased on protected attribute", x$prot.attr, "\n")
+  cat("\nBased on protected attribute", x$prot.attr, "\n")
   
-  cat("\n  AND \n")
+  cat("\n  AND\n")
   
   if (is.null(x$adj.mat)) {
-    cat("\nBased on topological order:\n", x$top.ord)
+
+    cat("\nBased on topological order:\n  ", x$top.ord, sep = "")
+
   } else {
+
+    mat <- rbind(colnames(x$adj.mat), x$adj.mat)
+    mat <- apply(mat, 2L, format, justify = "right")
+    mat <- cbind(format(c("", rownames(x$adj.mat))), mat)
+
     cat("\nBased on causal graph:\n")
-    print(x$adj.mat)
+    cat(apply(mat, 1L, paste, collapse = " "), sep = "\n")
+    cat("\n")
   }
   
   invisible(x)
@@ -181,53 +206,61 @@ summary.fairadaptBoot <- function(object, ...) {
     getDescendants(object$prot.attr, object$adj.mat),
     object$res.vars
   )
+
+  mod <- object$last.mod
   
-  structure(list(
-    formula = object$formula,
-    prot.attr = object$prot.attr,
-    attr.lvls = object$attr.lvls,
-    res.vars = object$res.vars,
-    train.samp = nrow(object$adapt.train),
-    test.samp = nrow(object$adapt.test),
-    adapt.vars = adapt.vars,
-    n.boot = object$n.boot,
-    save.object = object$save.object,
-    rand.mode = object$rand.mode,
-    quant.method = object$quant.method
-  ), class = "summary.fairadaptBoot")
+  structure(
+    list(
+      boot.call = object$boot.call,
+      prot.attr = object$prot.attr,
+      attr.lvls = mod$attr.lvls,
+      res.vars = object$res.vars,
+      train.samp = nrow(mod$adapt.train),
+      test.samp = nrow(mod$adapt.test),
+      adapt.vars = adapt.vars,
+      n.boot = object$n.boot,
+      save.object = object$save.object,
+      rand.mode = object$rand.mode,
+      quant.method = mod$quant.method
+    ),
+    class = "summary.fairadaptBoot"
+  )
 }
 
 #' @export
-print.summary.fairadaptBoot <- 
-  function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+print.summary.fairadaptBoot <- function(x, ...) {
     
-    cat("fairadaptBoot summary\n\n")
-    cat("Formula:\n", deparse(x$formula), "\n\n")
+  cat("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"),
+      "\n\n", sep = "")
     
-    cat("\nBootstrap repetitions:", x$n.boot)
+  cat("Bootstrap repetitions:     ", x$n.boot, "\n")
     
-    cat("Protected attribute:                 ", x$prot.attr, "\n")
-    cat("Protected attribute levels:          ",
-        paste(sort(x$attr.lvls), collapse = ", "), "\n")
+  cat("Protected attribute:       ", x$prot.attr, "\n")
+  cat("Protected attribute levels:",
+      paste(sort(x$attr.lvls), collapse = ", "), "\n")
     
-    if (!is.null(x$adapt.vars)) {
-      cat("Adapted variables:                   ",
-          paste(x$adapt.vars, collapse = ", "), "\n")
-    }
-    if(!is.null(x$res.vars)) {
-      cat("Resolving variables:                 ",
-          paste(x$res.vars, collapse = ", "), "\n")
-    }
-    cat("\n")
-    
-    cat("Number of training samples:          ", x$train.samp, "\n")
-    cat("Number of test samples:              ", x$test.samp, "\n")
-    cat("Quantile method:                     ", x$quant.method, "\n\n")
-    
-    cat("Randomness considered:               ", x$rand.mode, "\n")
-    cat("fairadapt objects saved:             ", x$save.object, "\n")
-    
-    invisible(x)
+  if (!is.null(x$adapt.vars)) {
+    cat("Adapted variables:         ",
+        paste(x$adapt.vars, collapse = ", "), "\n")
+  }
+
+  if(!is.null(x$res.vars)) {
+    cat("Resolving variables:       ",
+        paste(x$res.vars, collapse = ", "), "\n")
+  }
+
+  cat("\n")
+
+  cat("Number of training samples:", x$train.samp, "\n")
+  cat("Number of test samples:    ", x$test.samp, "\n")
+  cat("Quantile method:           ", x$quant.method, "\n")
+
+  cat("\n")
+
+  cat("Randomness considered:     ", x$rand.mode, "\n")
+  cat("fairadapt objects saved:   ", x$save.object, "\n")
+
+  invisible(x)
 }
 
 #' @export
@@ -243,12 +276,9 @@ predict.fairadaptBoot <- function(object, newdata, ...) {
               msg = "Columns missing in newdata")
   
   lapply(object$fairadapt, predict, newdata = newdata)
-  
 }
 
 #' @export
 adaptedData.fairadaptBoot <- function(x, train = TRUE) {
-  
-  if (train) x[["adapt.train"]] else x[["adapt.test"]]
-  
+  if (isTRUE(train)) x[["adapt.train"]] else x[["adapt.test"]]
 }

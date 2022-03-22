@@ -233,10 +233,10 @@ test_that("fairadapt", {
               adj.mat = adj.mat, prot.attr = "race", seed = 203)
   )
   
-  expect_output(print(mod), regexp = "fairadapt S3 object")
+  expect_output(print(mod), regexp = "Call:")
   mod.sum <- summary(mod)
   expect_s3_class(mod.sum, "summary.fairadapt")
-  expect_output(print(mod.sum), regexp = "fairadapt summary")
+  expect_output(print(mod.sum), regexp = "Call:")
 
   ind <- train[["race"]] == "White"
 

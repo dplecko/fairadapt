@@ -41,7 +41,7 @@ uni_adj <- matrix(c(       0,     1,      1,       0,
 uni_ada <- fairadapt(score ~ .,
   train.data = head(uni_admission, n = n_samp),
   test.data = tail(uni_admission, n = n_samp),
-  adj.mat = uni.adj.mat,
+  adj.mat = uni_adj,
   prot.attr = "gender"
 )
 

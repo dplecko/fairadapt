@@ -53,26 +53,34 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
   )
 }
 
-#' @importFrom graphics lines plot polygon
 #' @export
 print.fairadapt <- function(x, ...) {
 
-  cat("fairadapt S3 object\n")
   cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
-  cat("Adapting variables:\n", 
-      setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars))
+  vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+
+  cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
+      sep = "")
   
-  cat("\n\nBased on protected attribute", x$prot.attr, "\n")
-  
-  cat("\n  AND \n")
-  
+  cat("\nBased on protected attribute", x$prot.attr, "\n")
+
+  cat("\n  AND\n")
+
   if (is.null(x$adj.mat)) {
-    cat("\nBased on topological order:\n", x$top.ord)
+
+    cat("\nBased on topological order:\n  ", x$top.ord, sep = "")
+
   } else {
+
+    mat <- rbind(colnames(x$adj.mat), x$adj.mat)
+    mat <- apply(mat, 2L, format, justify = "right")
+    mat <- cbind(format(c("", rownames(x$adj.mat))), mat)
+
     cat("\nBased on causal graph:\n")
-    print(x$adj.mat)
+    cat(apply(mat, 1L, paste, collapse = " "), sep = "\n")
+    cat("\n")
   }
 
   invisible(x)
@@ -109,39 +117,45 @@ summary.fairadapt <- function(object, ...) {
 }
 
 #' @export
-print.summary.fairadapt <- 
-  function(x, digits = max(3L, getOption("digits") - 3L), ...) {
+print.summary.fairadapt <- function(x,
+                                    digits = max(3L, getOption("digits") - 3L),
+                                    ...) {
   
-    cat("fairadapt summary\n\n")
-    cat("Formula:\n", deparse(x$formula), "\n\n")
-    cat("Protected attribute:                 ", x$prot.attr, "\n")
-    cat("Protected attribute levels:          ",
-        paste(sort(x$attr.lvls), collapse = ", "), "\n")
+  cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"),
+      "\n\n", sep = "")
+
+  cat("Protected attribute:                ", x$prot.attr, "\n")
+  cat("Protected attribute levels:         ",
+      paste(sort(x$attr.lvls), collapse = ", "), "\n")
+
+  if (!is.null(x$adapt.vars)) {
+    cat("Adapted variables:                  ",
+        paste(x$adapt.vars, collapse = ", "), "\n")
+  }
+
+  if(!is.null(x$res.vars)) {
+    cat("Resolving variables:                ",
+        paste(x$res.vars, collapse = ", "), "\n")
+  }
+
+  cat("\n")
+
+  cat("Number of training samples:         ", x$train.samp, "\n")
+  cat("Number of test samples:             ", x$test.samp, "\n")
+  cat("Quantile method:                    ", x$quant.method, "\n")
+
+  cat("\n")
+
+  cat("Total variation (before adaptation):",
+      format(x$tv.start, digits = digits), "\n")
+
+  cat("Total variation (after adaptation): ",
+      format(x$tv.end, digits = digits), "\n")
     
-    if (!is.null(x$adapt.vars)) {
-      cat("Adapted variables:                   ",
-          paste(x$adapt.vars, collapse = ", "), "\n")
-    }
-    if(!is.null(x$res.vars)) {
-      cat("Resolving variables:                 ",
-          paste(x$res.vars, collapse = ", "), "\n")
-    }
-    cat("\n")
-    
-    cat("Number of training samples:          ", x$train.samp, "\n")
-    cat("Number of test samples:              ", x$test.samp, "\n")
-    cat("Quantile method:                     ", x$quant.method, "\n")
-    cat("\n")
-    
-    cat("Total variation (before adaptation): ", 
-        format(x$tv.start, digits = digits), "\n")
-    
-    cat("Total variation (after adaptation):  ", 
-        format(x$tv.end, digits = digits), "\n")
-    
-    invisible(x)
+  invisible(x)
 }
 
+#' @importFrom graphics lines plot polygon
 #' @importFrom graphics barplot text
 #' @export
 plot.fairadapt <- function(x, when = "after", ...) {
@@ -264,7 +278,7 @@ adaptedData.fairadapt <- function(x, train = TRUE) {
 #' uni_ada <- fairadapt(score ~ .,
 #'   train.data = head(uni_admission, n = n_samp),
 #'   test.data = tail(uni_admission, n = n_samp),
-#'   adj.mat = uni.adj.mat,
+#'   adj.mat = uni_adj,
 #'   prot.attr = "gender"
 #' )
 #'
@@ -424,7 +438,7 @@ predict.fairadapt <- function(object, newdata, ...) {
 #' uni_ada <- fairadapt(score ~ .,
 #'   train.data = head(uni_admission, n = n_samp),
 #'   test.data = tail(uni_admission, n = n_samp),
-#'   adj.mat = uni.adj.mat,
+#'   adj.mat = uni_adj,
 #'   prot.attr = "gender",
 #'   eval.qfit = 3L
 #' )

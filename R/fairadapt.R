@@ -76,7 +76,7 @@
 #' uni_ada <- fairadapt(score ~ .,
 #'   train.data = head(uni_admission, n = n_samp),
 #'   test.data = tail(uni_admission, n = n_samp),
-#'   adj.mat = uni.adj.mat,
+#'   adj.mat = uni_adj,
 #'   prot.attr = "gender"
 #' )
 #'
@@ -300,24 +300,27 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
 
   }
 
-  structure(list(
-    adapt.train = adapt.data[seq_len(train.len), ],
-    adapt.test = adapt.data[-seq_len(train.len), -1L],
-    train = train.data,
-    test = test.data,
-    base.lvl = base.lvl,
-    attr.lvls = attr.lvls,
-    base.ind = base.ind,
-    formula = formula,
-    res.vars = res.vars,
-    prot.attr = prot.attr,
-    graph = ig,
-    quant.method = deparse(substitute(quant.method)),
-    adapt.call = match.call(),
-    adj.mat = adj.mat,
-    cfd.mat = cfd.mat,
-    top.ord = top.ord,
-    q.engine = q.engine
-  ), class = "fairadapt")
+  structure(
+    list(
+      adapt.train = adapt.data[seq_len(train.len), ],
+      adapt.test = adapt.data[-seq_len(train.len), -1L],
+      train = train.data,
+      test = test.data,
+      base.lvl = base.lvl,
+      attr.lvls = attr.lvls,
+      base.ind = base.ind,
+      formula = formula,
+      res.vars = res.vars,
+      prot.attr = prot.attr,
+      graph = ig,
+      quant.method = deparse(substitute(quant.method)),
+      adapt.call = match.call(),
+      adj.mat = adj.mat,
+      cfd.mat = cfd.mat,
+      top.ord = top.ord,
+      q.engine = q.engine
+    ),
+    class = "fairadapt"
+  )
 
 }

@@ -107,7 +107,7 @@ expect_snapshot_csv <- function(name, code, mac_only = TRUE) {
   expect_snapshot_file(path, paste0(name, ".csv"))
 }
 
-expect_snapshot_json <- function(code, mac_only = TRUE) {
+expect_snapshot_json <- function(code, mac_only = TRUE, ...) {
 
   if (mac_only) {
     skip_on_os(c("windows", "linux", "solaris"))
@@ -115,7 +115,7 @@ expect_snapshot_json <- function(code, mac_only = TRUE) {
 
   skip_on_r_version("3.6.0")
 
-  expect_snapshot_value(code, style = "json2")
+  expect_snapshot_value(code, style = "json2", ...)
 }
 
 with_seed <- function(seed, code, rng_kind = "default",

@@ -22,7 +22,7 @@ test_that("fairadaptBoot", {
   
   fa.nms <- c("rand.mode", "n.boot", "save.object", "prot.attr", "adj.mat",
               "res.vars", "cfd.mat", "top.ord", "adapt.test", "boot.ind",
-              "fairadapt", "boot.call", "formula")
+              "fairadapt", "boot.call", "formula", "last.mod")
   
   # random forest
   
@@ -142,9 +142,9 @@ test_that("fairadaptBoot", {
                                  n.boot = 3)
   )
   
-  expect_output(print(mod), regexp = "fairadaptBoot S3 object")
+  expect_output(print(mod), regexp = "Call:")
   mod.sum <- summary(mod)
   expect_s3_class(mod.sum, "summary.fairadaptBoot")
-  expect_output(print(mod.sum), regexp = "fairadaptBoot summary")
+  expect_output(print(mod.sum), regexp = "Call:")
   
 })
