@@ -12,7 +12,7 @@ A data frame with 1,000 rows and 4 variables:
   \item{race}{race, binary with values Non-White and White}
   \item{juv_fel_count}{count of juvenile felonies}
   \item{juv_misd_count}{count of juvenile misdemeanors}
-  \item{juv_misd_count}{count of other juvenile offenses}
+  \item{juv_other_count}{count of other juvenile offenses}
   \item{priors_count}{count of prior offenses}
   \item{c_charge_degree}{degree of charge, with two values, F (felony) and M (misdemeanor)}
   \item{two_year_recid}{a logical TRUE/FALSE indicator of recidivism within two years after parole start}

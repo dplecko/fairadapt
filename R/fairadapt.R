@@ -1,3 +1,10 @@
+
+#' @keywords internal
+#' @import stats
+#' @importFrom assertthat assert_that
+#' @aliases fairadapt-package
+"_PACKAGE"
+
 #' Fairadapt
 #'
 #' Implementation of fair data adaptation with quantile preservation
@@ -71,12 +78,9 @@
 #'
 #' FA
 #'
-#' @author Drago Plecko
 #' @references
 #' Plecko, D. & Meinshausen, N. (2019).
 #' Fair Data Adaptation with Quantile Preservation \cr
-#' @import stats
-#' @importFrom assertthat assert_that
 #' @export
 fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   cfd.mat = NULL, top.ord = NULL, res.vars = NULL, quant.method = rangerQuants,

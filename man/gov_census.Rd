@@ -7,23 +7,23 @@
 \format{
 A data frame with 204,309 rows and 10 variables:
 \describe{
-    \item{ sex }{gender of the employee}
-    \item{ age }{employee age in years}
-    \item{ race }{race of the employee}
-    \item{ hispanic_origin }{indicator of hispanic origin}
-    \item{ citizenship }{citizenship of the employee}
-    \item{ nativity }{indicator of nativity to the US}
-    \item{ marital }{marital status}
-    \item{ family_size }{size of the employee's family}
-    \item{ children }{number of children of the employee}
-    \item{ education_level }{education level measured in years}
-    \item{ english_level }{}
-    \item{ salary }{yearly salary in US dollars}
-    \item{ hours_worked }{hours worked every week}
-    \item{ weeks_worked }{weeks worked in the given year}
-    \item{ occupation }{occupation classification}
-    \item{ industry }{industry classification}
-    \item{ economic_region }{economic region where the person is employed in the US}
+    \item{sex}{gender of the employee}
+    \item{age}{employee age in years}
+    \item{race}{race of the employee}
+    \item{hispanic_origin}{indicator of hispanic origin}
+    \item{citizenship}{citizenship of the employee}
+    \item{nativity}{indicator of nativity to the US}
+    \item{marital}{marital status}
+    \item{family_size}{size of the employee's family}
+    \item{children}{number of children of the employee}
+    \item{education_level}{education level measured in years}
+    \item{english_level}{}
+    \item{salary}{yearly salary in US dollars}
+    \item{hours_worked}{hours worked every week}
+    \item{weeks_worked}{weeks worked in the given year}
+    \item{occupation}{occupation classification}
+    \item{industry}{industry classification}
+    \item{economic_region}{economic region where the person is employed in the US}
 }
 }
 \source{

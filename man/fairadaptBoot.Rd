@@ -16,7 +16,7 @@ fairadaptBoot(
   quant.method = rangerQuants,
   save.object = FALSE,
   n.boot = 100,
-  rand.mode = "finsamp",
+  rand.mode = c("finsamp", "quant", "both"),
   ...
 )
 }
@@ -58,6 +58,15 @@ quantile regression). Other implemented options are \code{linearQuants} and
 and the associated method for the S3 generic \code{computeQuants} needs to be
 added.}
 
+\item{save.object}{a `logical` scalar, indicating whether all the
+`fairadapt` S3 objects built in bootstrap repetitions should be saved.}
+
+\item{n.boot}{An integer corresponding to the umber of bootstrap iterations.}
+
+\item{rand.mode}{A string, taking values `"finsamp"`, `"quant"` or `"both"`,
+corresponding to considering finite sample uncertainty, quantile
+uncertainty, or both.}
+
 \item{...}{Additional arguments forwarded to the function passed as
 `quant.method`.}
 }
@@ -90,7 +99,4 @@ FA
 \references{
 Plecko, D. & Meinshausen, N. (2019).
 Fair Data Adaptation with Quantile Preservation \cr
-}
-\author{
-Drago Plecko
 }

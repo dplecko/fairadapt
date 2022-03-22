@@ -110,6 +110,3 @@ FA
 Plecko, D. & Meinshausen, N. (2019).
 Fair Data Adaptation with Quantile Preservation \cr
 }
-\author{
-Drago Plecko
-}

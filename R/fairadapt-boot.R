@@ -32,6 +32,12 @@
 #' \code{mcqrnnQuants}. A custom function can be supplied by the user here,
 #' and the associated method for the S3 generic \code{computeQuants} needs to be
 #' added.
+#' @param save.object a `logical` scalar, indicating whether all the
+#' `fairadapt` S3 objects built in bootstrap repetitions should be saved.
+#' @param n.boot An integer corresponding to the umber of bootstrap iterations.
+#' @param rand.mode A string, taking values `"finsamp"`, `"quant"` or `"both"`,
+#' corresponding to considering finite sample uncertainty, quantile
+#' uncertainty, or both.
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'
@@ -54,12 +60,9 @@
 #'
 #' FA
 #'
-#' @author Drago Plecko
 #' @references
 #' Plecko, D. & Meinshausen, N. (2019).
 #' Fair Data Adaptation with Quantile Preservation \cr
-#' @import stats
-#' @importFrom assertthat assert_that
 #' @export
 fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data, 
                           test.data = NULL, cfd.mat = NULL, top.ord = NULL, 
