@@ -20,18 +20,23 @@ of the 25%, 50% and 75% quantile loss functions, for each variable.
 Quality of quantile fit statistics.
 }
 \examples{
-uni.adj.mat <- array(0, dim = c(4, 4))
-colnames(uni.adj.mat) <- rownames(uni.adj.mat) <-
-  c("gender", "edu", "test", "score")
+n_samp <- 200
+uni_dim <- c(       "gender", "edu", "test", "score")
+uni_adj <- matrix(c(       0,     1,      1,       0,
+                           0,     0,      1,       1,
+                           0,     0,      0,       1,
+                           0,     0,      0,       0),
+                  ncol = length(uni_dim),
+                  dimnames = rep(list(uni_dim), 2),
+                  byrow = TRUE)
 
-uni.adj.mat["gender", c("edu", "test")] <-
-  uni.adj.mat["edu", c("test", "score")] <-
-  uni.adj.mat["test", "score"] <- 1L
+uni_ada <- fairadapt(score ~ .,
+  train.data = head(uni_admission, n = n_samp),
+  test.data = tail(uni_admission, n = n_samp),
+  adj.mat = uni.adj.mat,
+  prot.attr = "gender",
+  eval.qfit = 3L
+)
 
-FA <- fairadapt(score ~ .,
-  train.data = uni_admission[1:100, ],
-  test.data = uni_admission[101:150, ],
-  adj.mat = uni.adj.mat, prot.attr = "gender", eval.qfit = 3L)
-
-quantFit(FA)
+quantFit(uni_ada)
 }
