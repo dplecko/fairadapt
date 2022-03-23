@@ -1,7 +1,13 @@
 #' Fairadapt Boostrap wrapper
 #' 
-#' The wrapper function for performing bootstrap uncertainty quantification for
-#' the `fairadapt()` function.
+#' The \code{fairadapt()} function performs data adaptation, but does so only
+#' once. Sometimes, it might be desirable to repeat this process, in order to be
+#' able to make uncertainty estimates about the data adaptation that is 
+#' performed. The wrapper function \code{fairadaptBoot()} enables the user to do
+#' so, by performing the \code{fairadapt()} procedure multiple times, and
+#' keeping in memory the important multiple data transformations. For a worked
+#' example of how to use \code{fairadaptBoot()} for uncertainty quantification,
+#' see the \code{fairadapt} vignette.
 #'
 #' @param formula Object of class `formula` describing the response and
 #' the covariates.

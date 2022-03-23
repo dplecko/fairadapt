@@ -14,7 +14,7 @@ fairadaptBoot(
   top.ord = NULL,
   res.vars = NULL,
   quant.method = rangerQuants,
-  save.object = FALSE,
+  keep.object = FALSE,
   n.boot = 100,
   rand.mode = c("finsamp", "quant", "both"),
   ...
@@ -58,7 +58,7 @@ quantile regression). Other implemented options are `linearQuants` and
 and the associated method for the S3 generic `computeQuants` needs to be
 added.}
 
-\item{save.object}{a `logical` scalar, indicating whether all the
+\item{keep.object}{a `logical` scalar, indicating whether all the
 `fairadapt` S3 objects built in bootstrap repetitions should be saved.}
 
 \item{n.boot}{An integer corresponding to the umber of bootstrap iterations.}
@@ -76,8 +76,14 @@ adapted training and testing data, together with the causal graph and some
 additional meta-information.
 }
 \description{
-The wrapper function for performing bootstrap uncertainty quantification for
-the `fairadapt()` function.
+The \code{fairadapt()} function performs data adaptation, but does so only
+once. Sometimes, it might be desirable to repeat this process, in order to be
+able to make uncertainty estimates about the data adaptation that is 
+performed. The wrapper function \code{fairadaptBoot()} enables the user to do
+so, by performing the \code{fairadapt()} procedure multiple times, and
+keeping in memory the important multiple data transformations. For a worked
+example of how to use \code{fairadaptBoot()} for uncertainty quantification,
+see the \code{fairadapt} vignette.
 }
 \examples{
 n_samp <- 200

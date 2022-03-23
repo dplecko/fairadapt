@@ -44,7 +44,7 @@ samples have the baseline value of the protected attribute.}
 \item{tau, iter.max, ...}{Forwarded to \link[qrnn]{mcqrnn.fit}.}
 }
 \value{
-A \code{ranger} or a \code{rangersplit} S3` object, depending on the 
+A \code{ranger} or a \code{rangersplit} S3 object, depending on the 
 value of the \code{A.root} argument, for \code{rangerQuants()}.
 
 A \code{rqs} or a \code{quantregsplit} S3 object, depending on the 
@@ -60,7 +60,7 @@ additional meta-information) and returns an object on which the
 \code{computeQuants()} generic can be called.
 }
 \details{
-Within the package, there are 3 different methods implemented, that use 
+Within the package, there are 3 different methods implemented, which use 
 quantile regressors based on linear models, random forests and neural 
 networks. However, there is additional flexibility and the user can provide
 her/his own quantile method. For this, the user needs to write (i) the 
