@@ -1,18 +1,24 @@
-#' Compute Quantiles using random forests (`ranger` package) in the Quantile
-#' Learning step.
+#' Quantile Engine Constructor for the Quantile Learning step.
+#' 
+#' There are several functions that can be used for the quantile learning step
+#' in the \code{fairadapt} package. 
+#' 
+#' The \code{rangerQuants()} function uses random forests 
+#' (\code{ranger} package) for quantile regression. 
 #'
-#' @param data A `data.frame` with data to be used for quantile
+#' @param data A \code{data.frame} with data to be used for quantile
 #' regression.
-#' @param A.root A `logical(1L)` indicating whether the protected
-#' attribute `A` is a root node of the causal graph. Used for splitting the
+#' @param A.root A \code{logical(1L)} indicating whether the protected
+#' attribute \code{A} is a root node of the causal graph. Used for splitting the
 #' quantile regression.
-#' @param ind A `logical` vector of length `nrow(data)`, indicating which
+#' @param ind A \code{logical} vector of length \code{nrow(data)}, indicating 
+#' which
 #' samples have the baseline value of the protected attribute.
-#' @param min.node.size,... Forwarded to [ranger::ranger()].
+#' @param min.node.size,... Forwarded to \link[ranger]{ranger}.
 #'
-#' @return A `ranger` or a `rangersplit` `S3` object, depending on the value
-#' of the `A.root` argument.
-#'
+#' @return A \code{ranger} or a \code{rangersplit} S3` object, depending on the 
+#' value of the \code{A.root} argument, for \code{rangerQuants()}.
+#' 
 #' @export
 rangerQuants <- function(data, A.root, ind, min.node.size = 20, ...) {
 
@@ -33,15 +39,16 @@ rangerQuants <- function(data, A.root, ind, min.node.size = 20, ...) {
                  keep.inbag = TRUE, min.node.size = min.node.size, ...)
 }
 
-#' Compute Quantiles using linear quantile regression (`quantreg` package) in
-#' the Quantile Learning step.
+#' @details The \code{linearQuants()} function uses linear quantile regression 
+#' (\code{quantreg} package) for the Quantile Learning step.
 #'
 #' @inheritParams rangerQuants
-#' @param tau,... Forwarded to [quantreg::rq()].
+#' @param tau,... Forwarded to \code{\link[quantreg]{rq}}.
 #'
-#' @return A `rqs` or a `quantregsplit` `S3` object, depending on the value of
-#' the `A.root` argument.
+#' @return A \code{rqs} or a \code{quantregsplit} S3 object, depending on the 
+#' value of the \code{A.root} argument, for \code{linearQuants()}.
 #'
+#' @rdname rangerQuants
 #' @export
 linearQuants <- function(data, A.root, ind,
                          tau = c(0.001, seq(0.005, 0.995, by = 0.01), 0.999),
@@ -74,14 +81,15 @@ linearQuants <- function(data, A.root, ind,
   quantreg::rq(form, data = data, tau = tau, ...)
 }
 
-#' Compute Quantiles using monotone quantile regression neural networks
-#' (`mcqrnn` package) in the Quantile Learning step.
+#' @details The \code{mcqrnnQuants()} function uses  monotone quantile 
+#' regression neural networks (`mcqrnn` package) in the Quantile Learning step. 
 #'
 #' @inheritParams rangerQuants
-#' @param tau,iter.max,... Forwarded to [qrnn::mcqrnn.fit()].
+#' @param tau,iter.max,... Forwarded to \link[qrnn]{mcqrnn.fit}.
 #'
-#' @return An `mcqrnn` `S3` object.
+#' @return An \code{mcqrnn} S3 object for \code{mcqrnnQuants()}.
 #'
+#' @rdname rangerQuants
 #' @export
 mcqrnnQuants <- function(data, A.root, ind, tau = seq(0.005, 0.995, by = 0.01),
                          iter.max = 500, ...) {
@@ -110,7 +118,7 @@ mcqrnnQuants <- function(data, A.root, ind, tau = seq(0.005, 0.995, by = 0.01),
 #' functions.
 #'
 #' @return A vector of counterfactual values corresponding to `newdata`.
-#'
+#' 
 #' @export
 computeQuants <- function(x, data, newdata, ind, ...) {
   UseMethod("computeQuants", x)
