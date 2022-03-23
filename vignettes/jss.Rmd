@@ -142,25 +142,26 @@ Sometimes, performing the first step of bias measurement is not the end goal. Su
 
 In Figure \ref{fig:software} we give a graphical overview of some of the available software in \proglang{python} and \proglang{R}, which are the languages most commonly used for fairness analysis. The figure might serve as a guide to a new fairness analyst wishing to get started. After deciding which task is to be undertaken, and which outcome / definition of fairness is desired, the user can consult Figure \ref{fig:software} for software options to get started. Since calibration is often satisfied by fitting an unconstrained model, software for satisfying calibration was not included in Figure \ref{fig:software}.
 
-```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} and \\proglang{python}. In the left column, nodes correspond to \\proglang{R}-packages and in the right column to \\proglang{python} modules. Abbreviations are: class for classification, reg regression, DP demographic parity, EO equality of odds.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "70%"}
+```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} and \\proglang{python}. In the left column, nodes correspond to \\proglang{R}-packages and in the right column to \\proglang{python} modules. DP stands for demographic parity, EO equality of odds.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "70%"}
 <<setup-graph>>
 
 \newcommand{\sx}{1.4}
 \newcommand{\sy}{-1.4}
+\usetikzlibrary{patterns.meta}
 
 \begin{tikzpicture}
 
   \begin{scope}
 
-		\draw [very thin] (\sx, 0.5 * \sy) -- (9 * \sx, 0.5 * \sy);
+		\draw [very thin] (\sx, -0.5 * \sy) -- (9 * \sx, -0.5 * \sy);
 		\draw [very thin] (\sx, 0 * \sy) -- (9 * \sx, 0 * \sy);
 		\draw [very thin] (\sx, 5.5 * \sy) -- (9 * \sx, 5.5 * \sy);
 		\draw [very thin] (\sx, 6 * \sy) -- (9 * \sx, 6 * \sy);
 		
 
-	  \draw [very thin] (\sx,0) -- (\sx, 6*\sy);
-		\draw [very thin] (5*\sx,0) -- (5*\sx, 6*\sy);
-		\draw [very thin] (9*\sx,0) -- (9*\sx, 6*\sy);
+	  \draw [very thin] (\sx, -0.5*\sy) -- (\sx, 6*\sy);
+		\draw [very thin] (5*\sx, -0.5*\sy) -- (5*\sx, 6*\sy);
+		\draw [very thin] (9*\sx, -0.5*\sy) -- (9*\sx, 6*\sy);
 		
 
 		\draw [very thin] (3*\sx, 5.5*\sy) -- (3*\sx, 6*\sy);
@@ -168,37 +169,37 @@ In Figure \ref{fig:software} we give a graphical overview of some of the availab
 		\draw [very thin] (7*\sx, 5.5*\sy) -- (7*\sx, 6*\sy);
     \draw [thin, dotted] (7*\sx, 2*\sy) -- (7*\sx, 5.5*\sy);
 
-		\node (ce) at (2*\sx, 5.75*\sy) {class};
-    \node (ce) at (4*\sx, 5.75*\sy) {reg};
-    \node (ce) at (6*\sx, 5.75*\sy) {class};
-    \node (ce) at (8*\sx, 5.75*\sy) {reg};
+		\node (ce) at (2*\sx, 5.75*\sy) {classification};
+    \node (ce) at (4*\sx, 5.75*\sy) {regression};
+    \node (ce) at (6*\sx, 5.75*\sy) {classification};
+    \node (ce) at (8*\sx, 5.75*\sy) {regression};
 		
-
-		\draw [very thin] (9*\sx, 2*\sy) -- (9.5*\sx, 2*\sy);
-		\draw [very thin] (9*\sx, 3.75*\sy) -- (9.5*\sx, 3.75*\sy);
     \draw [thin, dotted] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
-		\draw [very thin] (9*\sx, 5.5*\sy) -- (9.5*\sx, 5.5*\sy);
-		\draw [very thin] (9.5*\sx, 2*\sy) -- (9.5*\sx, 5.5*\sy);
-
-		\node[rotate=-90] () at (9.25*\sx, 2.875*\sy) {DP};
-    \node[rotate=-90] () at (9.25*\sx, 4.625*\sy) {EO};
+    \draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
 		
+    \draw [very thin] (1*\sx, 3.75*\sy) -- (0.5*\sx, 3.75*\sy);
+    \draw [very thin] (1*\sx, 2*\sy) -- (0*\sx, 2*\sy);
+    \draw [very thin] (1*\sx, 0*\sy) -- (0*\sx, 0*\sy);
+    \draw [very thin] (1*\sx, 5.5*\sy) -- (0*\sx, 5.5*\sy);
+		\draw [very thin] (0.5*\sx, 0*\sy) -- (0.5*\sx, 5.5*\sy);
+    \draw [very thin] (0*\sx, 0*\sy) -- (0*\sx, 5.5*\sy);
 
-		\draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
+		\node[rotate=90] () at (0.75*\sx, 2.875*\sy) {DP};
+    \node[rotate=90] () at (0.75*\sx, 4.625*\sy) {EO};
+    \node[rotate=90] () at (0.75*\sx, 1*\sy) {DP \& EO};
 
-
-		\node [draw=red, rotate=90] at (0.75*\sx, 1.25*\sy)  {Bias Detection};
-  	\node [draw=red, rotate=90] at (0.75*\sx, 3.75*\sy)  {Bias Removal};
+		\node [rotate=90] at (0.25*\sx, 1*\sy)  {Bias Detection};
+  	\node [rotate=90] at (0.25*\sx, 3.75*\sy)  {Bias Removal};
         
-    \node (r) at (3 * \sx, 0.25*\sy) {\texttt{R}};
-    \node (pyhon) at (7 * \sx, 0.25*\sy) {\texttt{Python}};
+    \node (r) at (3 * \sx, -0.25*\sy) {\texttt{R}};
+    \node (pyhon) at (7 * \sx, -0.25*\sy) {\texttt{Python}};
         
 
-    \node [s1] () at (6*\sx, 0.75*\sy) {aif360};
-    \node [s1] () at (6*\sx, 1.25*\sy) {fairlearn};
-    \node [s1] () at (6*\sx, 1.75*\sy) {ethicML};
+    \node [s1] () at (6*\sx, 0.5*\sy) {aif360};
+    \node [s1] () at (6*\sx, 1*\sy) {fairlearn};
+    \node [s1] () at (6*\sx, 1.5*\sy) {ethicML};
 
-    \node [s1] () at (8*\sx, 1.25*\sy) {fairness\\indicators};
+    \node [s1] () at (8*\sx, 1*\sy) {fairness\\indicators};
 
     \node [s1] () at (6*\sx, 2.375*\sy) {aif360};
     \node [s1] () at (6*\sx, 2.875*\sy) {fairlearn};
@@ -208,16 +209,18 @@ In Figure \ref{fig:software} we give a graphical overview of some of the availab
     \node [s1] () at (8*\sx, 2.875*\sy) {fairlearn};
     \node [s1] () at (8*\sx, 3.375*\sy) {ethicML};
     
-    \node () at (4*\sx, 4.625*\sy) {\Large $\times$};
-    \node () at (8*\sx, 4.625*\sy) {\Large $\times$};
+    \fill [pattern={Lines[angle=45,distance=5pt], very thin},pattern color=black] 
+      (3*\sx, 3.75*\sy) rectangle (5*\sx, 5.5*\sy);
+    \fill [pattern={Lines[angle=45,distance=5pt], very thin},pattern color=black] 
+      (7*\sx, 3.75*\sy) rectangle (9*\sx, 5.5*\sy);
     \node[rotate=45] () at (2*\sx, 4.625*\sy) {missing};
 
     \node [s1] () at (6*\sx, 4.125*\sy) {aif360};
     \node [s1] () at (6*\sx, 4.625*\sy) {fairlearn};
     \node [s1] () at (6*\sx, 5.125*\sy) {ethicML};
         
-    \node [s1] () at (2*\sx, 1*\sy) {fairness};
-    \node [s1] () at (4*\sx, 1.5*\sy) {fairmodels};
+    \node [s1] () at (2*\sx, 0.75*\sy) {fairness};
+    \node [s1] () at (4*\sx, 1.25*\sy) {fairmodels};
 
     \node [s1] () at (2*\sx, 2.625*\sy) {fairmodels};
     \node [s1] () at (2*\sx, 3.25*\sy) {fairadapt};
@@ -636,7 +639,7 @@ The user might naturally be interested in uncertainty quantification of the proc
   \pgfsetarrows{latex-latex};
 
   \begin{scope}
-    \fill [colone, label={above left:{Ctf-fair}}] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
+    \fill [colone!60, label={above left:{Ctf-fair}}] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
     
     \draw[] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
 
@@ -694,11 +697,11 @@ The second source of uncertainty arises from the uncertainty in quantiles and is
 For quantifying uncertainty, we use the `fairadaptBoot()` function, whose most important arguments are:
   
   - `formula`, `prot.attr`, `adj.mat`, `train.data` arguments are the same as for the `fairadapt()` function (see Section \ref{implementation}).
-  - `test.data`, a `data.frame` containing the test data, defaults to `NULL`. Whenever the test data equals `NULL`, then `save.object` must be `TRUE`.
-  - `save.object`, a `logical` scalar, indicating whether all the `fairadapt` S3 objects built in bootstrap repetitions should be saved. Default value is `FALSE`.
+  - `test.data`, a `data.frame` containing the test data, defaults to `NULL`. Whenever the test data equals `NULL`, then `keep.object` must be `TRUE`.
+  - `keep.object`, a `logical` scalar, indicating whether all the `fairadapt` S3 objects built in bootstrap repetitions should be kept in memory. Default value is `FALSE`.
   - `rand.mode`, a `character` scalar, taking values `"finsamp"`, `"quant"` or `"both"`, corresponding to considering finite sample uncertainty, quantile uncertainty, or both.
   
-The function `fairadaptBoot()` returns an S3 object of class `fairadaptBoot`. We emphasize that calling this function can be computationally heavy, both in terms of runtime and memory. Keeping the `save.object` argument equal to `FALSE` reduces the memory consumption substantially, with the drawback that `test.data` has to be provided in the argument, and also that the resulting `fairadaptBoot` object cannot be reused for making predictions at a later stage. Setting `save.object` to `TRUE` might consume a lot of memory, but then the object can be reused over again for transforming new test data. This can be done by using the `predict()` function for the `fairadaptBoot` S3 object, to which a `newdata` argument is available.
+The function `fairadaptBoot()` returns an S3 object of class `fairadaptBoot`. We emphasize that calling this function can be computationally heavy, both in terms of runtime and memory. Keeping the `keep.object` argument equal to `FALSE` reduces the memory consumption substantially, with the drawback that `test.data` has to be provided in the argument, and also that the resulting `fairadaptBoot` object cannot be reused for making predictions at a later stage. Setting `keep.object` to `TRUE` might consume a lot of memory, but then the object can be reused over again for transforming new test data. This can be done by using the `predict()` function for the `fairadaptBoot` S3 object, to which a `newdata` argument is available.
 
 We now compute bootstrap repetitions for finite sample uncertainty and quantile uncertainty on the COMPAS dataset \citep{larson2016compas}. We begin by loading the COMPAS dataset and constructing its causal graph:
 ```{r, compas}
