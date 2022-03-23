@@ -27,7 +27,7 @@
 #' samples have the baseline value of the protected attribute.
 #' @param min.node.size,... Forwarded to \link[ranger]{ranger}.
 #'
-#' @return A \code{ranger} or a \code{rangersplit} S3` object, depending on the 
+#' @return A \code{ranger} or a \code{rangersplit} S3 object, depending on the 
 #' value of the \code{A.root} argument, for \code{rangerQuants()}.
 #' 
 #' @export

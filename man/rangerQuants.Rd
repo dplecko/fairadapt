@@ -53,10 +53,21 @@ value of the \code{A.root} argument, for \code{linearQuants()}.
 An \code{mcqrnn} S3 object for \code{mcqrnnQuants()}.
 }
 \description{
-There are several functions that can be used for the quantile learning step
-in the \code{fairadapt} package.
+There are several methods that can be used for the quantile learning step
+in the \code{fairadapt} package. Each of the methods needs a specific 
+constructor. The constructor is a function that takes the data (with some 
+additional meta-information) and returns an object on which the 
+\code{computeQuants()} generic can be called.
 }
 \details{
+Within the package, there are 3 different methods implemented, that use 
+quantile regressors based on linear models, random forests and neural 
+networks. However, there is additional flexibility and the user can provide
+her/his own quantile method. For this, the user needs to write (i) the 
+constructor which returns an S3 classed object (see examples below); 
+(ii) a method for the \code{computeQuants()} generic for the S3 class 
+returned in (i).
+
 The \code{rangerQuants()} function uses random forests 
 (\code{ranger} package) for quantile regression.
 
