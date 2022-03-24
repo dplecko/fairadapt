@@ -1,7 +1,13 @@
 #' Fairadapt Boostrap wrapper
 #' 
-#' The wrapper function for performing bootstrap uncertainty quantification for
-#' the `fairadapt()` function.
+#' The \code{fairadapt()} function performs data adaptation, but does so only
+#' once. Sometimes, it might be desirable to repeat this process, in order to be
+#' able to make uncertainty estimates about the data adaptation that is 
+#' performed. The wrapper function \code{fairadaptBoot()} enables the user to do
+#' so, by performing the \code{fairadapt()} procedure multiple times, and
+#' keeping in memory the important multiple data transformations. For a worked
+#' example of how to use \code{fairadaptBoot()} for uncertainty quantification,
+#' see the \code{fairadapt} vignette.
 #'
 #' @param formula Object of class `formula` describing the response and
 #' the covariates.
@@ -32,7 +38,7 @@
 #' `mcqrnnQuants`. A custom function can be supplied by the user here,
 #' and the associated method for the S3 generic `computeQuants` needs to be
 #' added.
-#' @param save.object a `logical` scalar, indicating whether all the
+#' @param keep.object a `logical` scalar, indicating whether all the
 #' `fairadapt` S3 objects built in bootstrap repetitions should be saved.
 #' @param n.boot An integer corresponding to the umber of bootstrap iterations.
 #' @param rand.mode A string, taking values `"finsamp"`, `"quant"` or `"both"`,
@@ -72,7 +78,7 @@
 fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data, 
                           test.data = NULL, cfd.mat = NULL, top.ord = NULL, 
                           res.vars = NULL, quant.method = rangerQuants,
-                          save.object = FALSE, n.boot = 100, 
+                          keep.object = FALSE, n.boot = 100, 
                           rand.mode = c("finsamp", "quant", "both"),
                           ...) {
 
@@ -124,7 +130,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
                       cfd.mat = cfd.mat, top.ord = top.ord, res.vars = res.vars,
                       quant.method = quant.method, ...)
       
-      if (save.object) {
+      if (keep.object) {
         FA.lst[[rep]] <- FA
       }
     }
@@ -139,7 +145,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     }
   }
   
-  if (!save.object) {
+  if (!keep.object) {
     FA.lst <- NULL
   }
   
@@ -147,7 +153,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     list(
       rand.mode = rand.mode,
       n.boot = n.boot,
-      save.object = save.object,
+      keep.object = keep.object,
       prot.attr = prot.attr,
       adj.mat = adj.mat,
       res.vars = res.vars,
@@ -173,11 +179,15 @@ print.fairadaptBoot <- function(x, ...) {
   cat("Bootstrap repetitions:", x$n.boot, "\n")
 
   if (!is.null(x$adj.mat)) {
-    # FIXME: determine from top.ord?
     vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
-    cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
-        sep = "")
+  } else {
+    attr.idx <- which(x$top.ord == x$prot.attr)
+    if (attr.idx < length(x$top.ord)) {
+      vars <- x$top.ord[seq.int(attr.idx + 1L, length(x$top.ord))]
+    } 
   }
+  cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
+      sep = "")
   
   cat("\nBased on protected attribute", x$prot.attr, "\n")
   
@@ -226,7 +236,7 @@ summary.fairadaptBoot <- function(object, ...) {
       test.samp = nrow(mod$adapt.test),
       adapt.vars = adapt.vars,
       n.boot = object$n.boot,
-      save.object = object$save.object,
+      keep.object = object$keep.object,
       rand.mode = object$rand.mode,
       quant.method = mod$quant.method
     ),
@@ -265,7 +275,7 @@ print.summary.fairadaptBoot <- function(x, ...) {
   cat("\n")
 
   cat("Randomness considered:     ", x$rand.mode, "\n")
-  cat("fairadapt objects saved:   ", x$save.object, "\n")
+  cat("fairadapt objects saved:   ", x$keep.object, "\n")
 
   invisible(x)
 }
@@ -275,7 +285,7 @@ predict.fairadaptBoot <- function(object, newdata, ...) {
   
   assert_that(!is.null(object$fairadapt),
               msg = paste("Object cannot be used for making new predictions.",
-                          "Need to run `fairadaptBoot()` with `save.object`",
+                          "Need to run `fairadaptBoot()` with `keep.object`",
                           "= TRUE to be able to do so."))
   
   assert_that(all(names(object$fairadapt[[1]]$adapt.train[[1]]) %in% 

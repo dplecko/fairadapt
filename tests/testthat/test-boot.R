@@ -20,7 +20,7 @@ test_that("fairadaptBoot", {
   adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
                     byrow = TRUE, dimnames = list(vars, vars))
   
-  fa.nms <- c("rand.mode", "n.boot", "save.object", "prot.attr", "adj.mat",
+  fa.nms <- c("rand.mode", "n.boot", "keep.object", "prot.attr", "adj.mat",
               "res.vars", "cfd.mat", "top.ord", "adapt.test", "boot.ind",
               "fairadapt", "boot.call", "formula", "last.mod")
   
@@ -29,7 +29,7 @@ test_that("fairadaptBoot", {
   ran <- with_seed(202,
                    fairadaptBoot(y ~ ., train.data = train, test.data = test, 
                                  adj.mat = adj.mat, prot.attr = "a", seed = 202,
-                                 n.boot = 3L, save.object = TRUE)
+                                 n.boot = 3L, keep.object = TRUE)
   )
 
   expect_type(ran, "list")
@@ -107,7 +107,7 @@ test_that("fairadaptBoot", {
     203,
     fairadaptBoot(score ~ ., train.data = uni, adj.mat = adj.mat,
                   prot.attr = "gender", seed = 203, n.boot = 3L,
-                  save.object = TRUE)
+                  keep.object = TRUE)
   )
   
   charmod.pred <- predict(charmod, uni)

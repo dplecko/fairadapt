@@ -22,7 +22,7 @@
       
       Call:
       fairadaptBoot(formula = y ~ ., prot.attr = "a", adj.mat = adj.mat, 
-          train.data = train, test.data = test, save.object = TRUE, 
+          train.data = train, test.data = test, keep.object = TRUE, 
           n.boot = 3L, seed = 202)
       
       Bootstrap repetitions: 3 
@@ -49,7 +49,7 @@
       
       Call:
       fairadaptBoot(formula = y ~ ., prot.attr = "a", adj.mat = adj.mat, 
-          train.data = train, test.data = test, save.object = TRUE, 
+          train.data = train, test.data = test, keep.object = TRUE, 
           n.boot = 3L, seed = 202)
       
       Bootstrap repetitions:      3 
@@ -76,6 +76,9 @@
           seed = 202)
       
       Bootstrap repetitions: 3 
+      
+      Adapting variables:
+        x, y
       
       Based on protected attribute a 
       
@@ -114,7 +117,7 @@
       
       Call:
       fairadaptBoot(formula = score ~ ., prot.attr = "gender", adj.mat = adj.mat, 
-          train.data = uni, save.object = TRUE, n.boot = 3L, seed = 203)
+          train.data = uni, keep.object = TRUE, n.boot = 3L, seed = 203)
       
       Bootstrap repetitions: 3 
       
@@ -141,7 +144,7 @@
       
       Call:
       fairadaptBoot(formula = score ~ ., prot.attr = "gender", adj.mat = adj.mat, 
-          train.data = uni, save.object = TRUE, n.boot = 3L, seed = 203)
+          train.data = uni, keep.object = TRUE, n.boot = 3L, seed = 203)
       
       Bootstrap repetitions:      3 
       Protected attribute:        gender 

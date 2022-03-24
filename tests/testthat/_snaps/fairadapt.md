@@ -144,7 +144,7 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [1.18212]
+              "value": [1.16675]
             },
             {
               "type": "double",
@@ -160,7 +160,7 @@
             {
               "type": "double",
               "attributes": {},
-              "value": [8.27532]
+              "value": [8.51615]
             },
             {
               "type": "double",

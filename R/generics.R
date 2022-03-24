@@ -59,8 +59,14 @@ print.fairadapt <- function(x, ...) {
   cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"), 
       "\n\n", sep = "")
   
-  # FIXME: determine from top.ord?
-  vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+  if (!is.null(x$adj.mat)) {
+    vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
+  } else {
+    attr.idx <- which(x$top.ord == x$prot.attr)
+    if (attr.idx < length(x$top.ord)) {
+      vars <- x$top.ord[seq.int(attr.idx + 1L, length(x$top.ord))]
+    } 
+  }
 
   cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
       sep = "")

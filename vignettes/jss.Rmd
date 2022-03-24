@@ -132,6 +132,7 @@ quick_build <- TRUE
 Machine learning algorithms have become prevalent tools for decision-making in socially sensitive situations, such as determining credit-score ratings or predicting recidivism during parole. It has been recognized that algorithms are capable of learning societal biases, for example with respect to race \citep{larson2016recidivism} or gender \citep{lambrecht2019algorithmic, blau2003pay}, and this realization seeded an important debate in the machine learning community about fairness of algorithms and their impact on decision-making.
 
 ## Definitions of Fairness
+
 In order to define and measure discrimination, existing intuitive notions have been mathematically formalized, thereby providing fairness metrics. To this day, various different notions of fairness exist, which are sometimes mutually incompatible \citep{corbett2018measure}, meaning not of all of them can be achieved for a constructed predictor $\widehat{Y}$ simultaneously. There currently is no consensus on which notion of fairness is the correct one among the three prevalent notions discussed in the literature:
 
 (1) *Demographic parity* \citep{darlington1971fairness} requires the protected attribute $A$ (gender, race, religion etc.) to be independent of a constructed classifier or regressor $\widehat{Y}$, written as
@@ -143,6 +144,7 @@ In order to define and measure discrimination, existing intuitive notions have b
   Intuitively, this means that the protected attribute $A$ does not offer additional information about the outcome $Y$ once we know what the prediction $\widehat{Y}$ is.
 
 ## Fairness Tasks
+
 Apart from choosing a notion of fairness most appropriate to the setting that is analyzed, it is also good to separate out two somewhat different tasks in fairness analysis. The first, usually simpler task is that of *bias quantification*, or bias measurement. In this case, we are interested in computing metrics from our dataset that quantify whether a definition is satisfied or not. Concretely, suppose we have a dataset in which $\widehat{Y}$ is the predicted salary and $A$ is sex. If we are interested in demographic parity, $\widehat{Y} \ci A$, we can compute the average difference in salary between the male/female groups, that is $\ex[\widehat{Y} \mid A = \text{male}] - \ex[\widehat{Y} \mid A = \text{female}]$. For other definitions, different metrics would be appropriate.
 
 Sometimes, performing the first step of bias measurement is not the end goal. Suppose that we are analyzing a dataset and compute a metric which shows there might be discrimination in the dataset (say a large salary gap between sexes in the example above). We then might be interested in computing new, more fair predictions (in which, say, the salary gap is lower). This second task is that of *bias removal*, or bias mitigation, in which we want to remove from our predictions the bias that we previously found.
@@ -170,12 +172,13 @@ In Figure \ref{fig:software} we provide a graphical overview of some of the avai
 
 \newcommand{\sx}{1.4}
 \newcommand{\sy}{-1.4}
+\usetikzlibrary{patterns.meta}
 
 \begin{tikzpicture}
 
   \begin{scope}
 
-		\draw [very thin] (\sx, 0.5 * \sy) -- (9 * \sx, 0.5 * \sy);
+		\draw [very thin] (\sx, -0.5 * \sy) -- (9 * \sx, -0.5 * \sy);
 		\draw [very thin] (\sx, 0 * \sy) -- (9 * \sx, 0 * \sy);
 		\draw [very thin] (\sx, 5.5 * \sy) -- (9 * \sx, 5.5 * \sy);
 		\draw [very thin] (\sx, 6 * \sy) -- (9 * \sx, 6 * \sy);
@@ -189,19 +192,16 @@ In Figure \ref{fig:software} we provide a graphical overview of some of the avai
 		\draw [very thin] (7*\sx, 5.5*\sy) -- (7*\sx, 6*\sy);
     \draw [thin, dotted] (7*\sx, 2*\sy) -- (7*\sx, 5.5*\sy);
 
-		\node (ce) at (2*\sx, 5.75*\sy) {class};
-    \node (ce) at (4*\sx, 5.75*\sy) {reg};
-    \node (ce) at (6*\sx, 5.75*\sy) {class};
-    \node (ce) at (8*\sx, 5.75*\sy) {reg};
+		\node (ce) at (2*\sx, 5.75*\sy) {classification};
+    \node (ce) at (4*\sx, 5.75*\sy) {regression};
+    \node (ce) at (6*\sx, 5.75*\sy) {classification};
+    \node (ce) at (8*\sx, 5.75*\sy) {regression};
 		
 		\draw [very thin] (9*\sx, 2*\sy) -- (9.5*\sx, 2*\sy);
 		\draw [very thin] (9*\sx, 3.75*\sy) -- (9.5*\sx, 3.75*\sy);
-    \draw [thin, dotted] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
-		\draw [very thin] (9*\sx, 5.5*\sy) -- (9.5*\sx, 5.5*\sy);
-		\draw [very thin] (9.5*\sx, 2*\sy) -- (9.5*\sx, 5.5*\sy);
 
-		\node[rotate=-90] () at (9.25*\sx, 2.875*\sy) {DP};
-    \node[rotate=-90] () at (9.25*\sx, 4.625*\sy) {EO};
+    \draw [thin, dotted] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
+    \draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
 		
 		\draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
 
@@ -211,11 +211,11 @@ In Figure \ref{fig:software} we provide a graphical overview of some of the avai
     \node (r) at (3 * \sx, 0.25*\sy) {\textsf{R}};
     \node (pyhon) at (7 * \sx, 0.25*\sy) {\textsf{python}};
 
-    \node [s1] () at (6*\sx, 0.75*\sy) {aif360};
-    \node [s1] () at (6*\sx, 1.25*\sy) {fairlearn};
-    \node [s1] () at (6*\sx, 1.75*\sy) {ethicML};
+    \node [s1] () at (6*\sx, 0.5*\sy) {aif360};
+    \node [s1] () at (6*\sx, 1*\sy) {fairlearn};
+    \node [s1] () at (6*\sx, 1.5*\sy) {ethicML};
 
-    \node [s1] () at (8*\sx, 1.25*\sy) {fairness\\indicators};
+    \node [s1] () at (8*\sx, 1*\sy) {fairness\\indicators};
 
     \node [s1] () at (6*\sx, 2.375*\sy) {aif360};
     \node [s1] () at (6*\sx, 2.875*\sy) {fairlearn};
@@ -227,6 +227,7 @@ In Figure \ref{fig:software} we provide a graphical overview of some of the avai
 
     \node () at (4*\sx, 4.625*\sy) {\Large $\times$};
     \node () at (8*\sx, 4.625*\sy) {\Large $\times$};
+
     \node[rotate=45] () at (2*\sx, 4.625*\sy) {missing};
 
     \node [s1] () at (6*\sx, 4.125*\sy) {aif360};
@@ -701,8 +702,8 @@ The user might naturally be interested in uncertainty quantification of the proc
   \pgfsetarrows{latex-latex};
 
   \begin{scope}
-    \fill [colone, label={above left:{Ctf-fair}}] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
-
+    \fill [colone!60, label={above left:{Ctf-fair}}] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
+    
     \draw[] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
 
     \node (train) at (0, -1) {$\mathcal{D}_{train}$};

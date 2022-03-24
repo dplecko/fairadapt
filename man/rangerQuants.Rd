@@ -2,29 +2,78 @@
 % Please edit documentation in R/quants.R
 \name{rangerQuants}
 \alias{rangerQuants}
-\title{Compute Quantiles using random forests (`ranger` package) in the Quantile
-Learning step.}
+\alias{linearQuants}
+\alias{mcqrnnQuants}
+\title{Quantile Engine Constructor for the Quantile Learning step.}
 \usage{
 rangerQuants(data, A.root, ind, min.node.size = 20, ...)
+
+linearQuants(
+  data,
+  A.root,
+  ind,
+  tau = c(0.001, seq(0.005, 0.995, by = 0.01), 0.999),
+  ...
+)
+
+mcqrnnQuants(
+  data,
+  A.root,
+  ind,
+  tau = seq(0.005, 0.995, by = 0.01),
+  iter.max = 500,
+  ...
+)
 }
 \arguments{
-\item{data}{A `data.frame` with data to be used for quantile
+\item{data}{A \code{data.frame} with data to be used for quantile
 regression.}
 
-\item{A.root}{A `logical(1L)` indicating whether the protected
-attribute `A` is a root node of the causal graph. Used for splitting the
+\item{A.root}{A \code{logical(1L)} indicating whether the protected
+attribute \code{A} is a root node of the causal graph. Used for splitting the
 quantile regression.}
 
-\item{ind}{A `logical` vector of length `nrow(data)`, indicating which
+\item{ind}{A \code{logical} vector of length \code{nrow(data)}, indicating 
+which
 samples have the baseline value of the protected attribute.}
 
-\item{min.node.size, ...}{Forwarded to [ranger::ranger()].}
+\item{min.node.size, ...}{Forwarded to \link[ranger]{ranger}.}
+
+\item{tau, ...}{Forwarded to \code{\link[quantreg]{rq}}.}
+
+\item{tau, iter.max, ...}{Forwarded to \link[qrnn]{mcqrnn.fit}.}
 }
 \value{
-A `ranger` or a `rangersplit` `S3` object, depending on the value
-of the `A.root` argument.
+A \code{ranger} or a \code{rangersplit} S3 object, depending on the 
+value of the \code{A.root} argument, for \code{rangerQuants()}.
+
+A \code{rqs} or a \code{quantregsplit} S3 object, depending on the 
+value of the \code{A.root} argument, for \code{linearQuants()}.
+
+An \code{mcqrnn} S3 object for \code{mcqrnnQuants()}.
 }
 \description{
-Compute Quantiles using random forests (`ranger` package) in the Quantile
-Learning step.
+There are several methods that can be used for the quantile learning step
+in the \code{fairadapt} package. Each of the methods needs a specific 
+constructor. The constructor is a function that takes the data (with some 
+additional meta-information) and returns an object on which the 
+\code{computeQuants()} generic can be called.
+}
+\details{
+Within the package, there are 3 different methods implemented, which use 
+quantile regressors based on linear models, random forests and neural 
+networks. However, there is additional flexibility and the user can provide
+her/his own quantile method. For this, the user needs to write (i) the 
+constructor which returns an S3 classed object (see examples below); 
+(ii) a method for the \code{computeQuants()} generic for the S3 class 
+returned in (i).
+
+The \code{rangerQuants()} function uses random forests 
+(\code{ranger} package) for quantile regression.
+
+The \code{linearQuants()} function uses linear quantile regression 
+(\code{quantreg} package) for the Quantile Learning step.
+
+The \code{mcqrnnQuants()} function uses  monotone quantile 
+regression neural networks (`mcqrnn` package) in the Quantile Learning step.
 }
