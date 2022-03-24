@@ -1,5 +1,6 @@
 # fairadapt 0.2.2
 - arg `save.object` for `fairadaptBoot()` might be renamed, as "saving" for me intuitively means something like "write to disk"; maybe `keep.objects`? idk..
+- combine docs for quants funs, with a general intro and a section on each function
 
 # fairadapt 0.2.1
 Non-breaking changes:
