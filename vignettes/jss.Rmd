@@ -63,7 +63,7 @@ pkgdown:
   extension: pdf
 ---
 
-<!-- TODO: things ti check in the end:
+<!-- TODO: things to check in the end:
   - orphan lines, sections
   - instances where text width is exceeded
 -->
@@ -111,7 +111,7 @@ quick_build <- TRUE
 \tikzset{
   every node/.style = {
     draw = none, align = center, fill = none, text centered,
-    anchor = center, font = \it
+    anchor = center
   },
   every label/.style={circle, draw, fill = yellow},
   f1/.style = {
@@ -151,23 +151,7 @@ Sometimes, performing the first step of bias measurement is not the end goal. Su
 
 In Figure \ref{fig:software} we provide a graphical overview of some of the available software in \proglang{python} and \proglang{R}, which are the languages most commonly used for fairness analysis. For a given task and outcome/definition of fairness, we show existing software packages for both the classification and regression settings. Since calibration is often satisfied by fitting an unconstrained model, software capable of performing calibration was not included.
 
-<!-- TODO:
-  I like the idea behind a visualization of the s/w space!
-  As is, however, I find this visualization hard to parse.
-  - the class/reg distinction only seems to make sense for DP?
-  - and the DP/EO distinction applies only to Bias removal?
-  -> this nesting should somehow be made clearer in how the graphic is organized
-  also,
-  - why are "fairness" and "fairmodels" on separate lines? does this mean anything?
-  - for Bias detection/python, is fi only capable of regression and aif360 et al. only of classification? if so, why is there no line? (same goes for the R side)
-  - the "x" probably means "this doesn't exist/make sense"; was not immediately clear to me. if would be nice, if this was clear from how the graphic is organized (via nesting or the like)
-  - i think in general stuff should not be italicized, use only to highlight something, such as "missing", which as for my personal style preferences should be horizontal
-  - "reg" is vertically shifted w.r.t "class"
-  - you have "headings" on all 4 sides and using 4 different styles: all caps, all lowercase, capitalized, red frames, monospace; I find this visually overcrowded and it more confuses me than guide me through the graphic.
-  - with this organization style, you incur a lot of duplication: 8 packages turn into 20
--->
-
-```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} (left column) and \\proglang{python} (right column). Abbreviations are: \\textit{class}, classification; \\textit{reg}, regression; \\textit{DP}, demographic parity; \\textit{EO}, equality of odds.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "70%"}
+```{tikz, software, fig.cap = "Software options for fair data analysis in \\proglang{R} and \\proglang{python}. In the left column, nodes correspond to \\proglang{R}-packages and in the right column to \\proglang{python} modules. DP stands for demographic parity, EO equality of odds.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "70%"}
 <<setup-graph>>
 
 \newcommand{\sx}{1.4}
@@ -177,73 +161,74 @@ In Figure \ref{fig:software} we provide a graphical overview of some of the avai
 \begin{tikzpicture}
 
   \begin{scope}
-
 		\draw [very thin] (\sx, -0.5 * \sy) -- (9 * \sx, -0.5 * \sy);
 		\draw [very thin] (\sx, 0 * \sy) -- (9 * \sx, 0 * \sy);
 		\draw [very thin] (\sx, 5.5 * \sy) -- (9 * \sx, 5.5 * \sy);
 		\draw [very thin] (\sx, 6 * \sy) -- (9 * \sx, 6 * \sy);
 		
-	  \draw [very thin] (\sx,0) -- (\sx, 6*\sy);
-		\draw [very thin] (5*\sx,0) -- (5*\sx, 6*\sy);
-		\draw [very thin] (9*\sx,0) -- (9*\sx, 6*\sy);
+	  \draw [very thin] (\sx, -0.5*\sy) -- (\sx, 6*\sy);
+		\draw [very thin] (5*\sx, -0.5*\sy) -- (5*\sx, 6*\sy);
+		\draw [very thin] (9*\sx, -0.5*\sy) -- (9*\sx, 6*\sy);
 		
 		\draw [very thin] (3*\sx, 5.5*\sy) -- (3*\sx, 6*\sy);
-    \draw [thin, dotted] (3*\sx, 2*\sy) -- (3*\sx, 5.5*\sy);
+    \draw [thin, dotted] (3*\sx, 3.75*\sy) -- (3*\sx, 5.5*\sy);
 		\draw [very thin] (7*\sx, 5.5*\sy) -- (7*\sx, 6*\sy);
-    \draw [thin, dotted] (7*\sx, 2*\sy) -- (7*\sx, 5.5*\sy);
-
-		\node (ce) at (2*\sx, 5.75*\sy) {classification};
-    \node (ce) at (4*\sx, 5.75*\sy) {regression};
-    \node (ce) at (6*\sx, 5.75*\sy) {classification};
-    \node (ce) at (8*\sx, 5.75*\sy) {regression};
+    \draw [thin, dotted] (7*\sx, 3.75*\sy) -- (7*\sx, 5.5*\sy);
+		\node (ce) at (2*\sx, 5.75*\sy) {Classification};
+    \node (ce2) at (4*\sx, 5.75*\sy) {Regression};
+    \node (ce3) at (6*\sx, 5.75*\sy) {Classification};
+    \node (ce4) at (8*\sx, 5.75*\sy) {Regression};
 		
-		\draw [very thin] (9*\sx, 2*\sy) -- (9.5*\sx, 2*\sy);
-		\draw [very thin] (9*\sx, 3.75*\sy) -- (9.5*\sx, 3.75*\sy);
-
     \draw [thin, dotted] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
     \draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
 		
-		\draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
-
-		\node [draw=red, rotate=90] at (0.75*\sx, 1.25*\sy)  {Bias Detection};
-  	\node [draw=red, rotate=90] at (0.75*\sx, 3.75*\sy)  {Bias Removal};
-
-    \node (r) at (3 * \sx, 0.25*\sy) {\textsf{R}};
-    \node (pyhon) at (7 * \sx, 0.25*\sy) {\textsf{python}};
+    \draw [very thin] (1*\sx, 3.75*\sy) -- (0.5*\sx, 3.75*\sy);
+    \draw [very thin] (1*\sx, 2*\sy) -- (0*\sx, 2*\sy);
+    \draw [very thin] (1*\sx, 0*\sy) -- (0*\sx, 0*\sy);
+    \draw [very thin] (1*\sx, 5.5*\sy) -- (0*\sx, 5.5*\sy);
+		\draw [very thin] (0.5*\sx, 0*\sy) -- (0.5*\sx, 5.5*\sy);
+    \draw [very thin] (0*\sx, 0*\sy) -- (0*\sx, 5.5*\sy);
+		\node[rotate=90] () at (0.75*\sx, 2.875*\sy) {EO};
+    \node[rotate=90] () at (0.75*\sx, 4.625*\sy) {DP};
+    \node[rotate=90] () at (0.75*\sx, 1*\sy) {DP \& EO};
+		\node [rotate=90] at (0.25*\sx, 1*\sy)  {Bias Detection};
+  	\node [rotate=90] at (0.25*\sx, 3.75*\sy)  {Bias Removal};
+        
+    \node (r) at (3 * \sx, -0.25*\sy) {\texttt{R}};
+    \node (pyhon) at (7 * \sx, -0.25*\sy) {\texttt{Python}};
+    
 
     \node [s1] () at (6*\sx, 0.5*\sy) {aif360};
     \node [s1] () at (6*\sx, 1*\sy) {fairlearn};
     \node [s1] () at (6*\sx, 1.5*\sy) {ethicML};
-
     \node [s1] () at (8*\sx, 1*\sy) {fairness\\indicators};
+    
 
-    \node [s1] () at (6*\sx, 2.375*\sy) {aif360};
-    \node [s1] () at (6*\sx, 2.875*\sy) {fairlearn};
-    \node [s1] () at (6*\sx, 3.375*\sy) {ethicML};
+    \node [s1] () at (7*\sx, 2.375*\sy) {aif360};
+    \node [s1] () at (7*\sx, 2.875*\sy) {fairlearn};
+    \node [s1] () at (7*\sx, 3.375*\sy) {ethicML};
 
-    \node [s1] () at (8*\sx, 2.375*\sy) {aif360};
-    \node [s1] () at (8*\sx, 2.875*\sy) {fairlearn};
-    \node [s1] () at (8*\sx, 3.375*\sy) {ethicML};
-
-    \node () at (4*\sx, 4.625*\sy) {\Large $\times$};
-    \node () at (8*\sx, 4.625*\sy) {\Large $\times$};
-
-    \node[rotate=45] () at (2*\sx, 4.625*\sy) {missing};
-
+    
     \node [s1] () at (6*\sx, 4.125*\sy) {aif360};
     \node [s1] () at (6*\sx, 4.625*\sy) {fairlearn};
     \node [s1] () at (6*\sx, 5.125*\sy) {ethicML};
+    \node [s1] () at (8*\sx, 4.125*\sy) {aif360};
+    \node [s1] () at (8*\sx, 4.625*\sy) {fairlearn};
+    \node [s1] () at (8*\sx, 5.125*\sy) {ethicML};
+    
 
-    \node [s1] () at (2*\sx, 1*\sy) {fairness};
-    \node [s1] () at (4*\sx, 1.5*\sy) {fairmodels};
+    \node[rotate=0, font = \it] () at (3*\sx, 2.875*\sy) {missing};
+    \node [s1] () at (3*\sx, 0.666*\sy) {fairness};
+    \node [s1] () at (3*\sx, 1.333*\sy) {fairmodels};
 
-    \node [s1] () at (2*\sx, 2.625*\sy) {fairmodels};
-    \node [s1] () at (2*\sx, 3.25*\sy) {fairadapt};
 
-    \node [s1] () at (4*\sx, 2.375*\sy) {fairmodels};
-    \node [s1] () at (4*\sx, 2.875*\sy) {fairml};
-    \node [s1] () at (4*\sx, 3.375*\sy) {fairadapt};
-
+    \node [s1] () at (2*\sx, 4.3125*\sy) {fairmodels};
+    \node [s1] () at (2*\sx, 4.9375*\sy) {fairadapt};
+    
+    \node [s1] () at (4*\sx, 4.125*\sy) {fairmodels};
+    \node [s1] () at (4*\sx, 4.625*\sy) {fairml};
+    \node [s1] () at (4*\sx, 5.125*\sy) {fairadapt};
+      
   \end{scope}
 
 \end{tikzpicture}
@@ -263,19 +248,16 @@ The following sections describe an implementation of the fair data adaptation me
 
 ## Novelty in the package
 
-A first version of \pkg{fairadapt} was published with the original manuscript \citep{plecko2020fair}. The software has since been developed further and novelty in the package presented in this manuscript includes the following aspects.
+A first version of \pkg{fairadapt} was published with the original manuscript \citep{plecko2020fair}. The software has since been developed further and novelty in the package presented in this manuscript includes the following:
 
 * The methodology has been extended from the Markovian to the Semi-Markovian case (allowing noise variables to be correlated), which generalizes the scope of applications.
 * Backdoor paths into the protected attribute $A$ are now allowed, meaning that the attribute $A$ does not need to be a root node of the causal graph.
-* The user is provided with uncertainty quantification corresponding to the estimates.
+* The user is provided with functionality for uncertainty quantification of the estimates.
 * Introduction of S3 classes `fairadapt` and `fairadaptBoot`, alongside associated methods, provides a more formalized implementation.
-* More flexibility is allowing for in the quantile learning step, including options for several different algorithms and additionally allowing the possibility of specifying a custom quantile learning function (utilizing S3 dispatch).
+* More flexibility is allowed for in the quantile learning step, including different algorithms for quantile regression (linear, forest based, neural networks). Additionally, there is also a possibility of specifying a custom quantile learning function (utilizing S3 dispatch).
+* The user is provided with functionality for assessing the quality of the quantile regression fit, which allows for optimizing the hyperparameters of the more flexible algorithms.
 
-<!-- TODO: further points you could mention:
-  - cv/fit quality
--->
-
-The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with quickly reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{sec:uncq} in which we discuss how to perform uncertainty quantification with \pkg{fairadapt}. Section \ref{illustration} illustrates the use of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{sec:extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
+The rest of the manuscript is organized as follows: In Section \ref{methodology} we describe the methodology behind \pkg{fairadapt}, together with reviewing some important concepts of causal inference. In Section \ref{implementation} we discuss implementation details and provide some general user guidance, followed by Section \ref{sec:uncq} in which we discuss how to perform uncertainty quantification with \pkg{fairadapt}. Section \ref{illustration} illustrates the use of \pkg{fairadapt} through a large, real-world dataset and a hypothetical fairness application. Finally, in Section \ref{sec:extensions} we elaborate on some extensions, such as Semi-Markovian models and resolving variables.
 
 # Methodology
 
@@ -373,8 +355,6 @@ where the value $\tilde{e}$ was obtained in the previous step. This step can be 
 ```
 
 As a final step, the outcome variable $Y$ remains to be adjusted. The adaptation is based on the same principle as above, using transformed values of both education and the test score. The resulting value $\tilde{y}$ of $Y = y$ satisfies
-
-<!-- TODO: removed label, as not used anywhere; ok? -->
 
 $$\pr(Y \geq y \mid E = e, T = t, A = a') = \pr(Y \geq \tilde{y} \mid E = \tilde{e}, T = \tilde{t}, A = a).$$
 
@@ -566,7 +546,7 @@ if (quick_build && file.exists(bm_cache)) {
   bmark <- do.call(cbind, bmark)
 
   colnames(bmark) <- c("Random Forests", "Neural Networks", "Linear Regression")
-  rownames(bmark) <- paste0("$T(", as.character(nsamps), ", 4)$")
+  rownames(bmark) <- paste0("$T_{\\text{uni}}(", as.character(nsamps), ")$")
 
   saveRDS(bmark, file.path("..", "inst", "extdata", "bm_quant.rds"))
 }
@@ -597,13 +577,10 @@ tbl <- rbind(tbl, bmark)
 capt <- paste(
   "Summary table of different quantile regression methods. $n$ is the number",
   "of samples, $p$ number of covariates, $n_{\\text{epochs}}$ number of",
-  "training epochs for the neural network. $T(n, 4)$ denotes the runtime of",
+  "training epochs for the neural network. $T_{\\text{uni}}(n)$ denotes the runtime of",
   "different methods on the university admission dataset, with $n$ training",
-  "and testing samples."
+  "and $n$ testing samples."
 )
-
-# TODO: Do we want the table caption to be restricted to the table width?
-# TODO: I don't the the T(n, 4) notation; what does "4" represent?
 
 print(
   xtable(tbl, caption = capt, label = "tab:qmethods",
@@ -702,9 +679,9 @@ The user might naturally be interested in uncertainty quantification of the proc
   \pgfsetarrows{latex-latex};
 
   \begin{scope}
-    \fill [colone!60, label={above left:{Ctf-fair}}] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
+    \fill [colone!60, label={above left:{Ctf-fair}}] (-0.75, -0.6) rectangle (3.6*\myx+1.6, -3.3);
     
-    \draw[] (-0.75, -0.7) rectangle (3.6*\myx+1.5, -3.25);
+    \draw[] (-0.75, -0.6) rectangle (3.6*\myx+1.6, -3.3);
 
     \node (train) at (0, -1) {$\mathcal{D}_{train}$};
     \node (graph) at (0, -2) {graph $\mathcal{G}$};
@@ -712,7 +689,7 @@ The user might naturally be interested in uncertainty quantification of the proc
     \node[f1] (fairadapt) at (\myx, -1.5) {\texttt{fairadapt()}};
 
     \node (traintransform) at (2.25*\myx, -1) {$\widetilde{\mathcal{D}}_{train}$};
-    \node (fairadapts3) at (2.25*\myx, -2) {\texttt{fairadapt} S3-object};
+    \node (fairadapts3) at (2.25*\myx, -2) {\texttt{fairadapt}\\ S3-object};
     \node (test) at (2.25*\myx, -3) {$\mathcal{D}_{test}$};
 
     \node[f1] (predict0) at (3.5*\myx, -2.5) {\texttt{predict()}};
@@ -751,24 +728,12 @@ The user might naturally be interested in uncertainty quantification of the proc
 
 <!-- TODO:
   Nice graphic and good idea to also explain this visually. Some minor comments:
-  - make blue box bigger so that tilde Dtrain and tilde Dtest clearly start
-    from within the box
-  - increase distance between fairadapt() and predict(), this is my bad, as
-    I added to the label, sorry..
   - consider using anchors for arrows originating/going into boxes, e.g.
     corners and side mid-points or so; might give aesthetically more pleasing
     results than the current more arbitrary atart/endpoints
 -->
 
-Such a workflow can be described as follows. We start from the training data $\mathcal{D}_{train}$ and the causal graph $\mathcal{G}$. These two arguments are used as inputs of the `fairadapt()` function, which returns the transformed training data $\widetilde{\mathcal{D}}_{train}$ contained in a `fairadapt` S3 object. This `fairadapt` object, alongside test data $\mathcal{D}_{test}$ are then used as inputs to the `predict()` function, which returns the transformed test data $\widetilde{\mathcal{D}}_{test}$. Often, the end goal is to obtain fair predictions on the test data, and to this end we need to train a classifier/regressor. Either the training data $\mathcal{D}_{train}$ or its transformed counterpart $\widetilde{\mathcal{D}}_{train}$ can be used for building a predictor. The predictor then needs to be applied to the transformed train data $\widetilde{\mathcal{D}}_{test}$. Building on the graphical visualization in Figure \ref{fig:workflow-tikz}, which serves as a mental map of our workflow, we can now explain the distinct sources of uncertainty that can be considered.
-
-<!-- TODO: shouldn't this be a h2 heading? it's a bit unusual to have a h4
-     follow a h1 directly, no? btw, you had this as \paragraph{}, but this
-     corresponds to h4, also used elsewhere.
-     Later on, after the "Inherent uncertainty in the quantiles" section,
-     you'd need another h1 to signify the end of the h2 section
-     -> as a workaround I made this a list, but better solns may exists..
--->
+Such a workflow can be described as follows. We start from the training data $\mathcal{D}_{train}$ and the causal graph $\mathcal{G}$. These two arguments are used as inputs of the `fairadapt()` function, which returns the transformed training data $\widetilde{\mathcal{D}}_{train}$ contained in a `fairadapt` S3 object. This `fairadapt` object, alongside test data $\mathcal{D}_{test}$ are then used as inputs to the `predict()` function, which returns the transformed test data $\widetilde{\mathcal{D}}_{test}$. Often, the end goal is to obtain fair predictions on the test data, and to this end we need to train a classifier/regressor. Either the training data $\mathcal{D}_{train}$ or its transformed counterpart $\widetilde{\mathcal{D}}_{train}$ can be used for building a predictor. The predictor then needs to be applied to the transformed train data $\widetilde{\mathcal{D}}_{test}$. Building on the graphical visualization in Figure \ref{fig:workflow-tikz}, which serves as a mental map of our workflow, we can now explain the distinct sources of uncertainty that can be considered:
 
 - **Finite sample uncertainty**: The first, commonly encountered source of uncertainty is the one induced by a finite sample size. The training data $\mathcal{D}_{train}$ has a finite size, and for this reason inferences made using this data are imperfect. We wish to quantify the error in the predictions $\widehat{Y}^{fair}_{test}$ introduced by the finite sample size of $\mathcal{D}_{train}$. As Figure \ref{fig:workflow-tikz} shows, the training data $\mathcal{D}_{train}$ affects the resulting fair predictions in two ways. Firstly, it affects the value of the transformed test data $\widetilde{\mathcal{D}}_{test}$ (mediated by the fairadapt S3 object). Secondly, it affects the predictions $\widehat{Y}^{fair}_{test}$ also through the predictor (since it is the input to the regressor classifier). These finite sample uncertainties can be analyzed using *bootstrap* \citep{efron1994introduction}. This means that we repeat the procedure in Figure \ref{fig:workflow-tikz} many times, each time taking a different bootstrap sample of the training data. Below we will show how this can be done with the `fairadaptBoot()` function.
 
@@ -965,7 +930,6 @@ inv_frm <- function(x, modes = "single") {
   res <- replicate(100L, {
     col <- sample(ncol(x), 2L)
     prm <- order(x[, col[2L]][order(x[, col[1L]])])
-    # TODO this is still correct, right?
     sum(combn(prm, 2L, gt)) / choose(length(prm), 2L)
   })
 
@@ -996,12 +960,7 @@ prb_df <- rbind(prb_frm(pred_fin, "Finite Sample"),
 
 The results of these four metrics applied to different bootstrap repetitions on the COMPAS dataset are shown in Figure \ref{fig:compas-dm}.
 
-<!-- TODO write a sentence in the caption:
-  Panel A shows how Jaccard similarities between decision sets vary over
-  decision thresholds, while panel B ...
--->
-
-```{r, compas-dm, echo = FALSE, fig.width = 8, fig.height = 6, fig.cap = "Analyzing uncertainty of predictions in the COMPAS dataset from decision-maker's point of view.", out.width = "100%"}
+```{r, compas-dm, echo = FALSE, fig.width = 8, fig.height = 6, fig.cap = "Analyzing uncertainty of predictions in the COMPAS dataset from decision-maker's point of view. Panel A shows how the Jaccard similarity of two repetitions varies depending on the decision threshold. Panel B shows the cumulative distribution of the random variable that indicates whether two randomly selected individuals preserve order (in terms of predicted probabilities) in bootstrap repetitions. Panel C shows the density of the normalized inversion number of between predicted probabilities in bootstrap repetitions. Panel D shows the cumulative distribution function of the 95\\% confidence interval (CI) width for the predicted probability of different individuals.", out.width = "100%"}
 
 p1 <- ggplot(jac_df, aes(x = tsh, y = y, color = mode)) +
   geom_point() +
@@ -1229,7 +1188,7 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
   coord_cartesian(clip = "off")
 ```
 
-Before applying `fairadapt()`, we first log-transform the salaries and look at respective densities by sex group. We subset the data by using `n_samp` samples for training and `n_pred` samples for predicting and plot the data before performing the adaption.
+Before applying `fairadapt()`, we first log-transform the salaries. We then inspect the densities of variable `salary` by sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear shift between the two distributions, indicating that `male` employees are better compensated than `female` employees. We perform data the adaptation by using `n_samp` samples for training and `n_pred` samples for testing.
 
 ```{r, log-sub-quick, eval = quick_build, echo = quick_build}
 n_samp <- 3000
@@ -1241,57 +1200,53 @@ n_samp <- 30000
 n_pred <- 5
 ```
 
-```{r, log-sub}
+```{r, census-adapt}
 gov_dat$salary <- log(gov_dat$salary)
 
 gov_trn <- head(gov_dat, n = n_samp)
 gov_prd <- tail(gov_dat, n = n_pred)
-```
 
-<!-- TODO: personally, i'd group the two figs together, plot them side-by
-  side with the legend on the bottom; as is, fonts are too big compared with
-  other figs, doing the side-by-side would fix this as well;
-  also: no ggtitles, use plot_grid(...labels = LETTERS[1:2]) and explain panel
-  A, panel B in caption
-)
--->
-
-```{r, before-adapt, echo = FALSE, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, indicating a shift to higher values for male employees. This uses the US government-census dataset and shows the situation before applying fair data adaption, while Figure \\ref{fig:vis-adapt} presents transformed salary data.", cache = TRUE}
-ggplot(gov_trn, aes(x = salary, fill = sex)) +
-  geom_density(alpha = 0.4)  +
-  theme_bw()
-```
-
-There is a clear shift between the two sexes, indicating that `male` employees are currently better compensated when compared to `female` employees. However, this differences in `salary` could, in principle, be attributed to factors apart form gender inequality, such as the economic region in which an employee works. This needs to be accounted for as well, i.e., we do not wish to remove differences in salary between economic regions.
-
-```{r, census-adapt}
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
 
-After performing the adaptation, we can investigate whether the salary gap has shrunk. The densities after adaptation can be visualized using the \pkg{ggplot2}-exported S3 generic function `autoplot()`:
+After adapting the data, we investigate whether the salary gap has shrunk. This can be done by comparing distributions of variable `salary` using the \pkg{ggplot2}-exported S3 generic function `autoplot()` (Figure \ref{fig:census-vis}B).
+```{r, census-vis, echo = FALSE, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, before (panel A) and after adaptation (panel B). Panel A indicates a shift towards higher values for male employees. In panel B, after the data is transformed, the gap between groups is reduced.", cache = TRUE}
 
-```{r, vis-adapt, fig.height = 3, fig.cap = "The salary gap between male and female employees of the US government according to the government-census dataset is clearly reduced when comparing raw data (see Figure \\ref{fig:before-adapt}) to transformed salary data as yielded by applying fair data adaption using employee sex as the protected attribute and assuming a causal graph as shown in Figure \\ref{fig:census-graph}."}
-autoplot(gov_ada, when = "after") +
+p1 <- ggplot(gov_trn, aes(x = salary, fill = sex)) +
+  geom_density(alpha = 0.4)  +
   theme_bw()
-```
 
-If we are provided with additional testing data, and wish to adapt this as well, we can use the base \proglang{R} S3 generic function `predict()`:
+p2 <- autoplot(gov_ada, when = "after") +
+  theme_bw() + ggtitle(NULL)
+
+legend_join <- cowplot::get_legend(
+  p1 + guides(color = guide_legend(nrow = 1)) +
+    theme(legend.position = "bottom")
+)
+
+panels <- cowplot::plot_grid(
+  p1 + theme(legend.position = "none"), 
+  p2 + theme(legend.position = "none"), labels = LETTERS[1:2]
+)
+cowplot::plot_grid(panels, legend_join, ncol = 1, rel_heights = c(1, .1))
+```
+For adapting the additional testing data, we can use the base \proglang{R} S3 generic function `predict()`:
 
 ```{r, census-predict}
 predict(gov_ada, newdata = gov_prd)
 ```
 
-Finally, we can do fair-twin inspection using the `fairTwins()` function of \pkg{fairadapt}, to retrieve counterfactual feature values:
+Finally, we can do fair-twin inspection using the `fairTwins()` function of \pkg{fairadapt}, to retrieve counterfactual feature values for different individuals:
 
 ```{r, census-twins}
 fairTwins(gov_ada, train.id = 1:5,
           cols = c("sex", "age", "education_level", "salary"))
 ```
 
-Values are unchanged for female individuals (as *female* is used as baseline level), as is the case for `age`, which is not a descendant of the protected attribute `sex` (see Figure \ref{fig:census-graph}). However, variables `education_level` and `salary` do change for males, as they are descendants of the protected attribute `sex`.
+Note that values remain unchanged for female individuals (as *female* is used as baseline level). Variable `age`, which is not a descendant of the protected attribute `sex` (see Figure \ref{fig:census-graph}), also remains unchanged. However, variables `education_level` and `salary` do change for males, since these variables are descendants of the protected attribute `sex`.
 
-The variable `hours_worked` is also a descendant of $A$, and one might argue that this variable should *not* be adapted in the procedure, i.e., it should remain the same, irrespective of employee sex. This is the idea behind *resolving variables*, which we discuss next, in Section \ref{sec:resolvers}. It is worth emphasizing that we are not trying to answer the question of which choice of resolving variables is the correct one in the above example - this choice is left to social scientists deeply familiar with context and specifics of the above described dataset.
+The variable `hours_worked` is also a descendant of $A$, and one might argue that this variable should *not* be adapted in the procedure, i.e., it should remain the same, irrespective of employee sex. This is the idea behind *resolving variables*, which are discussed in Section \ref{sec:resolvers}. It is worth emphasizing that we are not trying to answer the question of which choice of resolving variables is the correct one in the above example - this choice is left to social scientists closely familiar with the context and specifics of the above described dataset.
 
 # Extensions {#sec:extensions}
 
