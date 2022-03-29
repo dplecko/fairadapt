@@ -170,17 +170,15 @@ In Figure \ref{fig:software} we provide a graphical overview of some of the avai
 		\draw [very thin] (5*\sx, -0.5*\sy) -- (5*\sx, 6*\sy);
 		\draw [very thin] (9*\sx, -0.5*\sy) -- (9*\sx, 6*\sy);
 		
-		\draw [very thin] (3*\sx, 5.5*\sy) -- (3*\sx, 6*\sy);
-    \draw [thin, dotted] (3*\sx, 3.75*\sy) -- (3*\sx, 5.5*\sy);
-		\draw [very thin] (7*\sx, 5.5*\sy) -- (7*\sx, 6*\sy);
-    \draw [thin, dotted] (7*\sx, 3.75*\sy) -- (7*\sx, 5.5*\sy);
+		\draw [thin, dotted] (3*\sx, 3.75*\sy) -- (3*\sx, 6*\sy);
+    \draw [thin, dotted] (7*\sx, 3.75*\sy) -- (7*\sx, 6*\sy);
 		\node (ce) at (2*\sx, 5.75*\sy) {Classification};
     \node (ce2) at (4*\sx, 5.75*\sy) {Regression};
     \node (ce3) at (6*\sx, 5.75*\sy) {Classification};
     \node (ce4) at (8*\sx, 5.75*\sy) {Regression};
 		
-    \draw [thin, dotted] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
-    \draw [thin, dotted] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
+    \draw [very thin] (\sx, 3.75*\sy) -- (9*\sx, 3.75*\sy);
+    \draw [very thin] (\sx, 2 * \sy) -- (9 * \sx, 2*\sy);
 		
     \draw [very thin] (1*\sx, 3.75*\sy) -- (0.5*\sx, 3.75*\sy);
     \draw [very thin] (1*\sx, 2*\sy) -- (0*\sx, 2*\sy);
@@ -1211,7 +1209,7 @@ gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
 ```
 
 After adapting the data, we investigate whether the salary gap has shrunk. This can be done by comparing distributions of variable `salary` using the \pkg{ggplot2}-exported S3 generic function `autoplot()` (Figure \ref{fig:census-vis}B).
-```{r, census-vis, echo = FALSE, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, before (panel A) and after adaptation (panel B). Panel A indicates a shift towards higher values for male employees. In panel B, after the data is transformed, the gap between groups is reduced.", cache = TRUE}
+```{r, census-vis, echo = FALSE, fig.width = 7, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, before (panel A) and after adaptation (panel B). Panel A indicates a shift towards higher values for male employees. In panel B, after the data is transformed, the gap between groups is reduced.", cache = TRUE}
 
 p1 <- ggplot(gov_trn, aes(x = salary, fill = sex)) +
   geom_density(alpha = 0.4)  +
@@ -1229,7 +1227,7 @@ panels <- cowplot::plot_grid(
   p1 + theme(legend.position = "none"), 
   p2 + theme(legend.position = "none"), labels = LETTERS[1:2]
 )
-cowplot::plot_grid(panels, legend_join, ncol = 1, rel_heights = c(1, .1))
+cowplot::plot_grid(panels, legend_join, ncol = 1, rel_heights = c(1, .08))
 ```
 For adapting the additional testing data, we can use the base \proglang{R} S3 generic function `predict()`:
 

@@ -47,5 +47,6 @@ Suggests:
     matrixStats,
     xtable
 RoxygenNote: 7.1.2
+Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr
 Config/testthat/edition: 3

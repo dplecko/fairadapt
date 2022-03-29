@@ -65,11 +65,17 @@ print.fairadapt <- function(x, ...) {
     attr.idx <- which(x$top.ord == x$prot.attr)
     if (attr.idx < length(x$top.ord)) {
       vars <- x$top.ord[seq.int(attr.idx + 1L, length(x$top.ord))]
-    } 
+    } else {
+      vars <- NULL
+    }
   }
 
-  cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
-      sep = "")
+  if (!is.null(vars)) {
+    cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
+        sep = "")
+  } else {
+    cat("\nNo adapted variables\n")
+  }
   
   cat("\nBased on protected attribute", x$prot.attr, "\n")
 

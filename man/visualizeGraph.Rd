@@ -7,7 +7,7 @@
 visualizeGraph(x, ...)
 }
 \arguments{
-\item{x}{Object of class `fairadapt`, a result of an adaptation
+\item{x}{Object of class \code{fairadapt}, a result of an adaptation
 procedure.}
 
 \item{...}{Additional arguments passed to the graph plotting function.}

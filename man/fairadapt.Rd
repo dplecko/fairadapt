@@ -20,63 +20,63 @@ fairadapt(
 )
 }
 \arguments{
-\item{formula}{Object of class `formula` describing the response and
+\item{formula}{Object of class \code{formula} describing the response and
 the covariates.}
 
-\item{prot.attr}{A value of class `character` describing the binary
-protected attribute. Must be one of the entries of `colnames(adj.mat)`.}
+\item{prot.attr}{A value of class \code{character} describing the binary
+protected attribute. Must be one of the entries of \code{colnames(adj.mat)}.}
 
-\item{adj.mat}{Matrix of class `matrix` encoding the relationships in
-the causal graph. `M[i,j] == 1L` implies the existence of an edge from
+\item{adj.mat}{Matrix of class \code{matrix} encoding the relationships in
+the causal graph. \code{M[i,j] == 1L} implies the existence of an edge from
 node i to node j. Must include all the variables appearing in the formula
-object. When the `adj.mat` argument is set to `NULL`, then the
-`top.ord` argument has to be supplied.}
+object. When the \code{adj.mat} argument is set to \code{NULL}, then the
+\code{top.ord} argument has to be supplied.}
 
 \item{train.data, test.data}{Training data & testing data, both of class
-`data.frame`. Test data is by default `NULL`.}
+\code{data.frame}. Test data is by default \code{NULL}.}
 
-\item{cfd.mat}{Symmetric matrix of class `matrix` encoding the
-bidirected edges in the causal graph. `M[i,j] == M[j, i] == 1L`
+\item{cfd.mat}{Symmetric matrix of class \code{matrix} encoding the
+bidirected edges in the causal graph. \verb{M[i,j] == M[j, i] == 1L}
 implies the existence of a bidirected edge between nodes i and j. Must
 include all the variables appearing in the formula object.}
 
-\item{top.ord}{A vector of class `character` describing the
-topological ordering of the causal graph. Default value is `NULL`,
-but this argument must be supplied if `adj.mat` is not specified.
+\item{top.ord}{A vector of class \code{character} describing the
+topological ordering of the causal graph. Default value is \code{NULL},
+but this argument must be supplied if \code{adj.mat} is not specified.
 Also must include all the variables appearing in the formula object.}
 
-\item{res.vars}{A vector of class `character` listing all the resolving
+\item{res.vars}{A vector of class \code{character} listing all the resolving
 variables, which should not be changed by the adaption procedure. Default
-value is `NULL`, corresponding to no resolving variables. Resolving
+value is \code{NULL}, corresponding to no resolving variables. Resolving
 variables should be a subset of the descendants of the protected attribute.}
 
 \item{quant.method}{A function choosing the method used for quantile
-regression. Default value is `rangerQuants` (using random forest
-quantile regression). Other implemented options are `linearQuants` and
-`mcqrnnQuants`. A custom function can be supplied by the user here,
-and the associated method for the S3 generic `computeQuants` needs to be
+regression. Default value is \code{rangerQuants} (using random forest
+quantile regression). Other implemented options are \code{linearQuants} and
+\code{mcqrnnQuants}. A custom function can be supplied by the user here,
+and the associated method for the S3 generic \code{computeQuants} needs to be
 added.}
 
-\item{visualize.graph}{A `logical` indicating whether the causal graph
-should be plotted upon calling the `fairadapt()` function. Default
-value is `FALSE`.}
+\item{visualize.graph}{A \code{logical} indicating whether the causal graph
+should be plotted upon calling the \code{fairadapt()} function. Default
+value is \code{FALSE}.}
 
 \item{eval.qfit}{Argument indicating whether the quality of the quantile
-regression fit should be computed using cross-validation. Default value is 
-`NULL`, but whenever a positive integer value is specified, then it is
+regression fit should be computed using cross-validation. Default value is
+\code{NULL}, but whenever a positive integer value is specified, then it is
 interpreted as the number of folds used in the cross-validation procedure.}
 
 \item{...}{Additional arguments forwarded to the function passed as
-`quant.method`.}
+\code{quant.method}.}
 }
 \value{
-An object of class `fairadapt`, containing the original and
+An object of class \code{fairadapt}, containing the original and
 adapted training and testing data, together with the causal graph and some
 additional meta-information.
 }
 \description{
 Implementation of fair data adaptation with quantile preservation
-(Plecko & Meinshausen 2019). Uses only plain `R`.
+(Plecko & Meinshausen 2019). Uses only plain \code{R}.
 }
 \details{
 The procedure takes the training and testing data as an input, together with

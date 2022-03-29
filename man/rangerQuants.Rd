@@ -33,47 +33,49 @@ regression.}
 attribute \code{A} is a root node of the causal graph. Used for splitting the
 quantile regression.}
 
-\item{ind}{A \code{logical} vector of length \code{nrow(data)}, indicating 
+\item{ind}{A \code{logical} vector of length \code{nrow(data)}, indicating
 which
 samples have the baseline value of the protected attribute.}
 
-\item{min.node.size, ...}{Forwarded to \link[ranger]{ranger}.}
+\item{min.node.size}{Forwarded to \code{\link[ranger:ranger]{ranger::ranger()}}.}
 
-\item{tau, ...}{Forwarded to \code{\link[quantreg]{rq}}.}
+\item{...}{Forwarded to further methods.}
 
-\item{tau, iter.max, ...}{Forwarded to \link[qrnn]{mcqrnn.fit}.}
+\item{tau}{Forwarded to \code{\link[quantreg:rq]{quantreg::rq()}} or \code{\link[qrnn:mcqrnn]{qrnn::mcqrnn.fit()}}.}
+
+\item{iter.max}{Forwarded to \code{\link[qrnn:mcqrnn]{qrnn::mcqrnn.fit()}}.}
 }
 \value{
-A \code{ranger} or a \code{rangersplit} S3 object, depending on the 
+A \code{ranger} or a \code{rangersplit} S3 object, depending on the
 value of the \code{A.root} argument, for \code{rangerQuants()}.
 
-A \code{rqs} or a \code{quantregsplit} S3 object, depending on the 
+A \code{rqs} or a \code{quantregsplit} S3 object, depending on the
 value of the \code{A.root} argument, for \code{linearQuants()}.
 
-An \code{mcqrnn} S3 object for \code{mcqrnnQuants()}.
+An \code{ mcqrnn} S3 object for \code{ mcqrnnQuants()}.
 }
 \description{
 There are several methods that can be used for the quantile learning step
-in the \code{fairadapt} package. Each of the methods needs a specific 
-constructor. The constructor is a function that takes the data (with some 
-additional meta-information) and returns an object on which the 
+in the \code{fairadapt} package. Each of the methods needs a specific
+constructor. The constructor is a function that takes the data (with some
+additional meta-information) and returns an object on which the
 \code{computeQuants()} generic can be called.
 }
 \details{
-Within the package, there are 3 different methods implemented, which use 
-quantile regressors based on linear models, random forests and neural 
+Within the package, there are 3 different methods implemented, which use
+quantile regressors based on linear models, random forests and neural
 networks. However, there is additional flexibility and the user can provide
-her/his own quantile method. For this, the user needs to write (i) the 
-constructor which returns an S3 classed object (see examples below); 
-(ii) a method for the \code{computeQuants()} generic for the S3 class 
+her/his own quantile method. For this, the user needs to write (i) the
+constructor which returns an S3 classed object (see examples below);
+(ii) a method for the \code{computeQuants()} generic for the S3 class
 returned in (i).
 
-The \code{rangerQuants()} function uses random forests 
+The \code{rangerQuants()} function uses random forests
 (\code{ranger} package) for quantile regression.
 
-The \code{linearQuants()} function uses linear quantile regression 
+The \code{linearQuants()} function uses linear quantile regression
 (\code{quantreg} package) for the Quantile Learning step.
 
-The \code{mcqrnnQuants()} function uses  monotone quantile 
-regression neural networks (`mcqrnn` package) in the Quantile Learning step.
+The \code{mcqrnnQuants()} function uses  monotone quantile
+regression neural networks (\code{mcqrnn} package) in the Quantile Learning step.
 }

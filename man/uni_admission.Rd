@@ -7,10 +7,10 @@
 \format{
 A data frame with 1,000 rows and 4 variables:
 \describe{
-  \item{gender}{the gender of the student}
-  \item{edu}{educational achievement, for instance GPA}
-  \item{test}{performance on a university admission test}
-  \item{score}{overall final score measuring the quality of a candidate}
+\item{gender}{the gender of the student}
+\item{edu}{educational achievement, for instance GPA}
+\item{test}{performance on a university admission test}
+\item{score}{overall final score measuring the quality of a candidate}
 }
 }
 \usage{

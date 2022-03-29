@@ -7,23 +7,23 @@
 computeQuants(x, data, newdata, ind, ...)
 }
 \arguments{
-\item{x}{Object with an associated `computeQuants()` method, to be used for
+\item{x}{Object with an associated \code{computeQuants()} method, to be used for
 inferring quantiles.}
 
-\item{data}{`data.frame` containing samples used in the quantile
+\item{data}{\code{data.frame} containing samples used in the quantile
 regression.}
 
-\item{newdata}{`data.frame` containing counterfactual values for which
+\item{newdata}{\code{data.frame} containing counterfactual values for which
 the quantiles need to be inferred.}
 
-\item{ind}{A `logical` vector of length `nrow(data)`, indicating which
+\item{ind}{A \code{logical} vector of length \code{nrow(data)}, indicating which
 samples have the baseline value of the protected attribute.}
 
 \item{...}{Additional arguments to be passed down to respective method
 functions.}
 }
 \value{
-A vector of counterfactual values corresponding to `newdata`.
+A vector of counterfactual values corresponding to \code{newdata}.
 }
 \description{
 Compute Quantiles generic for the Quantile Learning step.

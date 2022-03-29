@@ -7,11 +7,11 @@
 adaptedData(x, train = TRUE)
 }
 \arguments{
-\item{x}{Object of class `fairadapt`, a result of an adaptation
+\item{x}{Object of class \code{fairadapt}, a result of an adaptation
 procedure.}
 
 \item{train}{A logical indicating whether train data should be returned.
-Defaults to `TRUE`. If `FALSE`, test data is returned.}
+Defaults to \code{TRUE}. If \code{FALSE}, test data is returned.}
 }
 \description{
 Convenience function for returning adapted data
