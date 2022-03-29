@@ -15,7 +15,7 @@ status](https://github.com/dplecko/fairadapt/workflows/pkgdown/badge.svg)](https
 [![covr
 status](https://github.com/dplecko/fairadapt/workflows/coverage/badge.svg)](https://github.com/dplecko/fairadapt/actions?query=workflow%3Acoverage)
 [![Codecov test
-coverage](https://codecov.io/gh/dplecko/fairadapt/branch/master/graph/badge.svg?token=8A0EL5N4RE)](https://app.codecov.io/gh/dplecko/fairadapt)
+coverage](https://codecov.io/gh/dplecko/fairadapt/branch/main/graph/badge.svg?token=8A0EL5N4RE)](https://app.codecov.io/gh/dplecko/fairadapt)
 <!-- badges: end -->
 
 The R package fairadapt is intended for removing bias from machine
