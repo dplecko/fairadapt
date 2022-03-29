@@ -1,10 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://dplecko.github.io/fairadapt/404.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/LICENSE.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/articles/index.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/authors.html</loc>
+  </url>
+  <url>
     <loc>https://dplecko.github.io/fairadapt/index.html</loc>
   </url>
   <url>
+    <loc>https://dplecko.github.io/fairadapt/news/index.html</loc>
+  </url>
+  <url>
     <loc>https://dplecko.github.io/fairadapt/reference/adaptedData.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/compas.html</loc>
   </url>
   <url>
     <loc>https://dplecko.github.io/fairadapt/reference/computeQuants.html</loc>
@@ -13,7 +31,13 @@
     <loc>https://dplecko.github.io/fairadapt/reference/fairTwins.html</loc>
   </url>
   <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/fairadapt-package.html</loc>
+  </url>
+  <url>
     <loc>https://dplecko.github.io/fairadapt/reference/fairadapt.html</loc>
+  </url>
+  <url>
+    <loc>https://dplecko.github.io/fairadapt/reference/fairadaptBoot.html</loc>
   </url>
   <url>
     <loc>https://dplecko.github.io/fairadapt/reference/gov_census.html</loc>
@@ -22,10 +46,10 @@
     <loc>https://dplecko.github.io/fairadapt/reference/graphModel.html</loc>
   </url>
   <url>
-    <loc>https://dplecko.github.io/fairadapt/reference/linearQuants.html</loc>
+    <loc>https://dplecko.github.io/fairadapt/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://dplecko.github.io/fairadapt/reference/mcqrnnQuants.html</loc>
+    <loc>https://dplecko.github.io/fairadapt/reference/quantFit.html</loc>
   </url>
   <url>
     <loc>https://dplecko.github.io/fairadapt/reference/rangerQuants.html</loc>
@@ -35,8 +59,5 @@
   </url>
   <url>
     <loc>https://dplecko.github.io/fairadapt/reference/visualizeGraph.html</loc>
-  </url>
-  <url>
-    <loc>https://dplecko.github.io/fairadapt/articles/jss.pdf</loc>
   </url>
 </urlset>
