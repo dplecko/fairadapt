@@ -72,7 +72,6 @@ pkgdown:
 knitr::opts_chunk$set(echo = TRUE)
 
 library(fairadapt)
-library(data.table)
 library(ggplot2)
 library(ggraph)
 library(ranger)
@@ -88,8 +87,9 @@ options(
   kableExtra.latex.load_packages = FALSE
 )
 
-# TODO make this conditional, i.e. on CRAN, gh actions, where else?
-quick_build <- TRUE
+quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
+  isTRUE(as.logical(Sys.getenv("CI"))) ||
+  !identical(Sys.getenv("FAIRADAPT_VIGNETTE_QUICK_BUILD"), "false")
 ```
 
 ```{tikz, setup-graph, eval = FALSE, echo = FALSE}
