@@ -946,8 +946,8 @@ inv_df <- rbind(inv_frm(pred_fin, "Finite Sample"),
 
 ```{r, decision-maker-4}
 prb_frm <- function(x, modes = "single") {
-  qnt <- matrixStats::rowQuantiles(x, probs = c(0.05, 0.95))
-  data.frame(width = qnt[, 2] - qnt[, 1], mode = modes)
+  qnt <- apply(x, 1L, quantile, probs = c(0.05, 0.95))
+  data.frame(width = qnt[2L, ] - qnt[1L, ], mode = modes)
 }
 
 prb_df <- rbind(prb_frm(pred_fin, "Finite Sample"),
