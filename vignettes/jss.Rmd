@@ -544,10 +544,12 @@ if (quick_build && file.exists(bm_cache)) {
   bmark <- do.call(cbind, bmark)
 
   colnames(bmark) <- c("Random Forests", "Neural Networks", "Linear Regression")
-  rownames(bmark) <- paste0("$T_{\\text{uni}}(", as.character(nsamps), ")$")
+  rownames(bmark) <- as.character(nsamps)
 
   saveRDS(bmark, file.path("..", "inst", "extdata", "bm_quant.rds"))
 }
+
+rownames(bmark) <- paste0("$T_{\\text{uni}}(", rownames(bmark), ")$")
 
 tbl <- data.frame(
   linebreak(
@@ -575,9 +577,9 @@ tbl <- rbind(tbl, bmark)
 capt <- paste(
   "Summary table of different quantile regression methods. $n$ is the number",
   "of samples, $p$ number of covariates, $n_{\\text{epochs}}$ number of",
-  "training epochs for the neural network. $T_{\\text{uni}}(n)$ denotes the runtime of",
-  "different methods on the university admission dataset, with $n$ training",
-  "and $n$ testing samples."
+  "training epochs for the neural network. $T_{\\text{uni}}(n)$ denotes the",
+  "runtime of different methods on the university admission dataset, with $n$",
+  "training and $n$ testing samples."
 )
 
 print(
