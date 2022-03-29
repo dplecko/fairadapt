@@ -131,3 +131,8 @@ qfitScore <- function(x, quants, probs = c(0.25, 0.5, 0.75)) {
   )
   
 }
+
+release_questions <- function() {
+  paste("Is environment variable `FAIRADAPT_VIGNETTE_QUICK_BUILD` not set",
+        "to `false`?")
+}
