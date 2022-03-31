@@ -254,35 +254,35 @@ summary.fairadaptBoot <- function(object, ...) {
 #' @export
 print.summary.fairadaptBoot <- function(x, ...) {
     
-  cat("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"),
-      "\n\n", sep = "")
+  cat0("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"),
+      "\n\n")
     
-  cat("Bootstrap repetitions:     ", x$n.boot, "\n")
+  cat0("Bootstrap repetitions:      ", x$n.boot, "\n")
     
-  cat("Protected attribute:       ", x$prot.attr, "\n")
-  cat("Protected attribute levels:",
+  cat0("Protected attribute:        ", x$prot.attr, "\n")
+  cat0("Protected attribute levels: ",
       paste(sort(x$attr.lvls), collapse = ", "), "\n")
     
   if (!is.null(x$adapt.vars)) {
-    cat("Adapted variables:         ",
+    cat0("Adapted variables:          ",
         paste(x$adapt.vars, collapse = ", "), "\n")
   }
 
   if(!is.null(x$res.vars)) {
-    cat("Resolving variables:       ",
+    cat0("Resolving variables:        ",
         paste(x$res.vars, collapse = ", "), "\n")
   }
 
-  cat("\n")
+  cat0("\n")
 
-  cat("Number of training samples:", x$train.samp, "\n")
-  cat("Number of test samples:    ", x$test.samp, "\n")
-  cat("Quantile method:           ", x$quant.method, "\n")
+  cat0("Number of training samples: ", x$train.samp, "\n")
+  cat0("Number of test samples:     ", x$test.samp, "\n")
+  cat0("Quantile method:            ", x$quant.method, "\n")
 
-  cat("\n")
+  cat0("\n")
 
-  cat("Randomness considered:     ", x$rand.mode, "\n")
-  cat("fairadapt objects saved:   ", x$keep.object, "\n")
+  cat0("Randomness considered:      ", x$rand.mode, "\n")
+  cat0("fairadapt objects saved:    ", x$keep.object, "\n")
 
   invisible(x)
 }

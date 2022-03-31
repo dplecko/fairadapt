@@ -150,7 +150,7 @@ expect_snapshot_code <- function(x, mac_only = TRUE, arch = NULL, ...) {
     skip_if_not_on_arch(arch)
   }
 
-  expect_snapshot(x, ...)
+  expect_snapshot({{ x }}, ...)
 }
 
 with_seed <- function(seed, code, rng_kind = "default",
