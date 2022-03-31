@@ -1,4 +1,4 @@
-# generics
+# generics, rf
 
     Code
       print(ad.rf)
@@ -49,7 +49,7 @@
       Total variation (before adaptation): NA 
       Total variation (after adaptation):  NA 
 
----
+# generics, linear
 
     Code
       print(ad.lin)
@@ -100,7 +100,7 @@
       Total variation (before adaptation): NA 
       Total variation (after adaptation):  NA 
 
----
+# generics, cts
 
     Code
       print(ad.cts)

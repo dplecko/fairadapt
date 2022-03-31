@@ -83,10 +83,24 @@ compare_img_data <- function(old, new) {
   identical(magick::image_data(new), magick::image_data(old))
 }
 
-expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
+skip_if_not_on_arch <- function(arch) {
+
+  curr_arch <- R.Version()$arch
+
+  skip_if_not(
+    identical(curr_arch, arch),
+    message = paste("skipping on arch", curr_arch)
+  )
+}
+
+expect_snapshot_plot <- function(name, code, mac_only = TRUE, arch = NULL) {
 
   if (mac_only) {
     skip_on_os(c("windows", "linux", "solaris"))
+  }
+
+  if (!is.null(arch)) {
+    skip_if_not_on_arch(arch)
   }
 
   skip_if_not_installed("ggplot2", "3.0.0")
@@ -95,10 +109,14 @@ expect_snapshot_plot <- function(name, code, mac_only = TRUE) {
   expect_snapshot_file(path, paste0(name, ".png"), compare = compare_img_data)
 }
 
-expect_snapshot_csv <- function(name, code, mac_only = TRUE) {
+expect_snapshot_csv <- function(name, code, mac_only = TRUE, arch = NULL) {
 
   if (mac_only) {
     skip_on_os(c("windows", "linux", "solaris"))
+  }
+
+  if (!is.null(arch)) {
+    skip_if_not_on_arch(arch)
   }
 
   skip_on_r_version("3.6.0")
@@ -107,10 +125,14 @@ expect_snapshot_csv <- function(name, code, mac_only = TRUE) {
   expect_snapshot_file(path, paste0(name, ".csv"))
 }
 
-expect_snapshot_json <- function(code, mac_only = TRUE, ...) {
+expect_snapshot_json <- function(code, mac_only = TRUE, arch = NULL, ...) {
 
   if (mac_only) {
     skip_on_os(c("windows", "linux", "solaris"))
+  }
+
+  if (!is.null(arch)) {
+    skip_if_not_on_arch(arch)
   }
 
   skip_on_r_version("3.6.0")
