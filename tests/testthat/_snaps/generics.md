@@ -144,7 +144,7 @@
       Quantile method:                     rangerQuants 
       
       Total variation (before adaptation): 0.07294 
-      Total variation (after adaptation):  -0.02209 
+      Total variation (after adaptation):  -0.01818
 
 ---
 
