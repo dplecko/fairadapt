@@ -373,5 +373,5 @@ test_that("fairadapt", {
   expect_lt(mse.lin[["x3"]][[1L]], 100)
   expect_lt(mse.lin[["x3"]][[2L]], 100)
 
-  expect_snapshot_json(mse.lin)
+  expect_snapshot_json(mse.lin, tolerance = 0.2)
 })
