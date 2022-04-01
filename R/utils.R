@@ -136,3 +136,5 @@ release_questions <- function() {
   paste("Is environment variable `FAIRADAPT_VIGNETTE_QUICK_BUILD` not set",
         "to `false`?")
 }
+
+cat0 <- function(...) cat(..., sep = "")

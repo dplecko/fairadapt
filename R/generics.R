@@ -138,35 +138,35 @@ print.summary.fairadapt <- function(x,
                                     digits = max(3L, getOption("digits") - 3L),
                                     ...) {
   
-  cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"),
-      "\n\n", sep = "")
+  cat0("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"),
+      "\n\n")
 
-  cat("Protected attribute:                ", x$prot.attr, "\n")
-  cat("Protected attribute levels:         ",
+  cat0("Protected attribute:                 ", x$prot.attr, "\n")
+  cat0("Protected attribute levels:          ",
       paste(sort(x$attr.lvls), collapse = ", "), "\n")
 
   if (!is.null(x$adapt.vars)) {
-    cat("Adapted variables:                  ",
+    cat0("Adapted variables:                   ",
         paste(x$adapt.vars, collapse = ", "), "\n")
   }
 
   if(!is.null(x$res.vars)) {
-    cat("Resolving variables:                ",
+    cat0("Resolving variables:                 ",
         paste(x$res.vars, collapse = ", "), "\n")
   }
 
-  cat("\n")
+  cat0("\n")
 
-  cat("Number of training samples:         ", x$train.samp, "\n")
-  cat("Number of test samples:             ", x$test.samp, "\n")
-  cat("Quantile method:                    ", x$quant.method, "\n")
+  cat0("Number of training samples:          ", x$train.samp, "\n")
+  cat0("Number of test samples:              ", x$test.samp, "\n")
+  cat0("Quantile method:                     ", x$quant.method, "\n")
 
-  cat("\n")
+  cat0("\n")
 
-  cat("Total variation (before adaptation):",
+  cat0("Total variation (before adaptation): ",
       format(x$tv.start, digits = digits), "\n")
 
-  cat("Total variation (after adaptation): ",
+  cat0("Total variation (after adaptation):  ",
       format(x$tv.end, digits = digits), "\n")
     
   invisible(x)
