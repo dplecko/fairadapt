@@ -2,16 +2,27 @@
 % Please edit documentation in R/generics.R
 \name{adaptedData}
 \alias{adaptedData}
+\alias{adaptedData.fairadapt}
+\alias{adaptedData.fairadaptBoot}
 \title{Convenience function for returning adapted data}
 \usage{
 adaptedData(x, train = TRUE)
+
+\method{adaptedData}{fairadapt}(x, train = TRUE)
+
+\method{adaptedData}{fairadaptBoot}(x, train = TRUE)
 }
 \arguments{
-\item{x}{Object of class \code{fairadapt}, a result of an adaptation
-procedure.}
+\item{x}{Object of class \code{fairadapt} or \code{fairadaptBoot}, a result of an
+adaptation procedure.}
 
 \item{train}{A logical indicating whether train data should be returned.
 Defaults to \code{TRUE}. If \code{FALSE}, test data is returned.}
+}
+\value{
+Either a \code{data.frame} when called on an \code{fairadapt} object, or a \code{list}
+of \code{data.frame}s with the adapted data of length \code{n.boot}, when called on a
+\code{fairadaptBoot} object.
 }
 \description{
 Convenience function for returning adapted data

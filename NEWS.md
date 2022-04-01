@@ -1,9 +1,9 @@
 # fairadapt 0.2.2
-Breaking changes:
-- Argument `save.object` for `fairadaptBoot()` renamed to `keep.objects`
-
 Non-breaking changes:
--Addition of `fairadaptBoot()`
+-Addition of `fairadaptBoot()` functionality, which allows for bootstrap repetitions of the adaptation
+procedure performed by `fairadapt()` (used for uncertainty quantification)
+- adding `print()` and `summary()` methods for all the exported S3 classes in the package
+- improving the documentation for the quantile computation functions
 
 # fairadapt 0.2.1
 Non-breaking changes:

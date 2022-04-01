@@ -44,6 +44,7 @@
 #' @param rand.mode A string, taking values `"finsamp"`, `"quant"` or `"both"`,
 #' corresponding to considering finite sample uncertainty, quantile
 #' uncertainty, or both.
+#' @param seed 
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'
@@ -80,12 +81,17 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
                           res.vars = NULL, quant.method = rangerQuants,
                           keep.object = FALSE, n.boot = 100, 
                           rand.mode = c("finsamp", "quant", "both"),
-                          ...) {
+                          seed = 2022, ...) {
 
   rand.mode <- match.arg(rand.mode)
   
   trn.rnd <- rand.mode %in% c("finsamp", "both")
   tst.rnd <- rand.mode %in% c("quant", "both")
+  
+  if (!tst.rnd & !missing(seed)) {
+    message(paste0("A non-default value for the `seed` argument is ignored ",
+                   "when `rand.mode` = \"finsamp\"."))
+  }
   
   res.lst <- list()
   FA.lst <- list()
@@ -137,7 +143,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     
     # fix test randomness if needed
     if (!tst.rnd) {
-      set.seed(2022)
+      set.seed(seed)
     }
 
     if (!is.null(test.data)) {
@@ -287,6 +293,38 @@ print.summary.fairadaptBoot <- function(x, ...) {
   invisible(x)
 }
 
+#' Prediction function for new data from a saved `fairadaptBoot` object.
+#'
+#' @details The `newdata` argument should be compatible with `adapt.test`
+#' argument that was used when constructing the `fairadaptBoot` object. In
+#' particular, `newdata` should contain column names that appear in the `formula`
+#' argument that was used when calling `fairadaptBoot()` (apart from the outcome 
+#' variable on the LHS of the formula).
+#'  
+#' @param object Object of class `fairadapt`, a result of an adaptation
+#' procedure.
+#' @param newdata A `data.frame` containing the new data.
+#' @param ... Additional arguments forwarded to `computeQuants()`.
+#' @return A `data.frame` containing the adapted version of the new data.
+#' @examples
+#' n_samp <- 200
+#' uni_dim <- c(       "gender", "edu", "test", "score")
+#' uni_adj <- matrix(c(       0,     1,      1,       0,
+#'                            0,     0,      1,       1,
+#'                            0,     0,      0,       1,
+#'                            0,     0,      0,       0),
+#'                   ncol = length(uni_dim),
+#'                   dimnames = rep(list(uni_dim), 2),
+#'                   byrow = TRUE)
+#'
+#' uni_ada_boot <- fairadaptBoot(score ~ .,
+#'   train.data = head(uni_admission, n = n_samp),
+#'   adj.mat = uni_adj,
+#'   prot.attr = "gender",
+#'   n.boot = 10
+#' )
+#'
+#' predict(object = uni_ada_boot, newdata = tail(uni_admission, n = n_samp))
 #' @export
 predict.fairadaptBoot <- function(object, newdata, ...) {
   
@@ -299,10 +337,5 @@ predict.fairadaptBoot <- function(object, newdata, ...) {
                   names(newdata)),
               msg = "Columns missing in newdata")
   
-  lapply(object$fairadapt, predict, newdata = newdata)
-}
-
-#' @export
-adaptedData.fairadaptBoot <- function(x, train = TRUE) {
-  if (isTRUE(train)) x[["adapt.train"]] else x[["adapt.test"]]
+  lapply(object$fairadapt, predict, newdata = newdata, ...)
 }

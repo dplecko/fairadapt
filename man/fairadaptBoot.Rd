@@ -17,6 +17,7 @@ fairadaptBoot(
   keep.object = FALSE,
   n.boot = 100,
   rand.mode = c("finsamp", "quant", "both"),
+  seed = 2022,
   ...
 )
 }
@@ -66,6 +67,8 @@ added.}
 \item{rand.mode}{A string, taking values \code{"finsamp"}, \code{"quant"} or \code{"both"},
 corresponding to considering finite sample uncertainty, quantile
 uncertainty, or both.}
+
+\item{seed}{}
 
 \item{...}{Additional arguments forwarded to the function passed as
 \code{quant.method}.}

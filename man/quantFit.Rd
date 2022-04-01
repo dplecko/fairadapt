@@ -14,7 +14,7 @@ procedure.}
 }
 \value{
 A \code{numeric} vector, containing the average empirical loss for
-of the 25\%, 50\% and 75\% quantile loss functions, for each variable.
+the 25\%, 50\% and 75\% quantile loss functions, for each variable.
 }
 \description{
 Quality of quantile fit statistics.

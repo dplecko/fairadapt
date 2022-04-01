@@ -252,20 +252,35 @@ visualizeGraph.fairadapt <- function(x, ...) plot(x$graph, ...)
 
 #' Convenience function for returning adapted data
 #'
-#' @param x Object of class `fairadapt`, a result of an adaptation
-#' procedure.
+#' @param x Object of class `fairadapt` or `fairadaptBoot`, a result of an 
+#' adaptation procedure.
 #' @param train A logical indicating whether train data should be returned.
 #' Defaults to `TRUE`. If `FALSE`, test data is returned.
+#' @return Either a `data.frame` when called on an `fairadapt` object, or a `list`
+#' of `data.frame`s with the adapted data of length `n.boot`, when called on a
+#' `fairadaptBoot` object.
+#' 
 #' @export
 adaptedData <- function(x, train = TRUE) {
   UseMethod("adaptedData", x)
 }
 
+#' @rdname adaptedData
 #' @export
 adaptedData.fairadapt <- function(x, train = TRUE) {
 
   if (train) x[["adapt.train"]] else x[["adapt.test"]]
+}
 
+#' @rdname adaptedData
+#' @export
+adaptedData.fairadaptBoot <- function(x, train = TRUE) {
+  
+  if (train && !x$keep.object) {
+    stop("Adapted training data not available when `keep.object` = FALSE.")
+  } else if (train && x$keep.object) {
+    lapply(x$fairadapt, `[[`, "adapt.train")
+  } else x[["adapt.test"]]
 }
 
 #' Fair Twin Inspection convenience function.
@@ -356,7 +371,38 @@ fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)),
   res[, col.ord]
 }
 
-#' @export
+
+#' Prediction function for new data from a saved `fairadapt` object.
+#'
+#' @details The `newdata` argument should be compatible with `adapt.test`
+#' argument that was used when constructing the `fairadapt` object. In
+#' particular, `newdata` should contain column names that appear in the `formula`
+#' argument that was used when calling `fairadapt()` (apart from the outcome 
+#' variable on the LHS of the formula).
+#' 
+#' @param object Object of class `fairadapt`, a result of an adaptation
+#' procedure.
+#' @param newdata A `data.frame` containing the new data.
+#' @param ... Additional arguments forwarded to `computeQuants()`.
+#' @return A `data.frame` containing the adapted version of the new data.
+#' @examples
+#' n_samp <- 200
+#' uni_dim <- c(       "gender", "edu", "test", "score")
+#' uni_adj <- matrix(c(       0,     1,      1,       0,
+#'                            0,     0,      1,       1,
+#'                            0,     0,      0,       1,
+#'                            0,     0,      0,       0),
+#'                   ncol = length(uni_dim),
+#'                   dimnames = rep(list(uni_dim), 2),
+#'                   byrow = TRUE)
+#'
+#' uni_ada <- fairadapt(score ~ .,
+#'   train.data = head(uni_admission, n = n_samp),
+#'   adj.mat = uni_adj,
+#'   prot.attr = "gender"
+#' )
+#'
+#' predict(object = uni_ada, newdata = tail(uni_admission, n = n_samp))
 predict.fairadapt <- function(object, newdata, ...) {
 
   assert_that(all(names(object$adapt.test) %in% names(newdata)),
@@ -409,7 +455,7 @@ predict.fairadapt <- function(object, newdata, ...) {
           engine[[var]][["object"]],
           newdata[, c(var, engine[[var]][["parents"]]), drop = FALSE],
           adapt[!base.ind, engine[[var]][["parents"]], drop = FALSE],
-          base.ind, test = TRUE
+          base.ind, test = TRUE, ...
         )
     }
 
@@ -440,7 +486,7 @@ predict.fairadapt <- function(object, newdata, ...) {
 #' procedure.
 #' @param ... Ignored in this case.
 #' @return A `numeric` vector, containing the average empirical loss for
-#' of the 25%, 50% and 75% quantile loss functions, for each variable. 
+#' the 25%, 50% and 75% quantile loss functions, for each variable. 
 #' @examples
 #' n_samp <- 200
 #' uni_dim <- c(       "gender", "edu", "test", "score")
