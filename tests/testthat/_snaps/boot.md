@@ -52,17 +52,17 @@
           train.data = train, test.data = test, keep.object = TRUE, 
           n.boot = 3L, seed = 202)
       
-      Bootstrap repetitions:      3 
-      Protected attribute:        a 
-      Protected attribute levels: 0, 1 
-      Adapted variables:          y, x 
+      Bootstrap repetitions:      3
+      Protected attribute:        a
+      Protected attribute levels: 0, 1
+      Adapted variables:          y, x
       
-      Number of training samples: 100 
-      Number of test samples:     0 
-      Quantile method:            quant.method 
+      Number of training samples: 100
+      Number of test samples:     0
+      Quantile method:            quant.method
       
-      Randomness considered:      finsamp 
-      fairadapt objects saved:    TRUE 
+      Randomness considered:      finsamp
+      fairadapt objects saved:    TRUE
 
 ---
 
@@ -98,16 +98,16 @@
           test.data = test, top.ord = c("a", "x", "y"), n.boot = 3L, 
           seed = 202)
       
-      Bootstrap repetitions:      3 
-      Protected attribute:        a 
-      Protected attribute levels: 0, 1 
+      Bootstrap repetitions:      3
+      Protected attribute:        a
+      Protected attribute levels: 0, 1
       
-      Number of training samples: 100 
-      Number of test samples:     0 
-      Quantile method:            quant.method 
+      Number of training samples: 100
+      Number of test samples:     0
+      Quantile method:            quant.method
       
-      Randomness considered:      finsamp 
-      fairadapt objects saved:    FALSE 
+      Randomness considered:      finsamp
+      fairadapt objects saved:    FALSE
 
 ---
 
@@ -146,17 +146,17 @@
       fairadaptBoot(formula = score ~ ., prot.attr = "gender", adj.mat = adj.mat, 
           train.data = uni, keep.object = TRUE, n.boot = 3L, seed = 203)
       
-      Bootstrap repetitions:      3 
-      Protected attribute:        gender 
-      Protected attribute levels: 0, 1 
-      Adapted variables:          edu, test, score 
+      Bootstrap repetitions:      3
+      Protected attribute:        gender
+      Protected attribute levels: 0, 1
+      Adapted variables:          edu, test, score
       
-      Number of training samples: 1000 
-      Number of test samples:     0 
-      Quantile method:            quant.method 
+      Number of training samples: 1000
+      Number of test samples:     0
+      Quantile method:            quant.method
       
-      Randomness considered:      finsamp 
-      fairadapt objects saved:    TRUE 
+      Randomness considered:      finsamp
+      fairadapt objects saved:    TRUE
 
 ---
 
@@ -202,15 +202,15 @@
           adj.mat = adj.mat, train.data = train, test.data = test, 
           n.boot = 3, seed = 203)
       
-      Bootstrap repetitions:      3 
-      Protected attribute:        race 
-      Protected attribute levels: Non-White, White 
-      Adapted variables:          juv_fel_count, juv_misd_count, juv_other_count, priors_count, c_charge_degree, two_year_recid 
+      Bootstrap repetitions:      3
+      Protected attribute:        race
+      Protected attribute levels: Non-White, White
+      Adapted variables:          juv_fel_count, juv_misd_count, juv_other_count, priors_count, c_charge_degree, two_year_recid
       
-      Number of training samples: 1000 
-      Number of test samples:     0 
-      Quantile method:            quant.method 
+      Number of training samples: 1000
+      Number of test samples:     0
+      Quantile method:            quant.method
       
-      Randomness considered:      finsamp 
-      fairadapt objects saved:    FALSE 
+      Randomness considered:      finsamp
+      fairadapt objects saved:    FALSE
 
