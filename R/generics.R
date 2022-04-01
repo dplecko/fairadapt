@@ -470,11 +470,14 @@ quantFit <- function(x, ...) {
 quantFit.fairadapt <- function(x, ...) {
   
   qfit <- lapply(x$q.engine, `[[`, "qfit.score")
+
   assert_that(
     !is.null(qfit[[1L]]),
-    msg = paste("Run `fairadapt()` with `eval.qfit` equal to a positive integer", 
-                "to inspect quality of the fit.")
+    msg = paste(
+      "Run `fairadapt()` with `eval.qfit` equal to a positive integer",
+      "to inspect quality of the fit."
+    )
   )
+
   vapply(x$q.engine, `[[`, numeric(1L), "qfit.score")
-  
 }
