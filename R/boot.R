@@ -44,7 +44,9 @@
 #' @param rand.mode A string, taking values `"finsamp"`, `"quant"` or `"both"`,
 #' corresponding to considering finite sample uncertainty, quantile
 #' uncertainty, or both.
-#' @param seed 
+#' @param test.seed a seed for the randomness in breaking quantiles for the 
+#' discrete variables. This argument is only relevant when `rand.mode` equals
+#' `"quant"` or `"both"` (otherwise ignored).  
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'
@@ -81,14 +83,14 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
                           res.vars = NULL, quant.method = rangerQuants,
                           keep.object = FALSE, n.boot = 100, 
                           rand.mode = c("finsamp", "quant", "both"),
-                          seed = 2022, ...) {
+                          test.seed = 2022, ...) {
 
   rand.mode <- match.arg(rand.mode)
   
   trn.rnd <- rand.mode %in% c("finsamp", "both")
   tst.rnd <- rand.mode %in% c("quant", "both")
   
-  if (!tst.rnd & !missing(seed)) {
+  if (!tst.rnd & !missing(test.seed)) {
     message(paste0("A non-default value for the `seed` argument is ignored ",
                    "when `rand.mode` = \"finsamp\"."))
   }
@@ -143,7 +145,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     
     # fix test randomness if needed
     if (!tst.rnd) {
-      set.seed(seed)
+      set.seed(test.seed)
     }
 
     if (!is.null(test.data)) {

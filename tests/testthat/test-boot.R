@@ -25,6 +25,13 @@ test_that("fairadaptBoot", {
               "fairadapt", "boot.call", "formula", "last.mod")
   
   # random forest
+  expect_message(
+    with_seed(202,
+              fairadaptBoot(y ~ ., train.data = train, test.data = test, 
+                            adj.mat = adj.mat, prot.attr = "a", seed = 202,
+                            n.boot = 3L, keep.object = TRUE, test.seed = 202)
+    ), regexp = "^A non-default value for the `seed` argument is ignored"
+  )
   
   ran <- with_seed(202,
                    fairadaptBoot(y ~ ., train.data = train, test.data = test, 
@@ -38,6 +45,14 @@ test_that("fairadaptBoot", {
   expect_s3_class(ran, "fairadaptBoot")
   expect_s3_class(ran[["adapt.test"]][[1]], "data.frame")
   expect_s3_class(ran[["adapt.test"]][[2]], "data.frame")
+  
+  adda <- adaptedData(ran, train = TRUE)
+  expect_type(adda, "list")
+  expect_s3_class(adda[[1]], "data.frame")
+  
+  adda <- adaptedData(ran, train = FALSE)
+  expect_type(adda, "list")
+  expect_s3_class(adda[[1]], "data.frame")
   
   expect_identical(ran[["prot.attr"]], "a")
   
@@ -152,4 +167,14 @@ test_that("fairadaptBoot", {
 
   expect_snapshot(print(mod))
   expect_snapshot(summary(mod))
+  
+  expect_error(
+    adaptedData(mod), 
+    regexp = "Adapted training data not available when `keep.object` = FALSE"
+  )
+  
+  adap <- adaptedData(mod, train = FALSE)
+  expect_type(adap, "list")
+  expect_s3_class(adap[[1]], "data.frame")
+  
 })

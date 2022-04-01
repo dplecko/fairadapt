@@ -17,7 +17,7 @@ fairadaptBoot(
   keep.object = FALSE,
   n.boot = 100,
   rand.mode = c("finsamp", "quant", "both"),
-  seed = 2022,
+  test.seed = 2022,
   ...
 )
 }
@@ -68,7 +68,9 @@ added.}
 corresponding to considering finite sample uncertainty, quantile
 uncertainty, or both.}
 
-\item{seed}{}
+\item{test.seed}{a seed for the randomness in breaking quantiles for the
+discrete variables. This argument is only relevant when \code{rand.mode} equals
+\code{"quant"} or \code{"both"} (otherwise ignored).}
 
 \item{...}{Additional arguments forwarded to the function passed as
 \code{quant.method}.}

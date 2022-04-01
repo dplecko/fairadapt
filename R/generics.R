@@ -403,6 +403,7 @@ fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)),
 #' )
 #'
 #' predict(object = uni_ada, newdata = tail(uni_admission, n = n_samp))
+#' @export
 predict.fairadapt <- function(object, newdata, ...) {
 
   assert_that(all(names(object$adapt.test) %in% names(newdata)),

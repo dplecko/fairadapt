@@ -405,7 +405,7 @@ The assignment functions $f_i$ of the SCM are always assumed to be unknown, but 
 
 # Implementation
 
-The main function for performing fair data adaption using the \pkg{fairadapt} package is `fairadapt()`. This function returns an S3 classed object of class `fairadapt`. The `fairadapt` class has associated implementations of the base \proglang{R} S3 generics `print()`, `summary()`, `plot()` and `predict()`. Furthermore, methods are available for the `autoplot()` generic exported from \pkg{ggplot2} \citep{wickham2016ggplot2}, as well as `fairadapt`-specific implementations of S3 generics `visualizeGraph()`, `adaptedData()`, `quantFit()`, and `fairTwins()`.
+The main function for data adaption in the \pkg{fairadapt} package is `fairadapt()`. This function returns an S3 classed object of class `fairadapt`. The `fairadapt` class has associated implementations of the base \proglang{R} S3 generics `print()`, `summary()`, `plot()` and `predict()`. Furthermore, methods are available for the `autoplot()` generic exported from \pkg{ggplot2} \citep{wickham2016ggplot2}, as well as `fairadapt`-specific implementations of S3 generics `visualizeGraph()`, `adaptedData()`, `quantFit()`, and `fairTwins()`.
 
 The following sections describe the intended use of `fairadapt()`, together with the associated methods and their relations. The most important arguments of `fairadapt()` include:
 
@@ -449,15 +449,14 @@ basic <- fairadapt(score ~ ., train.data = uni_trn,
 basic
 ```
 
-The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called, such as number of variables, the protected attribute and also the total variation before and after adaptation, defined as
+The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called. This information includes the number of variables, the protected attribute and also the total variation before and after adaptation, written in our notation as
 
 $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$
-
-respectively, where $Y$ denotes the outcome variable. Total variation in the case of a binary outcome $Y$, corresponds to the parity gap.
+respectively. 
 
 ## Specifying the Graphical Model
 
-As the algorithm used for fair data adaption in `fairadapt()` requires access to the underlying graphical causal model $\mathcal{G}$ (see Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix can be passed as `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as an adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{csardi2006igraph}. While exported for the user to invoke manually, this function is called as part of the `fairadapt()` routine and the resulting `igraph` object can be visualized by calling the S3 generic `visualizeGraph()`, exported from `fairadapt` on an object of class `fairadapt`.
+The algorithm used for fair data adaption in `fairadapt()` is based on graphical causal model $\mathcal{G}$ (see Algorithm \ref{algo:fairadapt}). To specify the causal graph, we pass the corresponding adjacency matrix as the `adj.mat` argument. The convenience function `graphModel()` turns a graph specified as an adjacency matrix into an annotated graph using the \pkg{igraph} package \citep{csardi2006igraph}. Alternatively, by calling the S3 generic `visualizeGraph()` on a `fairadapt` object, the user can also inspect the graphical model that was used for the data adaptation.
 
 ```{r, graph-model}
 uni_graph <- graphModel(uni_adj)
@@ -482,23 +481,24 @@ ggraph(graphModel(uni_adj), "igraph", algorithm = "sugiyama") +
   coord_cartesian(clip = "off")
 ```
 
-A visualization of the `igraph` object returned by `graphModel()` is available from Figure \ref{fig:graph-plot}. The graph shown is equivalent to that of Figure \ref{fig:uni-adm} as they both represent the same causal model.
+A visualization of the `igraph` object returned by `graphModel()` is shown in Figure \ref{fig:graph-plot}. The graph is the same as that in Figure \ref{fig:uni-adm}. However, specifying the causal graph is not the only option to perform the data adaptation. A possible alternative is to specify a valid topological ordering over the observable variables $V$, and specify it as a `character` vector, using the `top.ord` argument.
 
 ## Quantile Learning Step
 
-The training step in `fairadapt()` that follows the typical machine learning workflow would be as follows. We first call the `fairadapt()` function and perform the quantile learning step on the `train.data`. After this, at a later stage we call the `predict()` function on the returned `fairadapt` S3 object in order to perform data adaption on new test data. Alternatively, it is also possible to input both `train.data` and `test.data` arguments directly to `fairadapt()`, which then transforms both of these arguments. This one-step procedure might be considered when the proportion of test samples compared to train samples is large, and when the `train.data` has a relatively small sample size. The benefit of this approach is that, even though the outcome $Y$ is not available, other attributes $X$ of `test.data` can be used for learning the quantiles.
+The most common and recommended usage of `fairadapt()` follows a typical machine learning framework. We start by calling the `fairadapt()` function that performs the quantile learning step and counterfactual correction, based on the `train.data` argument. Following this, we can call the `predict()` function on the returned `fairadapt` S3 object, in order to perform data adaption on new test data. In such a workflow, the adaptation of the training and testing data is done separately.
+In specific situations, it might be desirable to input both `train.data` and `test.data` arguments directly to `fairadapt()`, which then transforms both the training and testing data jointly. This one-step procedure might be considered when the proportion of test samples compared to train samples is large, and when the `train.data` has a relatively small sample size. The benefit of this approach is that, even though the outcome $Y$ is not available, other attributes $X$ of `test.data` can be used for quantile learning step.
 
-The data frames passed as `train.data` and `test.data` are required to have column names which also appear in the row and column names of the adjacency matrix, alongside the protected attribute $A$, passed as scalar-valued character vector `prot.attr`. The `test.data` argument defaults to `NULL`, with the intention that `test.data` is specified at a later stage.
+The data frames passed as `train.data` and `test.data` are required to have column names which also appear in the row and column names of the adjacency matrix. The protected attribute $A$, passed as scalar-valued character vector `prot.attr`, should also appear in the column names of `train.data` and `test.data`. The `test.data` argument defaults to `NULL`, with the intention that `test.data` is specified as an input to the `predict()` function at a later stage.
 
 ### Quantile Methods
 
 The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be carried out by several methods, three of which are implemented in \pkg{fairadapt}:
 
 * Quantile Regression Forests \citep{meinshausen2006qrf, wright2015ranger}.
-* Non-crossing quantile neural networks \citep{cannon2018non, cannon2015package}.
+* Non-Crossing Quantile Neural Networks \citep{cannon2018non, cannon2015package}.
 * Linear Quantile Regression \citep{koenker2001qr, koenker2018package}.
 
-Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is implemented, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach can also demonstrate competitive performance. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
+Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is used, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach can also demonstrate competitive performance. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
 
 ```{r benchmark-quant-methods, echo = FALSE, results = "asis"}
 
@@ -520,7 +520,7 @@ if (quick_build && file.exists(bm_cache)) {
 
   bmark <- readRDS(bm_cache)
 
-} else{
+} else {
 
   nsamps <- c(200L, 500L)
 
@@ -586,7 +586,6 @@ print(
   xtable(tbl, caption = capt, label = "tab:qmethods",
          align = rep("l", ncol(tbl) + 1L)),
   booktabs = TRUE,
-  caption.width = "12.5cm",
   table.placement = "t",
   sanitize.text.function = identity,
   comment = FALSE
@@ -599,7 +598,7 @@ The quantile methods shown in Table \ref{tab:qmethods} make calls to specific fu
 
 #### Computational Speed
 
-An important consideration in choosing values for optional arguments of specific quantile regression functions is computational speed. For example, `rangerQuants()` internally calls the `ranger()` function (from \pkg{ranger}) and with respect to computational speed, an important argument is `num.trees`, the number of trees used when building the quantile regression forest. Clearly, choosing a smaller number of trees will be faster, but at the same time will result in a poorer fit with larger variance.
+An important consideration in choosing values for optional arguments of specific quantile regression functions is computational speed. For example, the function `rangerQuants()` internally calls the `ranger()` function (from \pkg{ranger}) and with respect to computational speed, an important argument is `num.trees`, the number of trees used when building the quantile regression forest. Clearly, choosing a smaller number of trees will be faster, but at the same time will result in a fit with larger variance.
 
 Similarly, `mcqrnnQuants()` internally calls `mcqrnn.fit()` (from \pkg{qrnn}), which has a number of arguments that can be used for adapting the underlying neural network. In terms of computational speed, the most important arguments are `n.trials` (number of repeated initializations used to avoid local minima) and `iter.max` (maximum number of iterations of the optimization). Choosing smaller values will reduce the runtime. Lastly, function `linearQuants()` internally calls `rq()` (from \pkg{quantreg}). This function is less flexible, since the model is linear. However, its `method` argument can be used when the number of samples becomes large (using `method` equal to `"fn"` or `"pfn"` utilizes the Frisch-Newton interior point method, which might be preferable for large samples).
 
@@ -635,17 +634,17 @@ quantFit(fit_qual)
 
 The function returns the quality of the quantile fit for each variable. A very reasonable objective to minimize is the average of these values, by iterating over a grid of possible values of the tuning parameters. The interesting parameters to optimize for the two methods include:
 
-(i) for `ranger()`: parameters `mtry` (number of candidate variables in each split), `min.node.size` (size of leaf nodes after which splitting ) and `max.depth` (maximum depth of each tree),
+(i) for `ranger()`: parameters `mtry` (number of candidate variables considered for splitting in each step), `min.node.size` (size of leaf nodes below which splitting is stopped) and `max.depth` (maximum depth of each tree),
 (i) for `mcqrnn()`: parameters `n.hidden`, `n.hidden2` (number of nodes in the first and second hidden layers), `Th` (activation function), `method` (optimizer to be used), and a range of other parameters that are fed to the chosen optimizer via ellipsis.
 
-Given reasonable default values for the included qunatile methods, optimizing the quantile fit should be of interest mostly to advanced users (and hence we do not perform parameter tuning explicitly here).
+The quantile methods included in \pkg{fairadapt} have reasonable default values, that serve as a good starting point. Optimizing the quantile fit should therefore be of interest mostly to advanced users (and hence we do not perform parameter tuning here explicitly).
 
 ### Extending to Custom Methods
 
-The above set of methods is not exhaustive. Further options are conceivable and therefore \pkg{fairadapt} provides an extension mechanism to account for this. The `fairadapt()` argument `quant.method` expects a function to be passed, a call to which will be constructed with three unnamed arguments:
+The above-mentioned set of methods is not exhaustive. Further options are conceivable and therefore \pkg{fairadapt} provides an extension mechanism to allow for custom quantile method specified by the user. The `fairadapt()` argument `quant.method` expects a function to be passed, a call to which will be constructed with three unnamed arguments:
 
 1. A `data.frame` containing data to be used for quantile regression. This will either be the `data.frame` passed as `train.data`, or depending on whether `test.data` was specified, a row-bound version of train and test datasets.
-1. A logical flag, indicating whether the protected attribute is the root node of the causal graph. If the attribute $A$ is a root node, we know that $\pr(X \mid \text{do}(A = a)) = \pr(X \mid A = a)$. Therefore, the interventional and conditional distributions are in this case the same, and we can leverage this knowledge in the quantile learning procedure, by splitting the data into $A = 0$ and $A = 1$ groups.
+1. A logical flag, indicating whether the protected attribute is the root node of the causal graph. If the attribute $A$ is a root node, we know that $$\pr(X \mid \text{do}(A = a)) = \pr(X \mid A = a).$$ Therefore, the interventional and conditional distributions are in this case the same, and we can leverage this knowledge in the quantile learning procedure, by splitting the data into $A = 0$ and $A = 1$ groups.
 1. A `logical` vector of length `nrow(data)`, indicating which rows in the `data.frame` passed as `data` correspond to samples with baseline values of the protected attribute.
 
 Arguments passed as `...` to `fairadapt()` will be forwarded to the function specified as `quant.method` and passed after the first three fixed arguments listed above. The return value of the function passed as `quant.method` is expected to be an S3-classed object. This object should represent the conditional distribution $V_i \mid \pa(V_i)$ (see function `rangerQuants()` for an example). Additionally, the object should have an implementation of the S3 generic function `computeQuants()` available. For each row $(v_i, \pa(v_i))$ of the `data` argument, the `computeQuants()` function uses the S3 object to perform the following steps:
@@ -653,11 +652,11 @@ Arguments passed as `...` to `fairadapt()` will be forwarded to the function spe
 (i) Infer the quantile of $v_i \mid \pa(v_i)$.
 (i) Compute the counterfactual value $\tilde{v}_i$ under the change of protected attribute, using the counterfactual values of parents $\pa(\tilde{v}_i)$ computed in previous steps (values $\pa(\tilde{v}_i)$ are contained in the `newdata` argument).
 
-For an example, see the `ranger` specific method for `computeQuants()`, `computeQuants.ranger()`.
+For an example, see the `computeQuants.ranger()` method for a `ranger` object, which can be invoked by the `computeQuants()` generic. 
 
 ## Fair-Twin Inspection
 
-We now turn to a useful property of \pkg{fairadapt} with respect to exploring decisions for different individuals in the dataset. The university admission example presented in Section \ref{methodology} demonstrates how to compute counterfactual values for an individual while preserving their relative educational achievement. Setting candidate gender as the protected attribute and gender level *female* as baseline value, for a *male* student with values $(a, e, t, y)$, his *fair-twin* values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$, i.e., the values the student would have obtained, had he been *female*, are computed. These values can be retrieved from a `fairadapt` object by calling the S3-generic function `fairTwins()` as:
+We now turn to a useful property of \pkg{fairadapt}, which allows the user to explore counterfactual instances for different individuals in the dataset. The university admission example presented in Section \ref{methodology} demonstrates how to compute counterfactual values for an individual while preserving their relative educational achievement. Setting candidate gender as the protected attribute and gender level *female* as baseline value, for a *male* student with values $(a, e, t, y)$, his *fair-twin* values $(\tilde{a}, \tilde{e}, \tilde{t}, \tilde{y})$, i.e., the values the student would have obtained, had he been *female*, are computed. These values can be retrieved from a `fairadapt` object by calling the S3-generic function `fairTwins()` as:
 
 ```{r, fairtwin-uni}
 ft_basic <- fairTwins(basic, train.id = seq_len(n_samp))
@@ -668,7 +667,7 @@ In this example, we compute the values in a *female* world. Therefore, for *fema
 
 # Uncertainty Quantification {#sec:uncq}
 
-The user might naturally be interested in uncertainty quantification of the procedure performed in `fairadapt()`. Before discussing how this can be achieved, we first give a graphical sketch of the typical workflow when using `fairadapt()` (see Figure \ref{fig:workflow-tikz}).
+The user might naturally be interested in uncertainty quantification of the procedure performed in `fairadapt()`. In order to explain how this can be achieved, we give a visualization of the typical workflow when using `fairadapt()` (see Figure \ref{fig:workflow-tikz}).
 
 ```{tikz, workflow-tikz, fig.cap = "The typical workflow when using \\pkg{fairadapt}. The shaded region represents the fair pre-processing which happens within the \\pkg{fairadapt} package. Often, this is followed by applying a regressor or a classifier to the transformed data, in order to obtain fair predictions. The latter part is up to the user and not included in \\pkg{fairadapt}.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
 
@@ -726,27 +725,20 @@ The user might naturally be interested in uncertainty quantification of the proc
 \end{tikzpicture}
 ```
 
-<!-- TODO:
-  Nice graphic and good idea to also explain this visually. Some minor comments:
-  - consider using anchors for arrows originating/going into boxes, e.g.
-    corners and side mid-points or so; might give aesthetically more pleasing
-    results than the current more arbitrary atart/endpoints
--->
+Such a workflow can be described as follows. We start from the training data $\mathcal{D}_{train}$ and the causal graph $\mathcal{G}$. These two arguments are used as inputs of the `fairadapt()` function, which returns a `fairadapt` S3 object (which also contains the transformed test data $\widetilde{\mathcal{D}}_{train}$). The `fairadapt` object, together with the test data $\mathcal{D}_{test}$, is then used as a input to the `predict()` function. The `predict()` function returns the transformed test data $\widetilde{\mathcal{D}}_{test}$. Often, the end goal is to obtain fair predictions on some new test data ${\mathcal{D}}_{test}$. To do so, we need to train a classifier/regressor. Either the training data $\mathcal{D}_{train}$ or its transformed counterpart $\widetilde{\mathcal{D}}_{train}$ can be used for building a predictor. The predictor then needs to be applied to the transformed train data $\widetilde{\mathcal{D}}_{test}$. Building on the graphical visualization in Figure \ref{fig:workflow-tikz}, which serves as a mental map of our workflow, we can now explain the distinct sources of uncertainty that can be considered:
 
-Such a workflow can be described as follows. We start from the training data $\mathcal{D}_{train}$ and the causal graph $\mathcal{G}$. These two arguments are used as inputs of the `fairadapt()` function, which returns the transformed training data $\widetilde{\mathcal{D}}_{train}$ contained in a `fairadapt` S3 object. This `fairadapt` object, alongside test data $\mathcal{D}_{test}$ are then used as inputs to the `predict()` function, which returns the transformed test data $\widetilde{\mathcal{D}}_{test}$. Often, the end goal is to obtain fair predictions on the test data, and to this end we need to train a classifier/regressor. Either the training data $\mathcal{D}_{train}$ or its transformed counterpart $\widetilde{\mathcal{D}}_{train}$ can be used for building a predictor. The predictor then needs to be applied to the transformed train data $\widetilde{\mathcal{D}}_{test}$. Building on the graphical visualization in Figure \ref{fig:workflow-tikz}, which serves as a mental map of our workflow, we can now explain the distinct sources of uncertainty that can be considered:
+- **Finite sample uncertainty**: The first, commonly encountered source of uncertainty is the one induced by finite sample size. The training data $\mathcal{D}_{train}$ has a finite size, and for this reason inferences made using this data are imperfect. We wish to quantify the uncertainty in the predictions $\widehat{Y}^{fair}_{test}$ introduced by the finite sample size of $\mathcal{D}_{train}$. As Figure \ref{fig:workflow-tikz} shows, the training data $\mathcal{D}_{train}$ affects the resulting fair predictions in two ways. Firstly, it affects the value of the transformed test data $\widetilde{\mathcal{D}}_{test}$ (mediated by the `fairadapt` S3 object). Secondly, it affects the predictions $\widehat{Y}^{fair}_{test}$ through the predictor (since it is the input to the regressor/classifier). These finite sample uncertainties can be analyzed using *bootstrap* \citep{efron1994introduction}. This means that we repeat the procedure in Figure \ref{fig:workflow-tikz} many times, each time taking a different bootstrap sample of the training data. Below we will show how this can be done with the `fairadaptBoot()` function.
 
-- **Finite sample uncertainty**: The first, commonly encountered source of uncertainty is the one induced by a finite sample size. The training data $\mathcal{D}_{train}$ has a finite size, and for this reason inferences made using this data are imperfect. We wish to quantify the error in the predictions $\widehat{Y}^{fair}_{test}$ introduced by the finite sample size of $\mathcal{D}_{train}$. As Figure \ref{fig:workflow-tikz} shows, the training data $\mathcal{D}_{train}$ affects the resulting fair predictions in two ways. Firstly, it affects the value of the transformed test data $\widetilde{\mathcal{D}}_{test}$ (mediated by the fairadapt S3 object). Secondly, it affects the predictions $\widehat{Y}^{fair}_{test}$ also through the predictor (since it is the input to the regressor classifier). These finite sample uncertainties can be analyzed using *bootstrap* \citep{efron1994introduction}. This means that we repeat the procedure in Figure \ref{fig:workflow-tikz} many times, each time taking a different bootstrap sample of the training data. Below we will show how this can be done with the `fairadaptBoot()` function.
-
-- **Inherent uncertainty in the quantiles**: A second source of uncertainty arises from the uncertainty in quantile estimation and is specific to \pkg{fairadapt}. As described in Section \ref{methodology} (see also Figure \ref{fig:rel-edu}), the fairadapt procedure aims to preserve the relative quantile of the variable, when computing the $do(A=a)$ intervention. However, when we are working with variables that are not continuous, defining a quantile becomes more difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenges exists.}. Therefore, in presence of discrete variables, due to the imperfect estimation of quantiles, the fairadapt procedure has some inherent randomness. This randomness would still persist even if we had infinite training samples in $\mathcal{D}_{train}$. Importantly, to achieve fair predictions, taking an expectation over this randomness is not feasible. For a detailed discussion of why this is the case, refer to \citep[Section~5]{plecko2020fair}.
+- **Inherent uncertainty in the quantiles**: A second source of uncertainty arises from the uncertainty in quantile estimation and is specific to \pkg{fairadapt}. As described in Section \ref{methodology} (see also Figure \ref{fig:rel-edu}), the fairadapt procedure aims to preserve the relative quantile of the variable, when computing the $do(A=a)$ intervention. However, when we are working with variables that are not continuous, defining a quantile becomes more difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenge exists.}. Therefore, in presence of discrete variables, due to the imperfect estimation of quantiles, the fairadapt procedure has some inherent randomness. This randomness would still persist even if we had infinite training samples in $\mathcal{D}_{train}$. Importantly, to achieve fair predictions, taking an expectation over this randomness is not feasible. For a detailed discussion of why this is the case, refer to \citep[Section~5]{plecko2020fair}.
 
 For quantifying uncertainty, we use the `fairadaptBoot()` function, where the most important arguments are:
 
-- `formula`, `prot.attr`, `adj.mat`, `train.data` arguments are the same as for the `fairadapt()` function (see Section \ref{implementation}).
-- `test.data`, a `data.frame` containing the test data, defaults to `NULL`. Whenever the test data equals `NULL`, then `save.object` must be `TRUE`.
-- `save.object`, a `logical` scalar, indicating whether all the `fairadapt` S3 objects built in bootstrap repetitions should be saved. Default value is `FALSE`.
-- `rand.mode`, a `character` scalar, taking values `"finsamp"`, `"quant"` or `"both"`, corresponding to considering finite sample uncertainty, quantile uncertainty, or both.
+- `formula`, `prot.attr`, `adj.mat`, and `train.data` arguments are the same as for the `fairadapt()` function (see Section \ref{implementation}).
+- `test.data`, a `data.frame` containing the test data, defaults to `NULL`. Whenever the test data equals `NULL`, then `keep.object` must be `TRUE`.
+- `keep.object`, a `logical` scalar, indicating whether all the `fairadapt` S3 objects built in bootstrap repetitions should be kept in working memory. Default value is `FALSE`.
+- `rand.mode`, a `character` scalar, taking values `"finsamp"`, `"quant"`, or `"both"`, corresponding to considering finite sample uncertainty, quantile uncertainty, or both.
 
-The function `fairadaptBoot()` returns an S3 object of class `fairadaptBoot`. Calling this function can be computationally expensive, both in terms of runtime and memory. Keeping the default value of `FALSE` for the `save.object` argument reduces the memory consumption substantially, with the drawback that `test.data` has to be provided directly to `fairadaptBoot()`, and that the resulting `fairadaptBoot` object cannot be reused for making predictions at a later stage. Passing `TRUE` to save.object, on the other hand, might consume more memory, but then the object can be reused over again for transforming new test data. This can be done by using the `predict()` function for the `fairadaptBoot` S3 object, to which a `newdata` argument is available.
+The function `fairadaptBoot()` returns an S3 object of class `fairadaptBoot`. Calling this function can be computationally expensive, both in terms of runtime and memory. Keeping the default value of `FALSE` for the `keep.object` argument reduces the memory consumption substantially, with the drawback that `test.data` has to be provided directly to `fairadaptBoot()`, and that the resulting `fairadaptBoot` object cannot be reused for making predictions at a later stage. Passing `TRUE` to `save.object`, on the other hand, might consume more memory, but then the object can be reused for transforming new test data. This can be done by using the `predict()` function for the `fairadaptBoot` S3 object, to which a `newdata` argument is available.
 
 For illustration purposes, we now compute bootstrap repetitions for finite sample uncertainty and quantile uncertainty on the COMPAS dataset \citep{larson2016compas}. We begin by loading the COMPAS dataset and constructing its causal graph:
 
@@ -817,7 +809,7 @@ n_itr <- 5L
 
 ```{r, compas-boot-slow, eval = !quick_build, echo = !quick_build}
 cmp_trn <- tail(cmp_dat, n = 7000L)
-cmp_tst <- head(cmp_dat, n = 1000L)
+cmp_tst <- head(cmp_dat, n = 100L)
 
 n_itr <- 50L
 ```
@@ -836,7 +828,7 @@ fa_boot_quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
                                n.boot = n_itr)
 ```
 
-The objects returned are of class `fairadaptBoot` and contain a list `adapt.test` which in turn contains different replicates of the adapted test data (the length of this list is `n.boot`, the number of bootstrap repetitions). Finally, to obtain predictions, we train a random forest classifier on the different bootstrap samples of `train.data` and apply it to all of the transformed datasets. In doing so, we make use of the `boot.ind` list, contained in `fairadaptBoot` object, representing row indices of all bootstrap repetitions.
+The returned objects are of class `fairadaptBoot`. The object stores different replicates of the adapted test data (`n.boot` copies, the number of bootstrap repetitions) and some metadata. To obtain predictions, we train a random forest classifier on different bootstrap samples of `train.data`, and apply it to the transformed data bootstrap replicates. In doing so, we make use of the `boot.ind` list, contained in `fairadaptBoot` object, representing row indices of all bootstrap repetitions.
 
 ```{r, compas-forest}
 fit_rf <- function(x) {
@@ -847,10 +839,10 @@ extract_pred <- function(x) x$predictions[, 2L]
 
 cmp_rf <- lapply(fa_boot_fin$boot.ind, fit_rf)
 
-pred_fin <- Map(predict, cmp_rf, fa_boot_fin$adapt.test)
+pred_fin <- Map(predict, cmp_rf, adaptedData(fa_boot_fin, train = FALSE)) 
 pred_fin <- do.call(cbind, lapply(pred_fin, extract_pred))
 
-pred_quant <- Map(predict, cmp_rf, fa_boot_quant$adapt.test)
+pred_quant <- Map(predict, cmp_rf, adaptedData(fa_boot_quant, train = FALSE))
 pred_quant <- do.call(cbind, lapply(pred_quant, extract_pred))
 ```
 
@@ -860,7 +852,7 @@ In order to analyze the different sets of predictions $\widehat{Y}^{fair}_{test}
 
 ### Decision-maker Analysis
 
-The first way to analyze the uncertainty of the predictions is from the point of view of the decision-maker. By decision-maker, in this context we refer to the individual performing the analysis and obtaining a set of fair predictions. For a decision-maker, it is important to understand how sensitive the outcome of the classification is to uncertainties induced by both finite sample size and the inherent uncertainty induced by discrete variables. Let $p_A$ be the vector of predicted probabilities on the `test.data`, with length `nrow(test.data)`. Denote `nrow(test.data)` with $n_{test}$. Let $p_B$ be another vector of predicted probabilities (under a different bootstrap repetition). We can consider the following four metrics of uncertainty:
+The first way to analyze the uncertainty of the predictions is from the viewpoint of the decision-maker. By decision-maker, in this context we refer to the individual performing the analysis and obtaining a set of fair predictions. For a decision-maker, it is important to understand how sensitive the outcome of the classification is to uncertainties induced by both finite sample size and the inherent uncertainty induced by discrete variables. Let $p_A$ be the vector of predicted probabilities on the `test.data`, with length `nrow(test.data)`. Denote `nrow(test.data)` with $n_{test}$. Let $p_B$ be another vector of predicted probabilities (under a different bootstrap repetition). We can consider the following four metrics of uncertainty:
 
 ```{=latex}
 \begin{enumerate}
@@ -941,7 +933,7 @@ inv_df <- rbind(inv_frm(pred_fin, "Finite Sample"),
 ```
 
 ```{=latex}
-\item For each individual $i$, we can take the 5\% and 95\% quantiles of predicted probabilities in all of the `n.boot` bootstrap repetitions. We analyze the width of this interval across all individuals.
+\item For each individual $i$, we can take the 5\% and 95\% quantiles of predicted probabilities in all of the \texttt{n.boot} bootstrap repetitions. We analyze the width of this interval across all individuals.
 ```
 
 ```{r, decision-maker-4}
@@ -1033,7 +1025,7 @@ ind_prb <- data.frame(
 )
 ```
 
-The spread of predictions for the three individuals is visualized in Figure \ref{fig:compas-indiv}. While it might be tempting to take the mean of the individual predictions, to have more stable results, this should not be done, as such an approach does not guarantee the fairness constraint `fairadapt()` aims to achieve. Hence, in order to achieve the desired fairness criteria overall, we have to accept some level of randomization at the level of individual predictions. It would be interesting for future work to quantify and optimize explicitly the trade-off between the desired fairness criteria and the necessary level of randomization.
+This spread is visualized in Figure \ref{fig:compas-indiv}. While it might be tempting to take the mean of the different individual predictions, to have more stable results, this should not be done, as such an approach does not guarantee the fairness constraint `fairadapt()` aims to achieve. Hence, in order to achieve the desired fairness criteria overall, we have to accept some level of randomization at the level of individual predictions. It would be interesting for future work to quantify and optimize explicitly the trade-off between the desired fairness criteria and the necessary level of randomization.
 
 ```{r, compas-indiv, echo = FALSE, fig.width = 7, fig.height = 3.5, fig.cap = "Analyzing the spread of individual predictions in the COMPAS dataset, resulting from different bootstrap repetitions.", out.width = "100%"}
 ggplot(ind_prb, aes(x = prob, group = individual,
@@ -1055,7 +1047,7 @@ ggplot(ind_prb, aes(x = prob, group = individual,
 
 As a hypothetical real-world use of \pkg{fairadapt}, suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all female employees, that is the salaries that female employees would obtain, had they been male.
 
-To do this, the government is using data from the 2018 American Community Survey by the US Census Bureau, available in pre-processed form as a package dataset from \pkg{fairadapt}. Columns are grouped into demographic (`dem`), familial (`fam`), educational (`edu`) and occupational (`occ`) categories and finally, salary is selected as response (`res`) and sex as the protected attribute (`prt`):
+To do this, the government is using data from the 2018 American Community Survey by the US Census Bureau. This dataset is also available in pre-processed form as a package dataset from \pkg{fairadapt}. Columns are grouped into demographic (`dem`), familial (`fam`), educational (`edu`) and occupational (`occ`) categories and finally, salary is selected as response (`res`) and sex as the protected attribute (`prt`):
 
 ```{r, load-census}
 gov_dat <- data("gov_census", package = "fairadapt")
@@ -1076,7 +1068,7 @@ res <- "salary"
 
 The hypothesized causal graph for the dataset is given in Figure \ref{fig:census-tikz}. According to this, the causal graph can be specified as an adjacency matrix `gov_adj` and as confounding matrix `gov_cfd`:
 
-```{tikz, census-tikz, fig.cap = "The causal graph for the government-census dataset. $D$ are demographic features, $A$ is gender, $F$ represents marital and family information, $E$ education, $W$ work-related information and $Y$ the salary, which is also the outcome of interest.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+```{tikz, census-tikz, fig.cap = "The causal graph for the government-census dataset. $D$ are demographic features, $A$ is gender, $F$ represents marital and family information, $E$ education, $W$ work-related information and $Y$ the salary, which is also the outcome of interest. The bidirected edge between $A$ and $D$ represents that the noise variables $U_A$ and $U_D$ share information.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
 <<setup-graph>>
 
@@ -1105,7 +1097,7 @@ The hypothesized causal graph for the dataset is given in Figure \ref{fig:census
     \path[->] (m) edge[bend right = 20] (r);
     \path[->] (m) edge[bend right = 30] (y);
     \path[->] (r) edge[bend right = 20] (y);
-    \path[->, dashed] (a) edge[bend left = 10] (c);
+    \path[<->, dashed] (a) edge[bend left = 10] (c);
   \end{scope}
 
 \end{tikzpicture}
@@ -1188,7 +1180,7 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
   coord_cartesian(clip = "off")
 ```
 
-Before applying `fairadapt()`, we first log-transform the salaries. We then inspect the densities of variable `salary` by sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear shift between the two distributions, indicating that `male` employees are better compensated than `female` employees. We perform data the adaptation by using `n_samp` samples for training and `n_pred` samples for testing.
+Before applying `fairadapt()`, we first log-transform the salaries. We then inspect the densities of variable `salary` by sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear shift between the two distributions, indicating that `male` employees are better compensated than `female` employees. We perform the adaptation by using `n_samp` samples for training and `n_pred` samples for testing.
 
 ```{r, log-sub-quick, eval = quick_build, echo = quick_build}
 n_samp <- 3000
@@ -1210,7 +1202,7 @@ gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
 
-After adapting the data, we investigate whether the salary gap has shrunk. This can be done by comparing distributions of variable `salary` using the \pkg{ggplot2}-exported S3 generic function `autoplot()` (Figure \ref{fig:census-vis}B).
+After adapting the data, we investigate whether the salary gap has become smaller. This can be done by comparing distributions of variable `salary` using the \pkg{ggplot2}-exported S3 generic function `autoplot()` (Figure \ref{fig:census-vis}B).
 ```{r, census-vis, echo = FALSE, fig.width = 7, fig.height = 3, fig.cap = "Visualization of salary densities grouped by employee sex, before (panel A) and after adaptation (panel B). Panel A indicates a shift towards higher values for male employees. In panel B, after the data is transformed, the gap between groups is reduced.", cache = TRUE}
 
 p1 <- ggplot(gov_trn, aes(x = salary, fill = sex)) +
@@ -1231,7 +1223,7 @@ panels <- cowplot::plot_grid(
 )
 cowplot::plot_grid(panels, legend_join, ncol = 1, rel_heights = c(1, .08))
 ```
-For adapting the additional testing data, we can use the base \proglang{R} S3 generic function `predict()`:
+For adapting additional testing data, we use the base \proglang{R} S3 generic function `predict()`:
 
 ```{r, census-predict}
 predict(gov_ada, newdata = gov_prd)
@@ -1244,17 +1236,17 @@ fairTwins(gov_ada, train.id = 1:5,
           cols = c("sex", "age", "education_level", "salary"))
 ```
 
-Note that values remain unchanged for female individuals (as *female* is used as baseline level). Variable `age`, which is not a descendant of the protected attribute `sex` (see Figure \ref{fig:census-graph}), also remains unchanged. However, variables `education_level` and `salary` do change for males, since these variables are descendants of the protected attribute `sex`.
+Note that values remain unchanged for female individuals (as *female* was used as baseline level). Variable `age`, which is not a descendant of the protected attribute `sex` (see Figure \ref{fig:census-graph}), also remains unchanged. However, variables `education_level` and `salary` do change for males, since these variables are descendants of the protected attribute `sex`.
 
-The variable `hours_worked` is also a descendant of $A$, and one might argue that this variable should *not* be adapted in the procedure, i.e., it should remain the same, irrespective of employee sex. This is the idea behind *resolving variables*, which are discussed in Section \ref{sec:resolvers}. It is worth emphasizing that we are not trying to answer the question of which choice of resolving variables is the correct one in the above example - this choice is left to social scientists closely familiar with the context and specifics of the above described dataset.
+We conclude the section with a remark. Notice that the variable `hours_worked` is a descendant of $A$. However, one might argue that this variable should *not* be adapted in the procedure, i.e., it should remain the same, irrespective of employee sex. In other words, one might argue it is acceptable to distinguish individuals based on this variable. This is the idea behind *resolving variables*, which are discussed in Section \ref{sec:resolvers}. It is worth emphasizing that we are not answering the question of how to choose which variables are resolving - this choice is left to social scientists familiar with the context of the dataset.
 
 # Extensions {#sec:extensions}
 
-Several extensions to the basic Markovian SCM formulation introduced in Section \ref{markovian-scm-formulation} exist, some of which are available for use in `fairadapt()` and are outlined in the following sections.
+Several extensions to the basic Markovian SCM formulation introduced in Section \ref{markovian-scm-formulation} exist, and these and are outlined in the following sections.
 
 ## Adding Resolving Variables {#sec:resolvers}
 
-\cite{kilbertus2017avoiding} discuss that in some situations the protected attribute $A$ can affect variables in a non-discriminatory way. For instance, in the Berkeley admissions dataset \citep{bickel1975sex} we observe that females often apply for departments with lower admission rates and consequently have a lower admission probability. However, we perhaps would not wish to account for this difference in the adaptation procedure, if we were to argue that applying to a certain department is a choice everybody is free to make. Such examples motivated the idea of *resolving variables* by \citet{kilbertus2017avoiding}. A variable $R$ is called resolving if
+As we mentioned earlier, in some situations the protected attribute $A$ might affect other variables in a non-discriminatory way. For instance, in the Berkeley admissions dataset \citep{bickel1975sex} we observe that females often apply for departments with lower admission rates and consequently have a lower admission probability. However, we perhaps would not wish to account for this difference in the adaptation procedure, if we were to argue that applying to a certain department is a choice everybody is free to make. Such examples motivated the idea of *resolving variables* by \citet{kilbertus2017avoiding}. A variable $R$ is called resolving if
 
 (i) $R \in \de(A)$, where $\de(A)$ are the descendants of $A$ in the causal graph $\mathcal{G}$.
 (i) The causal effect of $A$ on $R$ is considered to be non-discriminatory.
@@ -1266,7 +1258,7 @@ fairadapt(score ~ ., train.data = uni_trn, test.data = uni_tst,
           adj.mat = uni_adj, prot.attr = "gender", res.vars = "test")
 ```
 
-As can be seen from the respective model summary outputs, the total variation after adaptation, in this case, is larger than in the `basic` example from Section \ref{implementation}, with no resolving variables. The intuitive reasoning here is that resolving variables allow for some discrimination, so we expect to see a larger total variation between the groups.
+As can be seen from the respective model summary outputs, the total variation after adaptation, in this case, is larger than in the example from Section \ref{implementation}, with no resolving variables. The intuitive reasoning here is that resolving variables allow for some discrimination, so we expect to see a larger total variation between the groups.
 
 ```{r, res-assign}
 uni_res <- graphModel(uni_adj, res.vars = "test")
@@ -1292,13 +1284,13 @@ ggraph(graphModel(uni_adj, res.vars = "test"), "igraph",
   coord_cartesian(clip = "off")
 ```
 
-A visualization of the corresponding graph is available from Figure \ref{fig:res-graph}, which highlights the resolving variable `test` in red. Apart from color, the graphical model remains unchanged from what is shown in Figure \ref{fig:graph-plot}.
+A visualization of the corresponding graph is available from Figure \ref{fig:res-graph}, which highlights the resolving variable `test` in red, but the underlying graphical model remains the same.
 
 ## Semi-Markovian and Topological Ordering Variant
 
-Section \ref{methodology} focuses on the Markovian case, which assumes that all exogenous variables $U_i$ are mutually independent. However, in practice this requirement is often not satisfied. If a mutual dependency structure between variables $U_i$ exists, this is called a Semi-Markovian model. In the university admission example, we could, for example, have $U_{\text{test}} \not\!\perp\!\!\!\perp U_{\text{score}}$, i.e., latent variables corresponding to variables test and final score being correlated. Such dependencies between latent variables can be represented by dashed, bidirected arrows in the causal diagram, as shown in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
+In Section \ref{methodology} we focused on the Markovian case, which assumes that all exogenous variables $U_i$ are mutually independent. However, in practice, this requirement is often not satisfied. If a mutual dependency structure between variables $U_i$ exists, we are speaking about Semi-Markovian models. In the university admission example, we might have that $U_{\text{test}} \not\!\perp\!\!\!\perp U_{\text{score}}$. That is, latent variables corresponding to variables test and final score being correlated. Such dependencies between latent variables can be represented by dashed, bidirected arrows in the causal diagram, as shown in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
 
-```{tikz, semi-markov, fig.cap = "Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \\ref{implementation}.  and visualized in its basic form in Figures \\ref{fig:uni-adm} and \\ref{fig:graph-plot}. Here, we allow for the possibility of a mutual dependency between the latent variables corresponding to variables test and final score.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
+```{tikz, semi-markov, fig.cap = "Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \\ref{implementation}. Here, we allow for the possibility of a mutual dependency between the latent variables corresponding to variables `test` and `score`.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "50%"}
 
 <<setup-graph>>
 
@@ -1322,17 +1314,17 @@ Section \ref{methodology} focuses on the Markovian case, which assumes that all 
 \end{tikzpicture}
 ```
 
-There is an important difference in the adaptation procedure for Semi-Markovian case: when inferring the latent quantiles $U_i$ of variable $V_i$, in the Markovian case, only the direct parents $\pa(V_i)$ are needed. In the Semi-Markovian case, due to correlation of latent variables, using only the $\pa(V_i)$ can lead to biased estimates of the $U_i$. Instead, the set of direct parents needs to be extended, as described in more detail by \citet{tian2002general}. A brief sketch of the argument goes as follows: Let the *C-components* be a partition of the set $V$, such that each *C-component* contains a set of variables which are mutually connected by bidirectional edges. Let $C(V_i)$ denote the entire *C-component* of variable $V_i$. We then define the set of extended parents as
+There is an important difference in the adaptation procedure for the Semi-Markovian case: when inferring the latent quantiles $U_i$ of variable $V_i$, in the Markovian case, only the direct parents $\pa(V_i)$ are needed. In the Semi-Markovian case, due to correlation of latent variables, using only the $\pa(V_i)$ can lead to biased estimates of the $U_i$. Instead, the set of direct parents needs to be extended, as described in more detail by \citet{tian2002general}. A brief sketch of the argument goes as follows: Let the *C-components* be a partition of the set $V$, such that each *C-component* contains a set of variables which are mutually connected by bidirected edges. Let $C(V_i)$ denote the entire *C-component* of variable $V_i$. We then define the set of extended parents as
 
 $$\Pa(V_i) := (C(V_i) \cup pa(C(V_i))) \cap \an(V_i),$$
 
 where $\an(V_i)$ is the set of ancestors of $V_i$. The adaptation procedure in the Semi-Markovian case in principle remains the same as outlined in Algorithm \ref{algo:fairadapt}, with the difference that the set of direct parents $\pa(V_i)$ is replaced by $\Pa(V_i)$ at each step.
 
-To include the bidirectional confounding edges in the adaptation, we can pass a `matrix` as `cfd.mat` argument to `fairadapt()` such that:
+To include the bidirected edges in the adaptation, we can pass a `matrix` as `cfd.mat` argument to `fairadapt()` such that:
 
 * `cfd.mat` has the same dimension, column and row names as `adj.mat`.
 * `cfd.mat` is symmetric.
-* As is the case with the adjacency matrix passed as `adj.mat`, an entry `cfd.mat[i, j] == 1` indicates that there is a bidirectional edge between variables `i` and `j`.
+* As with the adjacency matrix `adj.mat`, an entry `cfd.mat[i, j] == 1` indicates that there is a bidirected edge between variables `i` and `j`.
 
 The following code performs fair data adaptation of the Semi-Markovian university admission variant with a mutual dependency between the variables representing test and final scores. For this, we create a matrix `uni_cfd` with the same attributes as the adjacency matrix `uni_adj` and set the entries representing the bidirected edge between vertices `test` and `score` to $1$. Finally, we can pass this confounding matrix as `cfd.mat` to `fairadapt()`. A visualization of the resulting causal graph is available from Figure \ref{fig:semi-graph}.
 
@@ -1348,7 +1340,7 @@ semi <- fairadapt(score ~ ., train.data = uni_trn,
                   cfd.mat = uni_cfd, prot.attr = "gender")
 ```
 
-```{r, semi-graph, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "Visualization of the causal graphical model also shown in Figure \\ref{fig:semi-markov}, obtained when passing a confounding matrix indicating a bidirectional edge between vertices \\texttt{test} and \\texttt{score} to \\texttt{fairadapt()}. The resulting Semi-Markovian setting is also handled by \\texttt{fairadapt()}, extending the basic Markovian formulation introduced in Section \\ref{markovian-scm-formulation}.", out.width = "60%"}
+```{r, semi-graph, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "Visualization of the causal graphical model also shown in Figure \\ref{fig:semi-markov}, obtained when passing a confounding matrix indicating a bidirected edge between vertices \\texttt{test} and \\texttt{score} to \\texttt{fairadapt()}. The resulting Semi-Markovian model can also be handled by \\texttt{fairadapt()}, extending the basic Markovian formulation introduced in Section \\ref{markovian-scm-formulation}.", out.width = "60%"}
 
 set.seed(17)
 
@@ -1381,26 +1373,28 @@ Alternatively, instead of using the extended parent set $\Pa(V_i)$, we could als
 
 ## Questions of Identifiability
 
-So far we did not discuss whether it is always possible to carry out the counterfactual inference described in Section \ref{methodology}. In the causal literature, an intervention is termed *identifiable* if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. An important result by \cite{tian2002general} states that an intervention do$(X = x)$ on a singleton variable $X$ is identifiable if there is no bidirected path between $X$ and $\ch(X)$. Therefore, our intervention of interest is identifiable if one of the two following conditions are met:
+So far we did not discuss whether it is always possible to carry out the counterfactual inference described in Section \ref{methodology}. In the causal literature, an intervention is termed *identifiable* if it can be computed uniquely using the data and the assumptions encoded in the graphical model $\mathcal{G}$. An important result by \cite{tian2002general} states that an intervention do$(X = x)$ on a variable $X$ is identifiable if there is no bidirected path between $X$ and $\ch(X)$. Therefore, our intervention of interest is identifiable if one of the two following conditions are met:
 
 * The model is Markovian.
 * The model is Semi-Markovian and,
   (i) there is no bidirected path between $A$ and $\ch(A)$ and,
   (i) there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
 
-Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases which are in principle identifiable are not currently handled.
+Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases, which are in principle identifiable, are currently not handled.
 
 ## Future Avenues to be Explored
 
 We conclude with a brief look at the possible extensions of the \pkg{fairadapt} package, which we hope to consider in future work:
 
-1. *General identification*: as discussed above, there are certain cases of causal graphs in which our do$(A = a, R = R(a'))$ intervention is identifiable, but the `fairadapt()` function currently does not support doing so. One such example is front-door identification mentioned above. However, this is not the only such example. In a future version of \pkg{fairadapt}, we hope to cover all scenarios in which identification is possible.
+1. *Spurious pathways*: the \pkg{fairadapt} package allows for correcting discrimination along causal pathways from the protected attribute $A$ to outcome $Y$. However, it is also possible that $A$ and $Y$ are associated through a confounding mechanism, and correcting for such spurious association poses an interesting methodological and practical challenge. 
+
+1. *General identification*: as discussed above, there are certain cases of causal graphs in which our do$(A = a, R = R(a'))$ intervention is identifiable, but the `fairadapt()` function currently does not support doing so. One of such examples is front-door identification, mentioned above. In a future version of \pkg{fairadapt}, we hope to cover all scenarios in which identification is possible.
 
 1. *Path-specific effects*: when using resolving variables (Section \ref{sec:resolvers}), the user decides to label these variables as "non-discriminatory", that is, the algorithm is free to distinguish between groups based on these variables. In full generality, a user might be interested in considering all path-specific effects \citep{avin2005identifiability}. Such an approach would offer even more flexibility in modeling, since for every attribute-outcome path $A \rightarrow ... \rightarrow Y$, the user could decide whether it is fair or not.
 
 1. *Selection bias*: a commonly considered problem in causal inference is that of selection bias \citep{hernan2004structural}, when inclusion of individuals into the dataset depends on the observed variables in the dataset. In fairness applications, the presence of selection bias could invalidate our conclusions about discrimination and make our fair predictions biased. Recovering from selection bias algorithmically would therefore be a desirable feature in the \pkg{fairadapt} package.
 
-1. *Non-binary attribute $A$*: one current limitation is that the protected attribute $A$ is binary. When considering
+1. *Non-binary attribute $A$*: one assumption used currently is that the protected attribute $A$ is binary. When considering possible protected attributes as socioeconomic status or education, this assumption might need to be relaxed. We hope to address this in future work.
 
 ```{r session-info, include = FALSE}
 sessionInfo()
