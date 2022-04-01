@@ -106,7 +106,7 @@ uni_ada <- fairadaptBoot(score ~ .,
   test.data = tail(uni_admission, n = n_samp),
   adj.mat = uni_adj,
   prot.attr = "gender",
-  n.boot = 10
+  n.boot = 5
 )
 
 uni_ada
