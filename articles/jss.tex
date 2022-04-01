@@ -86,86 +86,94 @@ outcome are not discriminatory.
 \hypertarget{introduction}{%
 \section{Introduction}\label{introduction}}
 
-Machine learning algorithms have become prevalent tools for
-decision-making in socially sensitive situations, such as determining
-credit-score ratings or predicting recidivism during parole. It has been
-recognized that algorithms are capable of learning societal biases, for
-example with respect to race \citep{larson2016recidivism} or gender
-\citep{lambrecht2019algorithmic, blau2003pay}, and this realization
+As society transitions to an economy driven by artificial intelligence
+(AI), an increasing number of prediction tasks is delegated to AI tools.
+Sometimes these tasks are within socially sensitive domains, such as
+determining credit-score ratings or predicting recidivism during parole.
+In the process, it has been recognized that machine learning algorithms
+are capable of learning societal biases, which we might not want them to
+learn, for example with respect to race \citep{larson2016recidivism} or
+gender \citep{lambrecht2019algorithmic, blau2003pay}. This realization
 seeded an important debate in the machine learning community about
 fairness of algorithms and their impact on decision-making.
 
 \hypertarget{definitions-of-fairness}{%
 \subsection{Definitions of Fairness}\label{definitions-of-fairness}}
 
-In order to define and measure discrimination, existing intuitive
-notions have been mathematically formalized, thereby providing fairness
-metrics. To this day, various different notions of fairness exist, which
-are sometimes mutually incompatible \citep{corbett2018measure}, meaning
-not of all of them can be achieved for a constructed predictor
-\(\widehat{Y}\) simultaneously. There currently is no consensus on which
-notion of fairness is the correct one among the three prevalent notions
-discussed in the literature:
+The first step towards understanding algorithmic fairness is about
+providing a formal definition of what fairness (or discrimination)
+means. In light of this, existing intuitive notions have been
+mathematically formalized, thereby also providing fairness metrics that
+can be used to quantify discrimination. However, various different
+notions of fairness exist, and these are sometimes mutually incompatible
+\citep{corbett2018measure}, meaning they cannot be satisfied at the same
+time for a given predictor \(\widehat{Y}\). In fact, there is currently
+no consensus on which notion of fairness is the correct one. Among the
+many proposal discussed in the literature, the most commonly considered
+ones include:
 
 \begin{enumerate}
 \def\labelenumi{(\arabic{enumi})}
 \tightlist
 \item
-  \emph{Demographic parity} \citep{darlington1971fairness} requires the
-  protected attribute \(A\) (gender, race, religion etc.) to be
-  independent of a constructed classifier or regressor \(\widehat{Y}\),
-  written as \[\widehat{Y} {\perp\!\!\!\perp}A.\]
+  \emph{Demographic parity} \citep{darlington1971fairness}, which
+  requires the protected attribute \(A\) (gender, race, religion etc.)
+  to be independent of a constructed classifier or regressor
+  \(\widehat{Y}\), written as \[\widehat{Y} {\perp\!\!\!\perp}A.\]
 \item
-  \emph{Equality of odds} \citep{hardt2016eosl}, requires equal false
-  positive and false negative rates of classifier \(\widehat{Y}\)
+  \emph{Equality of odds} \citep{hardt2016eosl}, which requires equal
+  false positive and false negative rates of classifier \(\widehat{Y}\)
   between different groups (females and males for example) written as
   \[\widehat{Y} {\perp\!\!\!\perp}A \mid Y.\]
 \item
-  \emph{Calibration} \citep{chouldechova2017fair} requires the protected
-  attribute to be independent of the actual outcome given the prediction
-  \[Y {\perp\!\!\!\perp}A \mid \widehat{Y}.\] Intuitively, this means
-  that the protected attribute \(A\) does not offer additional
-  information about the outcome \(Y\) once we know what the prediction
-  \(\widehat{Y}\) is.
+  \emph{Calibration} \citep{chouldechova2017fair}, which requires the
+  protected attribute to be independent of the actual outcome given the
+  prediction \[Y {\perp\!\!\!\perp}A \mid \widehat{Y}.\] Intuitively,
+  this means that the protected attribute \(A\) does not offer
+  additional information about the outcome \(Y\) once we know what the
+  prediction \(\widehat{Y}\) is.
 \end{enumerate}
 
 \hypertarget{fairness-tasks}{%
 \subsection{Fairness Tasks}\label{fairness-tasks}}
 
 Apart from choosing a notion of fairness most appropriate to the setting
-that is analyzed, it is also good to separate out two somewhat different
-tasks in fairness analysis. The first, usually simpler task is that of
-\emph{bias quantification}, or bias measurement. In this case, we are
-interested in computing metrics from our dataset that quantify whether a
-definition is satisfied or not. Concretely, suppose we have a dataset in
-which \(\widehat{Y}\) is the predicted salary and \(A\) is sex. If we
-are interested in demographic parity,
+that is analyzed, it is instructive to distinguish between two somewhat
+different tasks in fairness analysis. The first, usually simpler task is
+that of \emph{bias quantification}, or bias measurement. In this case,
+we are interested in computing metrics from our dataset, in order to
+verify whether a definition is satisfied or not. Concretely, suppose we
+have a dataset in which \(\widehat{Y}\) is the predicted salary of an
+employee and \(A\) is sex. If we are interested in demographic parity,
 \(\widehat{Y} {\perp\!\!\!\perp}A\), we can compute the average
 difference in salary between the male/female groups, that is
-\(\mathbbm{E}[\widehat{Y} \mid A = \text{male}] - \mathbbm{E}[\widehat{Y} \mid A = \text{female}]\).
-For other definitions, different metrics would be appropriate.
+\[\mathbbm{E}[\widehat{Y} \mid A = \text{male}] - \mathbbm{E}[\widehat{Y} \mid A = \text{female}].\].
+Based on this quantity (which is known as total variation, or TV for
+short), we might decide that either there is a disparity between sexes,
+or perhaps not. For other definitions of fairness, different metrics
+would be appropriate.
 
-Sometimes, performing the first step of bias measurement is not the end
-goal. Suppose that we are analyzing a dataset and compute a metric which
-shows there might be discrimination in the dataset (say a large salary
-gap between sexes in the example above). We then might be interested in
-computing new, more fair predictions (in which, say, the salary gap is
-lower). This second task is that of \emph{bias removal}, or bias
-mitigation, in which we want to remove from our predictions the bias
-that we previously found.
+Sometimes performing the first step of bias measurement is not the end
+goal. Suppose that we found a large salary gap between sexes in the
+example above, raising issues about possible discrimination. We then
+might be interested in correcting this bias, by computing new, more fair
+predictions (in which, say, the salary gap is lower). This second task
+is that of \emph{bias removal}, or bias mitigation, in which we want to
+remove the undesired bias from our predictions.
 
-In Figure \ref{fig:software} we provide a graphical overview of some of
-the available software in \proglang{python} and \proglang{R}, which are
-the languages most commonly used for fairness analysis. For a given task
-and outcome/definition of fairness, we show existing software packages
-for both the classification and regression settings. Since calibration
-is often satisfied by fitting an unconstrained model, software capable
-of performing calibration was not included.
+Different software tools can be used to perform the two fairness tasks
+described above. In Figure \ref{fig:software} we provide a graphical
+overview of some of the available software in \proglang{python} and
+\proglang{R}, which are the languages most commonly used for fairness
+analysis. For a given task and outcome/definition of fairness, we show
+the existing software packages that the reader might want to use. Since
+calibration is often satisfied by fitting an unconstrained model, our
+focus is on demographic parity and equality of odds.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.7\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/software-1} 
+{\centering \includegraphics[width=0.7\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/software-1} 
 
 }
 
@@ -175,17 +183,16 @@ of performing calibration was not included.
 
 The software landscape for fair ML in \proglang{python} is more mature.
 Currently three well developed packages exist, capable of computing
-various fairness metrics and handling both classification and
-regression, suitable for satisfying either equality of odds or
-demographic parity. These repositories are \pkg{aif360}
-\citep{aif360-oct-2018} maintained by IBM, \pkg{fairlearn}
-\citep{bird2020fairlearn} maintained by Microsoft and \pkg{EthicML}. A
-further package, \pkg{fairness indicators}, is narrower in scope but
+various fairness metrics. Also, these tools support training predictors
+that satisfy either equality of odds or demographic parity. These
+repositories are \pkg{aif360} \citep{aif360-oct-2018} maintained by IBM,
+\pkg{fairlearn} \citep{bird2020fairlearn} maintained by Microsoft and
+\pkg{EthicML} \citep{ethicMLrepo}. A further package,
+\pkg{fairness indicators} \citep{fairnessind}, is narrower in scope but
 suitable for computing fairness metrics on very large datasets.
 
 For \proglang{R}, i.e., distributed via CRAN, there are fewer packages
-that relate to fair machine learning (see Figure \ref{fig:software} and
-note that there are no packages implementing equality of odds).
+that relate to fair machine learning (see Figure \ref{fig:software}).
 Available packages include \pkg{fairml} \citep{scutari2021fairml}, which
 implements the non-convex method of \cite{komiyama2018nonconvex}, as
 well as \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels}
@@ -193,24 +200,26 @@ well as \pkg{fairness} \citep{kozodoi2021fairness} and \pkg{fairmodels}
 measuring algorithmic bias and provide several pre- and post-processing
 methods for bias mitigation. The \pkg{fairadapt} package described in
 this manuscript is a bias removal method which is able to interpolate
-between demographic parity and calibration notions, and it works for
+between demographic parity and calibration notions, and is applicable to
 both regression and classification settings. In particular,
 \pkg{fairadapt} is the only software in Figure \ref{fig:software} which
-is \emph{causally aware}, that is, bias removal can be connected to
-actual mechanisms that are causally related to discrimination.
+is \emph{causally aware}. This means that the bias removal performed by
+\pkg{fairadapt} can be explained by and related to the causal mechanisms
+that generated the discrimination in the first place.
 
 \hypertarget{a-causal-approach}{%
 \subsection{A Causal Approach}\label{a-causal-approach}}
 
 The discussion on algorithmic fairness is, however, not restricted to
 the machine learning domain. There are many legal and philosophical
-aspects that have arisen. For example, the legal distinction between
-disparate impact and disparate treatment \citep{mcginley2011ricci} is
-important for assessing fairness from a judicial point of view. This in
-turn emphasizes the importance of the interpretation behind the
-decision-making process, which is often not the case with black-box
-machine learning algorithms. For this reason, research in fairness
-through a causal inference lens has gained attention.
+aspects that are paramount. For example, the legal distinction between
+the disparate impact and disparate treatment doctrines
+\citep{mcginley2011ricci, barocas2016big} is important for assessing
+fairness from a legal standpoint. This in turn emphasizes the importance
+of the interpretation behind the decision-making process, which is often
+not the case with black-box machine learning algorithms. For this
+reason, research in fairness through a causal inference lens gained
+attention.
 
 A possible approach to fairness is the use of counterfactual reasoning
 \citep{galles1998axiomatic}, which allows for arguing what might have
@@ -221,21 +230,21 @@ affect the probability of a specific candidate being accepted for a
 given job opening. This approach has motivated another notion of
 fairness, termed \emph{counterfactual fairness}
 \citep{kusner2017counterfactual}, which states that the decision made,
-should remain fixed, even if, hypothetically, some parameters such as
-race or gender were to be changed (this can be written succinctly as
-\(\widehat{Y}(a) = \widehat{Y}(a')\) in the potential outcomes
-notation). Causal inference can also be used for decomposition of the
-parity gap measure \citep{zhang2018fairness},
-\(\mathbbm{P}(\widehat{Y} = 1 \mid A = a) - \mathbbm{P}(\widehat{Y} = 1 \mid A = a')\),
-into direct, indirect and spurious components (yielding further insights
-into the demographic parity as a criterion), as well as the introduction
-of so-called resolving variables \cite{kilbertus2017avoiding}, in order
-to relax the possibly prohibitively strong notion of demographic parity.
+should remain fixed, even if, hypothetically, the protected attribute
+such as race or gender were to be changed (this can be written
+succinctly as \(\widehat{Y}_i(a) = \widehat{Y}_i(a')\) in the potential
+outcomes notation). Causal inference can also be used for decomposing
+the total variation measure into its direct, mediated, and confounded
+contributions \citep{zhang2018fairness}, yielding further insights into
+demographic parity as a criterion. Furthermore, by introducing the
+notion of so-called resolving variables, \cite{kilbertus2017avoiding}
+described relaxations of demographic parity, which can possibly be a
+prohibitively strong notion.
 
 The following sections describe an implementation of the fair data
 adaptation method outlined in \cite{plecko2020fair}, which combines the
 notions of counterfactual fairness and resolving variables, and
-explicitly computes counterfactual values for individuals. The
+explicitly computes counterfactual instances for individuals. The
 implementation is available as the \proglang{R}-package \pkg{fairadapt}
 from CRAN.
 
@@ -265,18 +274,18 @@ the following:
   \texttt{fairadaptBoot}, alongside associated methods, provides a more
   formalized implementation.
 \item
-  More flexibility is allowed for in the quantile learning step,
-  including different algorithms for quantile regression (linear, forest
-  based, neural networks). Additionally, there is also a possibility of
+  More flexibility is allowed in the quantile learning step, including
+  different algorithms for quantile regression (linear, forest based,
+  neural networks). Additionally, there is also a possibility of
   specifying a custom quantile learning function (utilizing S3
   dispatch).
 \item
   The user is provided with functionality for assessing the quality of
-  the quantile regression fit, which allows for optimizing the
+  the quantile regression fit, which allows for tuning the
   hyperparameters of the more flexible algorithms.
 \end{itemize}
 
-The rest of the manuscript is organized as follows: In Section
+The rest of the manuscript is organized as follows. In Section
 \ref{methodology} we describe the methodology behind \pkg{fairadapt},
 together with reviewing some important concepts of causal inference. In
 Section \ref{implementation} we discuss implementation details and
@@ -291,63 +300,64 @@ resolving variables.
 \hypertarget{methodology}{%
 \section{Methodology}\label{methodology}}
 
-First, the intuition behind \pkg{fairadapt} is described using an
-example, followed by a more rigorous mathematical formulation, using
-Markovian structural causal models (SCMs). Some relevant extensions,
-such as the Semi-Markovian case and the introduction of so called
-\emph{resolving variables}, are discussed in Section
+In this section, the intuition behind \pkg{fairadapt} is described using
+an example. This is followed by a more rigorous mathematical
+formulation, based on Markovian structural causal models (SCMs). Some
+relevant extensions, such as the Semi-Markovian case and the
+introduction of \emph{resolving variables} are discussed in Section
 \ref{sec:extensions}.
 
 \hypertarget{university-admission-example}{%
 \subsection{University Admission
 Example}\label{university-admission-example}}
 
-Consider the example of university admission based on previous
-educational achievement and an admissions test. Variable \(A\) is the
-protected attribute, describing candidate gender, with \(A = a\)
-corresponding to females and \(A = a'\) to males. Furthermore, let \(E\)
-be educational achievement (measured for example by grades achieved in
-school) and \(T\) the result of an admissions test for further
+Consider for example a dataset about students applying for university
+admission. Let variable \(A\), gender, be the protected attribute
+(\(A = a\) corresponding to females and \(A = a'\) to males). Let \(E\)
+denote educational achievement (measured for example by grades achieved
+in school) and \(T\) the result of an admissions test for further
 education. Finally, let \(Y\) be the outcome of interest (final score)
-upon which admission to further education is decided. Edges in the graph
-in Figure \ref{fig:uni-adm} indicate how variables affect one another.
+upon which admission to further education is decided. A visual
+representation of how the variables affect each other is given in Figure
+\ref{fig:uni-adm}.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/uni-adm-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/uni-adm-1} 
 
 }
 
-\caption[University admission based on previous educational achievement $E$ combined with and an admissions test score $T$]{University admission based on previous educational achievement $E$ combined with and an admissions test score $T$. The protected attribute $A$, encoding gender, has an unwanted causal effect on  $E$, $T$, as well as $Y$, which represents the final score used for the admission decision.}\label{fig:uni-adm}
+\caption[A visual representation of the university admission example]{A visual representation of the university admission example. $A$ denotes gender, $E$ previous educational achievement, and $T$ an admissions test score. The outcome $Y$ represents the final score used for the admission decision. The protected attribute $A$ has a discriminatory causal effect on variables $E$, $T$, and $Y$, which we wish to remove.}\label{fig:uni-adm}
 \end{figure}
 \end{CodeChunk}
 
 Attribute \(A\), gender, has a causal effect on variables \(E\), \(T\),
-as well as \(Y\), and we wish to eliminate this effect. For each
-individual with observed values \((a, e, t, y)\) we want to find a
-mapping
+and \(Y\). We consider this effect discriminatory and wish to eliminate
+it, in the following way. For each individual with observed values
+\((a, e, t, y)\) we want to find a mapping
 
 \[(a, e, t, y) \longrightarrow  ( {a}^{(fp)},  {e}^{(fp)},  {t}^{(fp)},  {y}^{(fp)}),\]
 
 which represents the value the person would have obtained in an
-alternative world where everyone was female. Explicitly, to a male
-person with education value \(e\), we assign the transformed value
-\( {e}^{(fp)}\) chosen such that
+alternative world where everyone was female. To construct such a
+mapping, we adapt (transform) the variables in the dataset in order.
+Explicitly, to a male person with education value \(e\), we assign the
+transformed value \( {e}^{(fp)}\), chosen such that
 
 \[\mathbbm{P}(E \geq e \mid A = a') = \mathbbm{P}(E \geq  {e}^{(fp)} \mid A = a).\]
 
 The key idea is that the \emph{relative educational achievement within
-the subgroup} remains constant if the protected attribute gender is
-modified. If, for example, a male has a higher educational achievement
-value than 70\% of males in the dataset, we assume that he would also be
-better than 70\% of females had he been female\footnote{This assumption
-  of course is not empirically testable, as it is impossible to observe
-  both a female and a male version of the same individual.}. After
-computing transformed educational achievement values corresponding to
-the \emph{female} world (\( {E}^{(fp)}\)), the transformed test score
+the subgroup} remains preserved if the protected attribute gender is
+changed. If, for example, a male person has a higher educational
+achievement value than 70\% of males in the dataset, we assume that he
+would also be better than 70\% of females, had he been female\footnote{This
+  assumption of course is not empirically testable, as it is impossible
+  to observe both a female and a male version of the same individual.}.
+After computing transformed educational achievement values corresponding
+to the \emph{female} world (\( {E}^{(fp)}\)), the transformed test score
 values \( {T}^{(fp)}\) can be calculated in a similar fashion, but
-conditioned on educational achievement. That is, a male with values
+conditional on educational achievement. That is, a male with values
 \((E, T) = (e, t)\) is assigned a test score \( {t}^{(fp)}\) such that
 
 \[\mathbbm{P}(T \geq t \mid E = e, A = a') = \mathbbm{P}(T \geq  {t}^{(fp)} \mid E =  {e}^{(fp)}, A = a),\]
@@ -358,7 +368,7 @@ step can be visualized as shown in Figure \ref{fig:rel-edu}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/rel-edu-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/rel-edu-1} 
 
 }
 
@@ -366,18 +376,18 @@ step can be visualized as shown in Figure \ref{fig:rel-edu}.
 \end{figure}
 \end{CodeChunk}
 
-As a final step, the outcome variable \(Y\) remains to be adjusted. The
+In the final step, the outcome variable \(Y\) needs to be adjusted. The
 adaptation is based on the same principle as above, using transformed
-values of both education and the test score. The resulting value
-\( {y}^{(fp)}\) of \(Y = y\) satisfies
+values of both education and the test score. The transformed value
+\( {y}^{(fp)}\) of \(Y = y\) is chosen to satisfy
 
 \[\mathbbm{P}(Y \geq y \mid E = e, T = t, A = a') = \mathbbm{P}(Y \geq  {y}^{(fp)} \mid E =  {e}^{(fp)}, T =  {t}^{(fp)}, A = a).\]
 
-This form of counterfactual correction is known as \emph{recursive
-substitution} \citep[Chapter~7]{pearl2009causality} and is described
-more formally in the following sections. The reader who is satisfied
-with the intuitive notion provided by the above example is encouraged to
-go straight to Section \ref{implementation}.
+The form of counterfactual correction described above is known as
+\emph{recursive substitution} \citep[Chapter~7]{pearl2009causality}. We
+formalize this approach in the following sections. The reader who is
+satisfied with the intuitive notion provided by the above example is
+encouraged to go straight to Section \ref{implementation}.
 
 \hypertarget{structural-causal-models}{%
 \subsection{Structural Causal Models}\label{structural-causal-models}}
@@ -422,47 +432,52 @@ generality, that
   Exogenous variables \(U_i\) are uniformly distributed on \([0, 1]\).
 \end{enumerate}
 
-In the following section, we discuss the Markovian case in which all
-exogenous variables \(U_i\) are mutually independent. The Semi-Markovian
-case, where variables \(U_i\) are allowed to have a mutual dependency
-structure, alongside the extension introducing \emph{resolving
-variables}, are discussed in Section \ref{sec:extensions}.
+Equipped with the notion of an SCM and the assumptions (i)-(ii), we can
+describe the adaptation procedure in the Markovian case, in which all
+exogenous variables \(U_i\) are mutually independent (for the
+Semi-Markovian case, where variables \(U_i\) are allowed to share
+information, see Section \ref{sec:extensions}).
 
 \hypertarget{markovian-scm-formulation}{%
 \subsection{Markovian SCM Formulation}\label{markovian-scm-formulation}}
 
-Let \(Y\) take values in \(\mathbbm{R}\) and represent an outcome of
-interest and \(A\) be the protected attribute taking two values
-\(a, a'\). The goal is to describe a pre-processing method which
-transforms the entire data \(V\) into its fair version \( {V}^{(fp)}\).
-This can be achieved by computing the counterfactual values
-\(V(A = a)\), which would have been observed if the protected attribute
-was fixed to a baseline value \(A = a\) for the entire sample.
+Let \(Y\) be the outcome of interest, taking values in \(\mathbbm{R}\).
+Let \(A\) be the binary protected attribute taking two values \(a, a'\).
+Denote by \(X\) the remaining covariates, and let \(V = (A, X, Y)\)
+denote the observed variables. Our goal is to describe a pre-processing
+method which transforms the observed variables \(V\) into their fair
+version \( {V}^{(fp)}\). This is achieved by computing the
+counterfactual values \(V(A = a)\), which would have been observed if
+the protected attribute was fixed to a baseline value \(A = a\) for the
+entire sample.
 
 More formally, going back to the \emph{university admission} example
 above, we want to align the distributions
 
 \[V_i \mid \mathrm{pa}(V_i), A = a \text{ and } V_i \mid \mathrm{pa}(V_i), A = a',\]
-
-meaning that the distribution of \(V_i\) should be indistinguishable for
-both female and male applicants, for every variable \(V_i\). Since each
+meaning that the distribution of \(V_i\) conditional on
+\(\mathrm{pa}(V_i)\) should be indistinguishable between female and male
+groups (and this should hold for every variable \(V_i\)). Since each
 function \(f_i\) of the original SCM is reparametrized so that
 \(f_i(\mathrm{pa}(v_i), u_i)\) is increasing in \(u_i\) for every fixed
-\(\mathrm{pa}(v_i)\), and also due to variables \(U_i\) being uniformly
-distributed on \([0, 1]\), variables \(U_i\) can be seen as the latent
-\emph{quantiles}.
+\(\mathrm{pa}(v_i)\), and since variables \(U_i\) are uniformly
+distributed on \([0, 1]\), the \(U_i\) values can be interpreted as the
+latent \emph{quantiles} associated with \(V_i\). These latent quantiles
+are assumed to be preserved when performing the adaptation procedure.
 
-The algorithm proposed for data adaption proceeds by fixing \(A = a\),
-followed by iterating over descendants of the protected attribute \(A\),
-sorted in topological order. For each \(V_i\), the assignment function
-\(f_i\) and the corresponding quantiles \(U_i\) are inferred. Finally,
-transformed values \( {V_i}^{(fp)}\) are obtained by evaluating \(f_i\),
-using quantiles \(U_i\) and the transformed parents
+The fair data adaption algorithms starts by fixing \(A = a\) for all
+individuals. After this, the algorithm iterates over descendants of the
+protected attribute \(A\), in any valid topological order (this
+topological order is inferred from the causal graph \(\mathcal{G}\),
+which is also an input of the algorithm). For each \(V_i\), the
+assignment function \(f_i\) and the corresponding quantiles \(U_i\) are
+inferred. Finally, transformed values \( {V_i}^{(fp)}\) are obtained by
+evaluating \(f_i\), using quantiles \(U_i\) and the transformed parents
 \( {\mathrm{pa}(V_i)}^{(fp)}\) (see Algorithm \ref{algo:fairadapt}).
 
 \begin{algorithm}
     \DontPrintSemicolon
-    \KwIn{$V$, causal graph $\mathcal{G}$}
+    \KwIn{observed variables $V$, causal graph $\mathcal{G}$}
     set $A \gets a$ for everyone\\
     \For{$V_i \in \mathrm{de}(A)$ in topological order}{
       learn function $V_i \gets f_i(\mathrm{pa}(V_i), U_i)$ \;
@@ -475,35 +490,32 @@ using quantiles \(U_i\) and the transformed parents
     \label{algo:fairadapt}
 \end{algorithm}
 
-The assignment functions \(f_i\) of the SCM are of course unknown, but
-are non-parametrically inferred at each step. Algorithm
+The assignment functions \(f_i\) of the SCM are always assumed to be
+unknown, but are inferred non-parametrically at each step. Algorithm
 \ref{algo:fairadapt} obtains the counterfactual values \(V(A = a)\)
 under the \(do(A = a)\) intervention for each individual, while keeping
 the latent quantiles \(U\) fixed. In the case of continuous variables,
 the latent quantiles \(U\) can be determined exactly, while for the
-discrete case, this is more subtle and described in
-\citet[Section~5]{plecko2020fair}.
+discrete case, the situation is more subtle. A detailed discussion can
+be found in \citet[Section~5]{plecko2020fair}.
 
 \hypertarget{implementation}{%
 \section{Implementation}\label{implementation}}
 
-In order to perform fair data adaption using the \pkg{fairadapt}
-package, the function \texttt{fairadapt()} is exported, which returns an
-object of class \texttt{fairadapt}. Implementations of the base
-\proglang{R} S3 generics \texttt{print()}, \texttt{plot()} and
-\texttt{predict()}, as well as the generic \texttt{autoplot()}, exported
-from \pkg{ggplot2} \citep{wickham2016ggplot2}, are provided for
-\texttt{fairadapt} objects, alongside \texttt{fairadapt}-specific
-implementations of S3 generics \texttt{visualizeGraph()},
-\texttt{adaptedData()} and \texttt{fairTwins()}. Finally, an extension
-mechanism is available via the S3 generic function
-\texttt{computeQuants()}, which is used for performing the quantile
-learning step.
+The main function for data adaption in the \pkg{fairadapt} package is
+\texttt{fairadapt()}. This function returns an S3 classed object of
+class \texttt{fairadapt}. The \texttt{fairadapt} class has associated
+implementations of the base \proglang{R} S3 generics \texttt{print()},
+\texttt{summary()}, \texttt{plot()} and \texttt{predict()}. Furthermore,
+methods are available for the \texttt{autoplot()} generic exported from
+\pkg{ggplot2} \citep{wickham2016ggplot2}, as well as
+\texttt{fairadapt}-specific implementations of S3 generics
+\texttt{visualizeGraph()}, \texttt{adaptedData()}, \texttt{quantFit()},
+and \texttt{fairTwins()}.
 
-The following sections show how the listed methods relate to one another
-alongside their intended use, beginning with constructing a call to
-\texttt{fairadapt()}. The most important arguments of
-\texttt{fairadapt()} include:
+The following sections describe the intended use of
+\texttt{fairadapt()}, together with the associated methods and their
+relations. The most important arguments of \texttt{fairadapt()} include:
 
 \begin{itemize}
 \tightlist
@@ -522,40 +534,42 @@ alongside their intended use, beginning with constructing a call to
   name in the \texttt{train.data} argument.
 \end{itemize}
 
-It is worth emphasizing the possible data types that can be used in the
+It is worth clarifying the possible data types that can be used in the
 \texttt{train.data} argument. We note the following:
 
 \begin{enumerate}
 \def\labelenumi{(\roman{enumi})}
 \tightlist
 \item
-  \emph{Attribute \(A\)}: the protected attribute is limited to the
-  binary case. The \code{prot.attr} column in \code{train.data} can be
-  of any data type coercible to a \code{factor}, but can only take two
-  distinct values. Otherwise an error is thrown.
+  \emph{Attribute \(A\)}: the protected attribute is assumed to be
+  binary. The \code{prot.attr} column in \code{train.data} can be of any
+  data type coercible to a \code{factor}, but can only take two distinct
+  values. Otherwise an error is thrown.
 \item
   \emph{Outcome \(Y\)}: the dependent variable specified on the left
   hand side of the \code{formula} argument can be either a
-  \code{numeric}, \code{integer}, \code{logical} or ordered
+  \code{numeric}, \code{integer}, \code{logical}, or an ordered
   \code{factor}. Unordered \code{factor} or \code{character} inputs for
   the outcome variable will result in an error.
 \item
-  \emph{Remaining attributes \(X\)}: all other attributes do not have
-  limitations. Unordered \code{factor} or \code{character} inputs can be
-  used in the \code{train.data} argument.
+  \emph{Remaining covariates \(X\)}: all other variables do not have
+  limitations. Unordered \code{factor} or \code{character} inputs can
+  also be used as covariates \(X\).
 \end{enumerate}
 
-As a quick demonstration of performing fair data adaption, we load the
+As an example, we perform fair data adaption on the university admission
+dataset described in Section \ref{methodology}. We load the
 \texttt{uni\_admission} dataset provided by \pkg{fairadapt}, consisting
-of synthetic university admission data of 1000 students. We subset this
+of synthetic university admission data of 1000 students. We subset the
 data, using the first \texttt{n\_samp} rows as training data
 (\texttt{uni\_trn}) and the following \texttt{n\_samp} rows as testing
 data (\texttt{uni\_tst}). Furthermore, we construct an adjacency matrix
 \texttt{uni\_adj} with edges \(\texttt{gender} \to \texttt{edu}\),
 \(\texttt{gender} \to \texttt{test}\),
 \(\texttt{edu} \to \texttt{test}\), \(\texttt{edu} \to \texttt{score}\),
-and \(\texttt{test} \to \texttt{score}\). As the protected attribute, we
-choose \texttt{gender}.
+and \(\texttt{test} \to \texttt{score}\), corresponding to the causal
+graph from Figure \ref{fig:uni-adm}. We set \texttt{gender} as the
+protected attribute.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -618,30 +632,27 @@ test       1      0   0    0
 \end{CodeChunk}
 
 The implicitly called \texttt{print()} method in the previous code block
-displays some information about how \texttt{fairadapt()} was called,
-such as number of variables, the protected attribute and also the total
-variation before and after adaptation, defined as
+displays some information about how \texttt{fairadapt()} was called.
+This information includes the number of variables, the protected
+attribute and also the total variation before and after adaptation,
+written in our notation as
 
 \[\mathbbm{E}[Y \mid A = a] - \mathbbm{E}[Y \mid A = a'] \text{ and } \mathbbm{E}[ {Y}^{(fp)} \mid A = a] - \mathbbm{E}[ {Y}^{(fp)} \mid A = a'],\]
-
-respectively, where \(Y\) denotes the outcome variable. Total variation
-in the case of a binary outcome \(Y\), corresponds to the parity gap.
+respectively.
 
 \hypertarget{specifying-the-graphical-model}{%
 \subsection{Specifying the Graphical
 Model}\label{specifying-the-graphical-model}}
 
-As the algorithm used for fair data adaption in \texttt{fairadapt()}
-requires access to the underlying graphical causal model \(\mathcal{G}\)
-(see Algorithm \ref{algo:fairadapt}), a corresponding adjacency matrix
-can be passed as \texttt{adj.mat} argument. The convenience function
-\texttt{graphModel()} turns a graph specified as an adjacency matrix
-into an annotated graph using the \pkg{igraph} package
-\citep{csardi2006igraph}. While exported for the user to invoke
-manually, this function is called as part of the \texttt{fairadapt()}
-routine and the resulting \texttt{igraph} object can be visualized by
-calling the S3 generic \texttt{visualizeGraph()}, exported from
-\texttt{fairadapt} on an object of class \texttt{fairadapt}.
+The algorithm used for fair data adaption in \texttt{fairadapt()} is
+based on graphical causal model \(\mathcal{G}\) (see Algorithm
+\ref{algo:fairadapt}). To specify the causal graph, we pass the
+corresponding adjacency matrix as the \texttt{adj.mat} argument. The
+convenience function \texttt{graphModel()} turns a graph specified as an
+adjacency matrix into an annotated graph using the \pkg{igraph} package
+\citep{csardi2006igraph}. Alternatively, by calling the S3 generic
+\texttt{visualizeGraph()} on a \texttt{fairadapt} object, the user can
+also inspect the graphical model that was used for the data adaptation.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -652,7 +663,7 @@ R> uni_graph <- graphModel(uni_adj)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/graph-plot-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/graph-plot-1} 
 
 }
 
@@ -661,34 +672,42 @@ R> uni_graph <- graphModel(uni_adj)
 \end{CodeChunk}
 
 A visualization of the \texttt{igraph} object returned by
-\texttt{graphModel()} is available from Figure \ref{fig:graph-plot}. The
-graph shown is equivalent to that of Figure \ref{fig:uni-adm} as they
-both represent the same causal model.
+\texttt{graphModel()} is shown in Figure \ref{fig:graph-plot}. The graph
+is the same as that in Figure \ref{fig:uni-adm}. However, specifying the
+causal graph is not the only option to perform the data adaptation. A
+possible alternative is to specify a valid topological ordering over the
+observable variables \(V\), and specify it as a \texttt{character}
+vector, using the \texttt{top.ord} argument.
 
 \hypertarget{quantile-learning-step}{%
 \subsection{Quantile Learning Step}\label{quantile-learning-step}}
 
-The training step in \texttt{fairadapt()} that follows the typical
-machine learning workflow would be as follows. We first call the
-\texttt{fairadapt()} function and perform the quantile learning step on
-the \texttt{train.data}. After this, at a later stage we call the
-\texttt{predict()} function on the returned \texttt{fairadapt} S3 object
-in order to perform data adaption on new test data. Alternatively, it is
-also possible to input both \texttt{train.data} and \texttt{test.data}
-arguments directly to \texttt{fairadapt()}, which then transforms both
-of these arguments. This one-step procedure might be considered when the
-proportion of test samples compared to train samples is large, and when
-the \texttt{train.data} has a relatively small sample size. The benefit
-of this approach is that, even though the outcome \(Y\) is not
-available, other attributes \(X\) of \texttt{test.data} can be used for
-learning the quantiles.
+The most common and recommended usage of \texttt{fairadapt()} follows a
+typical machine learning framework. We start by calling the
+\texttt{fairadapt()} function that performs the quantile learning step
+and counterfactual correction, based on the \texttt{train.data}
+argument. Following this, we can call the \texttt{predict()} function on
+the returned \texttt{fairadapt} S3 object, in order to perform data
+adaption on new test data. In such a workflow, the adaptation of the
+training and testing data is done separately. In specific situations, it
+might be desirable to input both \texttt{train.data} and
+\texttt{test.data} arguments directly to \texttt{fairadapt()}, which
+then transforms both the training and testing data jointly. This
+one-step procedure might be considered when the proportion of test
+samples compared to train samples is large, and when the
+\texttt{train.data} has a relatively small sample size. The benefit of
+this approach is that, even though the outcome \(Y\) is not available,
+other attributes \(X\) of \texttt{test.data} can be used for quantile
+learning step.
 
 The data frames passed as \texttt{train.data} and \texttt{test.data} are
 required to have column names which also appear in the row and column
-names of the adjacency matrix, alongside the protected attribute \(A\),
-passed as scalar-valued character vector \texttt{prot.attr}. The
+names of the adjacency matrix. The protected attribute \(A\), passed as
+scalar-valued character vector \texttt{prot.attr}, should also appear in
+the column names of \texttt{train.data} and \texttt{test.data}. The
 \texttt{test.data} argument defaults to \texttt{NULL}, with the
-intention that \texttt{test.data} is specified at a later stage.
+intention that \texttt{test.data} is specified as an input to the
+\texttt{predict()} function at a later stage.
 
 \hypertarget{quantile-methods}{%
 \subsubsection{Quantile Methods}\label{quantile-methods}}
@@ -703,7 +722,7 @@ implemented in \pkg{fairadapt}:
   Quantile Regression Forests
   \citep{meinshausen2006qrf, wright2015ranger}.
 \item
-  Non-crossing quantile neural networks
+  Non-Crossing Quantile Neural Networks
   \citep{cannon2018non, cannon2015package}.
 \item
   Linear Quantile Regression \citep{koenker2001qr, koenker2018package}.
@@ -715,7 +734,7 @@ forest approach is well-suited, at the expense of a slight increase in
 runtime. The neural network approach is substantially slower when
 compared to linear and random forest estimators and consequently does
 not scale well to large sample sizes. As default, the random forest
-based approach is implemented, due to its non-parametric nature and
+based approach is used, due to its non-parametric nature and
 computational speed. However, for smaller sample sizes, the neural
 network approach can also demonstrate competitive performance. A quick
 summary outlining some differences between the three natively supported
@@ -731,11 +750,11 @@ methods is available from Table \ref{tab:qmethods}.
   \texttt{quant.method} & \code{rangerQuants} & \code{mcqrnnQuants} & \code{linearQuants} \\ 
   complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ 
   \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1 hidden layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\ 
-  $T_{\text{uni}}(200)$ & 0.6 & 33.9 & 0.4 \\ 
-  $T_{\text{uni}}(500)$ & 1.6 & 175.8 & 0.6 \\ 
+  $T_{\text{uni}}(200)$ & 0.5 & 46.1 & 0.3 \\ 
+  $T_{\text{uni}}(500)$ & 1 & 123.5 & 0.6 \\ 
    \bottomrule
 \end{tabular}
-\parbox{12.5cm}{\caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T_{\text{uni}}(n)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and $n$ testing samples.}} 
+\caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T_{\text{uni}}(n)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and $n$ testing samples.} 
 \label{tab:qmethods}
 \end{table}
 
@@ -753,12 +772,12 @@ forwards arguments passed as \texttt{...} to the function specified as
 
 An important consideration in choosing values for optional arguments of
 specific quantile regression functions is computational speed. For
-example, \texttt{rangerQuants()} internally calls the \texttt{ranger()}
-function (from \pkg{ranger}) and with respect to computational speed, an
-important argument is \texttt{num.trees}, the number of trees used when
-building the quantile regression forest. Clearly, choosing a smaller
-number of trees will be faster, but at the same time will result in a
-poorer fit with larger variance.
+example, the function \texttt{rangerQuants()} internally calls the
+\texttt{ranger()} function (from \pkg{ranger}) and with respect to
+computational speed, an important argument is \texttt{num.trees}, the
+number of trees used when building the quantile regression forest.
+Clearly, choosing a smaller number of trees will be faster, but at the
+same time will result in a fit with larger variance.
 
 Similarly, \texttt{mcqrnnQuants()} internally calls
 \texttt{mcqrnn.fit()} (from \pkg{qrnn}), which has a number of arguments
@@ -841,9 +860,9 @@ The interesting parameters to optimize for the two methods include:
 \tightlist
 \item
   for \texttt{ranger()}: parameters \texttt{mtry} (number of candidate
-  variables in each split), \texttt{min.node.size} (size of leaf nodes
-  after which splitting ) and \texttt{max.depth} (maximum depth of each
-  tree),
+  variables considered for splitting in each step),
+  \texttt{min.node.size} (size of leaf nodes below which splitting is
+  stopped) and \texttt{max.depth} (maximum depth of each tree),
 \item
   for \texttt{mcqrnn()}: parameters \texttt{n.hidden},
   \texttt{n.hidden2} (number of nodes in the first and second hidden
@@ -852,19 +871,21 @@ The interesting parameters to optimize for the two methods include:
   chosen optimizer via ellipsis.
 \end{enumerate}
 
-Given reasonable default values for the included qunatile methods,
-optimizing the quantile fit should be of interest mostly to advanced
-users (and hence we do not perform parameter tuning explicitly here).
+The quantile methods included in \pkg{fairadapt} have reasonable default
+values, that serve as a good starting point. Optimizing the quantile fit
+should therefore be of interest mostly to advanced users (and hence we
+do not perform parameter tuning here explicitly).
 
 \hypertarget{extending-to-custom-methods}{%
 \subsubsection{Extending to Custom
 Methods}\label{extending-to-custom-methods}}
 
-The above set of methods is not exhaustive. Further options are
-conceivable and therefore \pkg{fairadapt} provides an extension
-mechanism to account for this. The \texttt{fairadapt()} argument
-\texttt{quant.method} expects a function to be passed, a call to which
-will be constructed with three unnamed arguments:
+The above-mentioned set of methods is not exhaustive. Further options
+are conceivable and therefore \pkg{fairadapt} provides an extension
+mechanism to allow for custom quantile method specified by the user. The
+\texttt{fairadapt()} argument \texttt{quant.method} expects a function
+to be passed, a call to which will be constructed with three unnamed
+arguments:
 
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
@@ -878,7 +899,7 @@ will be constructed with three unnamed arguments:
   A logical flag, indicating whether the protected attribute is the root
   node of the causal graph. If the attribute \(A\) is a root node, we
   know that
-  \(\mathbbm{P}(X \mid \text{do}(A = a)) = \mathbbm{P}(X \mid A = a)\).
+  \[\mathbbm{P}(X \mid \text{do}(A = a)) = \mathbbm{P}(X \mid A = a).\]
   Therefore, the interventional and conditional distributions are in
   this case the same, and we can leverage this knowledge in the quantile
   learning procedure, by splitting the data into \(A = 0\) and \(A = 1\)
@@ -915,18 +936,19 @@ following steps:
   argument).
 \end{enumerate}
 
-For an example, see the \texttt{ranger} specific method for
-\texttt{computeQuants()}, \texttt{computeQuants.ranger()}.
+For an example, see the \texttt{computeQuants.ranger()} method for a
+\texttt{ranger} object, which can be invoked by the
+\texttt{computeQuants()} generic.
 
 \hypertarget{fair-twin-inspection}{%
 \subsection{Fair-Twin Inspection}\label{fair-twin-inspection}}
 
-We now turn to a useful property of \pkg{fairadapt} with respect to
-exploring decisions for different individuals in the dataset. The
-university admission example presented in Section \ref{methodology}
-demonstrates how to compute counterfactual values for an individual
-while preserving their relative educational achievement. Setting
-candidate gender as the protected attribute and gender level
+We now turn to a useful property of \pkg{fairadapt}, which allows the
+user to explore counterfactual instances for different individuals in
+the dataset. The university admission example presented in Section
+\ref{methodology} demonstrates how to compute counterfactual values for
+an individual while preserving their relative educational achievement.
+Setting candidate gender as the protected attribute and gender level
 \emph{female} as baseline value, for a \emph{male} student with values
 \((a, e, t, y)\), his \emph{fair-twin} values
 \(( {a}^{(fp)},  {e}^{(fp)},  {t}^{(fp)},  {y}^{(fp)})\), i.e., the
@@ -941,11 +963,11 @@ R> head(ft_basic, n = 3)
 \end{CodeInput}
 \begin{CodeOutput}
   gender      score score_adapted        edu edu_adapted       test
-1      1  1.9501728    1.43925785  1.3499572   0.7144597  1.6177397
-2      0 -2.3502495   -2.35024955 -1.9779234  -1.9779234 -3.1217962
-3      1  0.6285619   -0.04234933  0.6263626  -0.1418551  0.5300347
+1      1  1.9501728    0.96725357  1.3499572  0.62737801  1.6177397
+2      0 -2.3502495   -2.35024955 -1.9779234 -1.97792341 -3.1217962
+3      1  0.6285619   -0.04234933  0.6263626 -0.08228098  0.5300347
   test_adapted
-1    0.9450420
+1    0.9491819
 2   -3.1217962
 3   -0.2313427
 \end{CodeOutput}
@@ -963,15 +985,14 @@ of the assumed causal model and resolving variables (see Section
 \section{Uncertainty Quantification}\label{sec:uncq}}
 
 The user might naturally be interested in uncertainty quantification of
-the procedure performed in \texttt{fairadapt()}. Before discussing how
-this can be achieved, we first give a graphical sketch of the typical
-workflow when using \texttt{fairadapt()} (see Figure
-\ref{fig:workflow-tikz}).
+the procedure performed in \texttt{fairadapt()}. In order to explain how
+this can be achieved, we give a visualization of the typical workflow
+when using \texttt{fairadapt()} (see Figure \ref{fig:workflow-tikz}).
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/workflow-tikz-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/workflow-tikz-1} 
 
 }
 
@@ -982,13 +1003,14 @@ workflow when using \texttt{fairadapt()} (see Figure
 Such a workflow can be described as follows. We start from the training
 data \(\mathcal{D}_{train}\) and the causal graph \(\mathcal{G}\). These
 two arguments are used as inputs of the \texttt{fairadapt()} function,
-which returns the transformed training data
-\(\widetilde{\mathcal{D}}_{train}\) contained in a \texttt{fairadapt} S3
-object. This \texttt{fairadapt} object, alongside test data
-\(\mathcal{D}_{test}\) are then used as inputs to the \texttt{predict()}
-function, which returns the transformed test data
-\(\widetilde{\mathcal{D}}_{test}\). Often, the end goal is to obtain
-fair predictions on the test data, and to this end we need to train a
+which returns a \texttt{fairadapt} S3 object (which also contains the
+transformed test data \(\widetilde{\mathcal{D}}_{train}\)). The
+\texttt{fairadapt} object, together with the test data
+\(\mathcal{D}_{test}\), is then used as a input to the
+\texttt{predict()} function. The \texttt{predict()} function returns the
+transformed test data \(\widetilde{\mathcal{D}}_{test}\). Often, the end
+goal is to obtain fair predictions on some new test data
+\({\mathcal{D}}_{test}\). To do so, we need to train a
 classifier/regressor. Either the training data \(\mathcal{D}_{train}\)
 or its transformed counterpart \(\widetilde{\mathcal{D}}_{train}\) can
 be used for building a predictor. The predictor then needs to be applied
@@ -1001,18 +1023,18 @@ considered:
 \begin{itemize}
 \item
   \textbf{Finite sample uncertainty}: The first, commonly encountered
-  source of uncertainty is the one induced by a finite sample size. The
+  source of uncertainty is the one induced by finite sample size. The
   training data \(\mathcal{D}_{train}\) has a finite size, and for this
   reason inferences made using this data are imperfect. We wish to
-  quantify the error in the predictions \(\widehat{Y}^{fair}_{test}\)
-  introduced by the finite sample size of \(\mathcal{D}_{train}\). As
-  Figure \ref{fig:workflow-tikz} shows, the training data
-  \(\mathcal{D}_{train}\) affects the resulting fair predictions in two
-  ways. Firstly, it affects the value of the transformed test data
-  \(\widetilde{\mathcal{D}}_{test}\) (mediated by the fairadapt S3
-  object). Secondly, it affects the predictions
-  \(\widehat{Y}^{fair}_{test}\) also through the predictor (since it is
-  the input to the regressor classifier). These finite sample
+  quantify the uncertainty in the predictions
+  \(\widehat{Y}^{fair}_{test}\) introduced by the finite sample size of
+  \(\mathcal{D}_{train}\). As Figure \ref{fig:workflow-tikz} shows, the
+  training data \(\mathcal{D}_{train}\) affects the resulting fair
+  predictions in two ways. Firstly, it affects the value of the
+  transformed test data \(\widetilde{\mathcal{D}}_{test}\) (mediated by
+  the \texttt{fairadapt} S3 object). Secondly, it affects the
+  predictions \(\widehat{Y}^{fair}_{test}\) through the predictor (since
+  it is the input to the regressor/classifier). These finite sample
   uncertainties can be analyzed using \emph{bootstrap}
   \citep{efron1994introduction}. This means that we repeat the procedure
   in Figure \ref{fig:workflow-tikz} many times, each time taking a
@@ -1026,7 +1048,7 @@ considered:
   preserve the relative quantile of the variable, when computing the
   \(do(A=a)\) intervention. However, when we are working with variables
   that are not continuous, defining a quantile becomes more
-  difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenges exists.}.
+  difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenge exists.}.
   Therefore, in presence of discrete variables, due to the imperfect
   estimation of quantiles, the fairadapt procedure has some inherent
   randomness. This randomness would still persist even if we had
@@ -1042,37 +1064,37 @@ function, where the most important arguments are:
 \begin{itemize}
 \tightlist
 \item
-  \texttt{formula}, \texttt{prot.attr}, \texttt{adj.mat},
+  \texttt{formula}, \texttt{prot.attr}, \texttt{adj.mat}, and
   \texttt{train.data} arguments are the same as for the
   \texttt{fairadapt()} function (see Section \ref{implementation}).
 \item
   \texttt{test.data}, a \texttt{data.frame} containing the test data,
   defaults to \texttt{NULL}. Whenever the test data equals
-  \texttt{NULL}, then \texttt{save.object} must be \texttt{TRUE}.
+  \texttt{NULL}, then \texttt{keep.object} must be \texttt{TRUE}.
 \item
-  \texttt{save.object}, a \texttt{logical} scalar, indicating whether
+  \texttt{keep.object}, a \texttt{logical} scalar, indicating whether
   all the \texttt{fairadapt} S3 objects built in bootstrap repetitions
-  should be saved. Default value is \texttt{FALSE}.
+  should be kept in working memory. Default value is \texttt{FALSE}.
 \item
   \texttt{rand.mode}, a \texttt{character} scalar, taking values
-  \texttt{"finsamp"}, \texttt{"quant"} or \texttt{"both"}, corresponding
-  to considering finite sample uncertainty, quantile uncertainty, or
-  both.
+  \texttt{"finsamp"}, \texttt{"quant"}, or \texttt{"both"},
+  corresponding to considering finite sample uncertainty, quantile
+  uncertainty, or both.
 \end{itemize}
 
 The function \texttt{fairadaptBoot()} returns an S3 object of class
 \texttt{fairadaptBoot}. Calling this function can be computationally
 expensive, both in terms of runtime and memory. Keeping the default
-value of \texttt{FALSE} for the \texttt{save.object} argument reduces
+value of \texttt{FALSE} for the \texttt{keep.object} argument reduces
 the memory consumption substantially, with the drawback that
 \texttt{test.data} has to be provided directly to
 \texttt{fairadaptBoot()}, and that the resulting \texttt{fairadaptBoot}
 object cannot be reused for making predictions at a later stage. Passing
-\texttt{TRUE} to save.object, on the other hand, might consume more
-memory, but then the object can be reused over again for transforming
-new test data. This can be done by using the \texttt{predict()} function
-for the \texttt{fairadaptBoot} S3 object, to which a \texttt{newdata}
-argument is available.
+\texttt{TRUE} to \texttt{save.object}, on the other hand, might consume
+more memory, but then the object can be reused for transforming new test
+data. This can be done by using the \texttt{predict()} function for the
+\texttt{fairadaptBoot} S3 object, to which a \texttt{newdata} argument
+is available.
 
 For illustration purposes, we now compute bootstrap repetitions for
 finite sample uncertainty and quantile uncertainty on the COMPAS dataset
@@ -1127,7 +1149,7 @@ A possible causal graph for the COMPAS dataset is given in Figure
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.4\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/compas-graph-1} 
+{\centering \includegraphics[width=0.4\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/compas-graph-1} 
 
 }
 
@@ -1168,15 +1190,14 @@ R> fa_boot_quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
 \end{CodeInput}
 \end{CodeChunk}
 
-The objects returned are of class \texttt{fairadaptBoot} and contain a
-list \texttt{adapt.test} which in turn contains different replicates of
-the adapted test data (the length of this list is \texttt{n.boot}, the
-number of bootstrap repetitions). Finally, to obtain predictions, we
-train a random forest classifier on the different bootstrap samples of
-\texttt{train.data} and apply it to all of the transformed datasets. In
-doing so, we make use of the \texttt{boot.ind} list, contained in
-\texttt{fairadaptBoot} object, representing row indices of all bootstrap
-repetitions.
+The returned objects are of class \texttt{fairadaptBoot}. The object
+stores different replicates of the adapted test data (\texttt{n.boot}
+copies, the number of bootstrap repetitions) and some metadata. To
+obtain predictions, we train a random forest classifier on different
+bootstrap samples of \texttt{train.data}, and apply it to the
+transformed data bootstrap replicates. In doing so, we make use of the
+\texttt{boot.ind} list, contained in \texttt{fairadaptBoot} object,
+representing row indices of all bootstrap repetitions.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1188,10 +1209,10 @@ R> extract_pred <- function(x) x$predictions[, 2L]
 R> 
 R> cmp_rf <- lapply(fa_boot_fin$boot.ind, fit_rf)
 R> 
-R> pred_fin <- Map(predict, cmp_rf, fa_boot_fin$adapt.test)
+R> pred_fin <- Map(predict, cmp_rf, adaptedData(fa_boot_fin, train = FALSE)) 
 R> pred_fin <- do.call(cbind, lapply(pred_fin, extract_pred))
 R> 
-R> pred_quant <- Map(predict, cmp_rf, fa_boot_quant$adapt.test)
+R> pred_quant <- Map(predict, cmp_rf, adaptedData(fa_boot_quant, train = FALSE))
 R> pred_quant <- do.call(cbind, lapply(pred_quant, extract_pred))
 \end{CodeInput}
 \end{CodeChunk}
@@ -1207,9 +1228,9 @@ be taken, and we elaborate on both in the following sections.
 \subsubsection{Decision-maker Analysis}\label{decision-maker-analysis}}
 
 The first way to analyze the uncertainty of the predictions is from the
-point of view of the decision-maker. By decision-maker, in this context
-we refer to the individual performing the analysis and obtaining a set
-of fair predictions. For a decision-maker, it is important to understand
+viewpoint of the decision-maker. By decision-maker, in this context we
+refer to the individual performing the analysis and obtaining a set of
+fair predictions. For a decision-maker, it is important to understand
 how sensitive the outcome of the classification is to uncertainties
 induced by both finite sample size and the inherent uncertainty induced
 by discrete variables. Let \(p_A\) be the vector of predicted
@@ -1297,7 +1318,7 @@ R> inv_df <- rbind(inv_frm(pred_fin, "Finite Sample"),
 \end{CodeInput}
 \end{CodeChunk}
 
-\item For each individual $i$, we can take the 5\% and 95\% quantiles of predicted probabilities in all of the `n.boot` bootstrap repetitions. We analyze the width of this interval across all individuals.
+\item For each individual $i$, we can take the 5\% and 95\% quantiles of predicted probabilities in all of the \texttt{n.boot} bootstrap repetitions. We analyze the width of this interval across all individuals.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1320,7 +1341,7 @@ repetitions on the COMPAS dataset are shown in Figure
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/compas-dm-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/compas-dm-1} 
 
 }
 
@@ -1349,21 +1370,21 @@ R> ind_prb <- data.frame(
 \end{CodeInput}
 \end{CodeChunk}
 
-The spread of predictions for the three individuals is visualized in
-Figure \ref{fig:compas-indiv}. While it might be tempting to take the
-mean of the individual predictions, to have more stable results, this
-should not be done, as such an approach does not guarantee the fairness
-constraint \texttt{fairadapt()} aims to achieve. Hence, in order to
-achieve the desired fairness criteria overall, we have to accept some
-level of randomization at the level of individual predictions. It would
-be interesting for future work to quantify and optimize explicitly the
+This spread is visualized in Figure \ref{fig:compas-indiv}. While it
+might be tempting to take the mean of the different individual
+predictions, to have more stable results, this should not be done, as
+such an approach does not guarantee the fairness constraint
+\texttt{fairadapt()} aims to achieve. Hence, in order to achieve the
+desired fairness criteria overall, we have to accept some level of
+randomization at the level of individual predictions. It would be
+interesting for future work to quantify and optimize explicitly the
 trade-off between the desired fairness criteria and the necessary level
 of randomization.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/compas-indiv-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/compas-indiv-1} 
 
 }
 
@@ -1383,12 +1404,12 @@ employees, that is the salaries that female employees would obtain, had
 they been male.
 
 To do this, the government is using data from the 2018 American
-Community Survey by the US Census Bureau, available in pre-processed
-form as a package dataset from \pkg{fairadapt}. Columns are grouped into
-demographic (\texttt{dem}), familial (\texttt{fam}), educational
-(\texttt{edu}) and occupational (\texttt{occ}) categories and finally,
-salary is selected as response (\texttt{res}) and sex as the protected
-attribute (\texttt{prt}):
+Community Survey by the US Census Bureau. This dataset is also available
+in pre-processed form as a package dataset from \pkg{fairadapt}. Columns
+are grouped into demographic (\texttt{dem}), familial (\texttt{fam}),
+educational (\texttt{edu}) and occupational (\texttt{occ}) categories
+and finally, salary is selected as response (\texttt{res}) and sex as
+the protected attribute (\texttt{prt}):
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1441,11 +1462,11 @@ matrix \texttt{gov\_cfd}:
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/census-tikz-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/census-tikz-1} 
 
 }
 
-\caption[The causal graph for the government-census dataset]{The causal graph for the government-census dataset. $D$ are demographic features, $A$ is gender, $F$ represents marital and family information, $E$ education, $W$ work-related information and $Y$ the salary, which is also the outcome of interest.}\label{fig:census-tikz}
+\caption[The causal graph for the government-census dataset]{The causal graph for the government-census dataset. $D$ are demographic features, $A$ is gender, $F$ represents marital and family information, $E$ education, $W$ work-related information and $Y$ the salary, which is also the outcome of interest. The bidirected edge between $A$ and $D$ represents that the noise variables $U_A$ and $U_D$ share information.}\label{fig:census-tikz}
 \end{figure}
 \end{CodeChunk}
 
@@ -1474,7 +1495,7 @@ R> gov_grph <- graphModel(gov_adj, gov_cfd)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/census-graph-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/census-graph-1} 
 
 }
 
@@ -1487,8 +1508,8 @@ salaries. We then inspect the densities of variable \texttt{salary} by
 sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear
 shift between the two distributions, indicating that \texttt{male}
 employees are better compensated than \texttt{female} employees. We
-perform data the adaptation by using \texttt{n\_samp} samples for
-training and \texttt{n\_pred} samples for testing.
+perform the adaptation by using \texttt{n\_samp} samples for training
+and \texttt{n\_pred} samples for testing.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1510,14 +1531,14 @@ R> gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
 \end{CodeChunk}
 
 After adapting the data, we investigate whether the salary gap has
-shrunk. This can be done by comparing distributions of variable
+become smaller. This can be done by comparing distributions of variable
 \texttt{salary} using the \pkg{ggplot2}-exported S3 generic function
 \texttt{autoplot()} (Figure \ref{fig:census-vis}B).
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/census-vis-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/census-vis-1} 
 
 }
 
@@ -1525,8 +1546,8 @@ shrunk. This can be done by comparing distributions of variable
 \end{figure}
 \end{CodeChunk}
 
-For adapting the additional testing data, we can use the base
-\proglang{R} S3 generic function \texttt{predict()}:
+For adapting additional testing data, we use the base \proglang{R} S3
+generic function \texttt{predict()}:
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1586,43 +1607,43 @@ R> fairTwins(gov_ada, train.id = 1:5,
 \end{CodeChunk}
 
 Note that values remain unchanged for female individuals (as
-\emph{female} is used as baseline level). Variable \texttt{age}, which
+\emph{female} was used as baseline level). Variable \texttt{age}, which
 is not a descendant of the protected attribute \texttt{sex} (see Figure
 \ref{fig:census-graph}), also remains unchanged. However, variables
 \texttt{education\_level} and \texttt{salary} do change for males, since
 these variables are descendants of the protected attribute \texttt{sex}.
 
-The variable \texttt{hours\_worked} is also a descendant of \(A\), and
-one might argue that this variable should \emph{not} be adapted in the
-procedure, i.e., it should remain the same, irrespective of employee
-sex. This is the idea behind \emph{resolving variables}, which are
-discussed in Section \ref{sec:resolvers}. It is worth emphasizing that
-we are not trying to answer the question of which choice of resolving
-variables is the correct one in the above example - this choice is left
-to social scientists closely familiar with the context and specifics of
-the above described dataset.
+We conclude the section with a remark. Notice that the variable
+\texttt{hours\_worked} is a descendant of \(A\). However, one might
+argue that this variable should \emph{not} be adapted in the procedure,
+i.e., it should remain the same, irrespective of employee sex. In other
+words, one might argue it is acceptable to distinguish individuals based
+on this variable. This is the idea behind \emph{resolving variables},
+which are discussed in Section \ref{sec:resolvers}. It is worth
+emphasizing that we are not answering the question of how to choose
+which variables are resolving - this choice is left to social scientists
+familiar with the context of the dataset.
 
 \hypertarget{sec:extensions}{%
 \section{Extensions}\label{sec:extensions}}
 
 Several extensions to the basic Markovian SCM formulation introduced in
-Section \ref{markovian-scm-formulation} exist, some of which are
-available for use in \texttt{fairadapt()} and are outlined in the
-following sections.
+Section \ref{markovian-scm-formulation} exist, and these and are
+outlined in the following sections.
 
 \hypertarget{sec:resolvers}{%
 \subsection{Adding Resolving Variables}\label{sec:resolvers}}
 
-\cite{kilbertus2017avoiding} discuss that in some situations the
-protected attribute \(A\) can affect variables in a non-discriminatory
-way. For instance, in the Berkeley admissions dataset
-\citep{bickel1975sex} we observe that females often apply for
-departments with lower admission rates and consequently have a lower
-admission probability. However, we perhaps would not wish to account for
-this difference in the adaptation procedure, if we were to argue that
-applying to a certain department is a choice everybody is free to make.
-Such examples motivated the idea of \emph{resolving variables} by
-\citet{kilbertus2017avoiding}. A variable \(R\) is called resolving if
+As we mentioned earlier, in some situations the protected attribute
+\(A\) might affect other variables in a non-discriminatory way. For
+instance, in the Berkeley admissions dataset \citep{bickel1975sex} we
+observe that females often apply for departments with lower admission
+rates and consequently have a lower admission probability. However, we
+perhaps would not wish to account for this difference in the adaptation
+procedure, if we were to argue that applying to a certain department is
+a choice everybody is free to make. Such examples motivated the idea of
+\emph{resolving variables} by \citet{kilbertus2017avoiding}. A variable
+\(R\) is called resolving if
 
 \begin{enumerate}
 \def\labelenumi{(\roman{enumi})}
@@ -1677,11 +1698,11 @@ test       1      0   0    0
 \end{CodeChunk}
 
 As can be seen from the respective model summary outputs, the total
-variation after adaptation, in this case, is larger than in the
-\texttt{basic} example from Section \ref{implementation}, with no
-resolving variables. The intuitive reasoning here is that resolving
-variables allow for some discrimination, so we expect to see a larger
-total variation between the groups.
+variation after adaptation, in this case, is larger than in the example
+from Section \ref{implementation}, with no resolving variables. The
+intuitive reasoning here is that resolving variables allow for some
+discrimination, so we expect to see a larger total variation between the
+groups.
 
 \begin{CodeChunk}
 \begin{CodeInput}
@@ -1692,7 +1713,7 @@ R> uni_res <- graphModel(uni_adj, res.vars = "test")
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/res-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/res-graph-1} 
 
 }
 
@@ -1702,20 +1723,20 @@ R> uni_res <- graphModel(uni_adj, res.vars = "test")
 
 A visualization of the corresponding graph is available from Figure
 \ref{fig:res-graph}, which highlights the resolving variable
-\texttt{test} in red. Apart from color, the graphical model remains
-unchanged from what is shown in Figure \ref{fig:graph-plot}.
+\texttt{test} in red, but the underlying graphical model remains the
+same.
 
 \hypertarget{semi-markovian-and-topological-ordering-variant}{%
 \subsection{Semi-Markovian and Topological Ordering
 Variant}\label{semi-markovian-and-topological-ordering-variant}}
 
-Section \ref{methodology} focuses on the Markovian case, which assumes
-that all exogenous variables \(U_i\) are mutually independent. However,
-in practice this requirement is often not satisfied. If a mutual
-dependency structure between variables \(U_i\) exists, this is called a
-Semi-Markovian model. In the university admission example, we could, for
-example, have
-\(U_{\text{test}} \not\!\perp\!\!\!\perp U_{\text{score}}\), i.e.,
+In Section \ref{methodology} we focused on the Markovian case, which
+assumes that all exogenous variables \(U_i\) are mutually independent.
+However, in practice, this requirement is often not satisfied. If a
+mutual dependency structure between variables \(U_i\) exists, we are
+speaking about Semi-Markovian models. In the university admission
+example, we might have that
+\(U_{\text{test}} \not\!\perp\!\!\!\perp U_{\text{score}}\). That is,
 latent variables corresponding to variables test and final score being
 correlated. Such dependencies between latent variables can be
 represented by dashed, bidirected arrows in the causal diagram, as shown
@@ -1724,15 +1745,15 @@ in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/semi-markov-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/semi-markov-1} 
 
 }
 
-\caption{Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \ref{implementation}.  and visualized in its basic form in Figures \ref{fig:uni-adm} and \ref{fig:graph-plot}. Here, we allow for the possibility of a mutual dependency between the latent variables corresponding to variables test and final score.}\label{fig:semi-markov}
+\caption[Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \ref{implementation}]{Causal graphical model corresponding to a Semi-Markovian variant of the university admissions example, introduced in Section \ref{implementation}. Here, we allow for the possibility of a mutual dependency between the latent variables corresponding to variables `test` and `score`.}\label{fig:semi-markov}
 \end{figure}
 \end{CodeChunk}
 
-There is an important difference in the adaptation procedure for
+There is an important difference in the adaptation procedure for the
 Semi-Markovian case: when inferring the latent quantiles \(U_i\) of
 variable \(V_i\), in the Markovian case, only the direct parents
 \(\mathrm{pa}(V_i)\) are needed. In the Semi-Markovian case, due to
@@ -1742,7 +1763,7 @@ parents needs to be extended, as described in more detail by
 \citet{tian2002general}. A brief sketch of the argument goes as follows:
 Let the \emph{C-components} be a partition of the set \(V\), such that
 each \emph{C-component} contains a set of variables which are mutually
-connected by bidirectional edges. Let \(C(V_i)\) denote the entire
+connected by bidirected edges. Let \(C(V_i)\) denote the entire
 \emph{C-component} of variable \(V_i\). We then define the set of
 extended parents as
 
@@ -1754,9 +1775,9 @@ same as outlined in Algorithm \ref{algo:fairadapt}, with the difference
 that the set of direct parents \(\mathrm{pa}(V_i)\) is replaced by
 \(\mathrm{Pa}(V_i)\) at each step.
 
-To include the bidirectional confounding edges in the adaptation, we can
-pass a \texttt{matrix} as \texttt{cfd.mat} argument to
-\texttt{fairadapt()} such that:
+To include the bidirected edges in the adaptation, we can pass a
+\texttt{matrix} as \texttt{cfd.mat} argument to \texttt{fairadapt()}
+such that:
 
 \begin{itemize}
 \tightlist
@@ -1766,9 +1787,9 @@ pass a \texttt{matrix} as \texttt{cfd.mat} argument to
 \item
   \texttt{cfd.mat} is symmetric.
 \item
-  As is the case with the adjacency matrix passed as \texttt{adj.mat},
-  an entry \texttt{cfd.mat{[}i,\ j{]}\ ==\ 1} indicates that there is a
-  bidirectional edge between variables \texttt{i} and \texttt{j}.
+  As with the adjacency matrix \texttt{adj.mat}, an entry
+  \texttt{cfd.mat{[}i,\ j{]}\ ==\ 1} indicates that there is a
+  bidirected edge between variables \texttt{i} and \texttt{j}.
 \end{itemize}
 
 The following code performs fair data adaptation of the Semi-Markovian
@@ -1798,11 +1819,11 @@ R> semi <- fairadapt(score ~ ., train.data = uni_trn,
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpNWOCFD/file131a3d8b2311/articles/jss_files/figure-latex/semi-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpqaLz6c/filed364d4901ad/articles/jss_files/figure-latex/semi-graph-1} 
 
 }
 
-\caption{Visualization of the causal graphical model also shown in Figure \ref{fig:semi-markov}, obtained when passing a confounding matrix indicating a bidirectional edge between vertices \texttt{test} and \texttt{score} to \texttt{fairadapt()}. The resulting Semi-Markovian setting is also handled by \texttt{fairadapt()}, extending the basic Markovian formulation introduced in Section \ref{markovian-scm-formulation}.}\label{fig:semi-graph}
+\caption{Visualization of the causal graphical model also shown in Figure \ref{fig:semi-markov}, obtained when passing a confounding matrix indicating a bidirected edge between vertices \texttt{test} and \texttt{score} to \texttt{fairadapt()}. The resulting Semi-Markovian model can also be handled by \texttt{fairadapt()}, extending the basic Markovian formulation introduced in Section \ref{markovian-scm-formulation}.}\label{fig:semi-graph}
 \end{figure}
 \end{CodeChunk}
 
@@ -1828,9 +1849,9 @@ causal literature, an intervention is termed \emph{identifiable} if it
 can be computed uniquely using the data and the assumptions encoded in
 the graphical model \(\mathcal{G}\). An important result by
 \cite{tian2002general} states that an intervention do\((X = x)\) on a
-singleton variable \(X\) is identifiable if there is no bidirected path
-between \(X\) and \(\mathrm{ch}(X)\). Therefore, our intervention of
-interest is identifiable if one of the two following conditions are met:
+variable \(X\) is identifiable if there is no bidirected path between
+\(X\) and \(\mathrm{ch}(X)\). Therefore, our intervention of interest is
+identifiable if one of the two following conditions are met:
 
 \begin{itemize}
 \tightlist
@@ -1855,8 +1876,8 @@ Based on this, the \texttt{fairadapt()} function may return an error, if
 the specified intervention is not possible to compute. An additional
 limitation is that \pkg{fairadapt} currently does not support
 \emph{front-door identification} \citep[Chapter~3]{pearl2009causality},
-meaning that certain special cases which are in principle identifiable
-are not currently handled.
+meaning that certain special cases, which are in principle identifiable,
+are currently not handled.
 
 \hypertarget{future-avenues-to-be-explored}{%
 \subsection{Future Avenues to be
@@ -1868,13 +1889,20 @@ We conclude with a brief look at the possible extensions of the
 \begin{enumerate}
 \def\labelenumi{\arabic{enumi}.}
 \item
+  \emph{Spurious pathways}: the \pkg{fairadapt} package allows for
+  correcting discrimination along causal pathways from the protected
+  attribute \(A\) to outcome \(Y\). However, it is also possible that
+  \(A\) and \(Y\) are associated through a confounding mechanism, and
+  correcting for such spurious association poses an interesting
+  methodological and practical challenge.
+\item
   \emph{General identification}: as discussed above, there are certain
   cases of causal graphs in which our do\((A = a, R = R(a'))\)
   intervention is identifiable, but the \texttt{fairadapt()} function
-  currently does not support doing so. One such example is front-door
-  identification mentioned above. However, this is not the only such
-  example. In a future version of \pkg{fairadapt}, we hope to cover all
-  scenarios in which identification is possible.
+  currently does not support doing so. One of such examples is
+  front-door identification, mentioned above. In a future version of
+  \pkg{fairadapt}, we hope to cover all scenarios in which
+  identification is possible.
 \item
   \emph{Path-specific effects}: when using resolving variables (Section
   \ref{sec:resolvers}), the user decides to label these variables as
@@ -1895,8 +1923,11 @@ We conclude with a brief look at the possible extensions of the
   algorithmically would therefore be a desirable feature in the
   \pkg{fairadapt} package.
 \item
-  \emph{Non-binary attribute \(A\)}: one current limitation is that the
-  protected attribute \(A\) is binary. When considering
+  \emph{Non-binary attribute \(A\)}: one assumption used currently is
+  that the protected attribute \(A\) is binary. When considering
+  possible protected attributes as socioeconomic status or education,
+  this assumption might need to be relaxed. We hope to address this in
+  future work.
 \end{enumerate}
 
 \bibliography{jss.bib}

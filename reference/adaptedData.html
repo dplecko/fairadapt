@@ -63,18 +63,29 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">adaptedData</span><span class="op">(</span><span class="va">x</span>, train <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">adaptedData</span><span class="op">(</span><span class="va">x</span>, train <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># S3 method for fairadapt</span>
+<span class="fu">adaptedData</span><span class="op">(</span><span class="va">x</span>, train <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+
+<span class="co"># S3 method for fairadaptBoot</span>
+<span class="fu">adaptedData</span><span class="op">(</span><span class="va">x</span>, train <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
-<dd><p>Object of class <code>fairadapt</code>, a result of an adaptation
-procedure.</p></dd>
+<dd><p>Object of class <code>fairadapt</code> or <code>fairadaptBoot</code>, a result of an
+adaptation procedure.</p></dd>
 <dt>train</dt>
 <dd><p>A logical indicating whether train data should be returned.
 Defaults to <code>TRUE</code>. If <code>FALSE</code>, test data is returned.</p></dd>
 </dl></div>
+    <div id="value">
+    <h2>Value</h2>
+    <p>Either a <code>data.frame</code> when called on an <code>fairadapt</code> object, or a <code>list</code>of <code>data.frame</code>s with the adapted data of length <code>n.boot</code>, when called on a
+<code>fairadaptBoot</code> object.</p>
+    </div>
 
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">

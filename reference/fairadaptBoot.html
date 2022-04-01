@@ -90,6 +90,7 @@ see the <code>fairadapt</code> vignette.</p>
   keep.object <span class="op">=</span> <span class="cn">FALSE</span>,
   n.boot <span class="op">=</span> <span class="fl">100</span>,
   rand.mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"finsamp"</span>, <span class="st">"quant"</span>, <span class="st">"both"</span><span class="op">)</span>,
+  test.seed <span class="op">=</span> <span class="fl">2022</span>,
   <span class="va">...</span>
 <span class="op">)</span></code></pre></div>
     </div>
@@ -142,6 +143,10 @@ added.</p></dd>
 <dd><p>A string, taking values <code>"finsamp"</code>, <code>"quant"</code> or <code>"both"</code>,
 corresponding to considering finite sample uncertainty, quantile
 uncertainty, or both.</p></dd>
+<dt>test.seed</dt>
+<dd><p>a seed for the randomness in breaking quantiles for the
+discrete variables. This argument is only relevant when <code>rand.mode</code> equals
+<code>"quant"</code> or <code>"both"</code> (otherwise ignored).</p></dd>
 <dt>...</dt>
 <dd><p>Additional arguments forwarded to the function passed as
 <code>quant.method</code>.</p></dd>
