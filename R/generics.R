@@ -139,20 +139,20 @@ print.summary.fairadapt <- function(x,
                                     ...) {
   
   cat0("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"),
-      "\n\n")
+       "\n\n")
 
   cat0("Protected attribute:                 ", x$prot.attr, "\n")
   cat0("Protected attribute levels:          ",
-      paste(sort(x$attr.lvls), collapse = ", "), "\n")
+       paste(sort(x$attr.lvls), collapse = ", "), "\n")
 
   if (!is.null(x$adapt.vars)) {
     cat0("Adapted variables:                   ",
-        paste(x$adapt.vars, collapse = ", "), "\n")
+         paste(x$adapt.vars, collapse = ", "), "\n")
   }
 
   if(!is.null(x$res.vars)) {
     cat0("Resolving variables:                 ",
-        paste(x$res.vars, collapse = ", "), "\n")
+         paste(x$res.vars, collapse = ", "), "\n")
   }
 
   cat0("\n")
@@ -164,10 +164,10 @@ print.summary.fairadapt <- function(x,
   cat0("\n")
 
   cat0("Total variation (before adaptation): ",
-      format(x$tv.start, digits = digits), "\n")
+       format(x$tv.start, digits = digits), "\n")
 
   cat0("Total variation (after adaptation):  ",
-      format(x$tv.end, digits = digits), "\n")
+       format(x$tv.end, digits = digits), "\n")
     
   invisible(x)
 }
