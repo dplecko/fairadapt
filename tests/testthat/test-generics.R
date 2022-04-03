@@ -107,7 +107,7 @@ test_that("generics, cts", {
   announce_snapshot_file(name = "predi_disc.csv")
 
   expect_snapshot(print(ad.cts))
-  expect_snapshot_code(summary(ad.cts), mac_only = FALSE, arch = "x86_64")
+  expect_snapshot_code(summary(ad.cts), arch = "x86_64")
 
   aut.plt <- autoplot(ad.cts)
 

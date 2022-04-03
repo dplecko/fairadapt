@@ -23,9 +23,9 @@ Prediction function for new data from a saved \code{fairadaptBoot} object.
 \details{
 The \code{newdata} argument should be compatible with \code{adapt.test}
 argument that was used when constructing the \code{fairadaptBoot} object. In
-particular, \code{newdata} should contain column names that appear in the \code{formula}
-argument that was used when calling \code{fairadaptBoot()} (apart from the outcome
-variable on the LHS of the formula).
+particular, \code{newdata} should contain column names that appear in the
+\code{formula} argument that was used when calling \code{fairadaptBoot()} (apart from
+the outcome variable on the LHS of the formula).
 }
 \examples{
 n_samp <- 200
@@ -42,7 +42,8 @@ uni_ada_boot <- fairadaptBoot(score ~ .,
   train.data = head(uni_admission, n = n_samp),
   adj.mat = uni_adj,
   prot.attr = "gender",
-  n.boot = 10
+  n.boot = 5,
+  keep.object = TRUE
 )
 
 predict(object = uni_ada_boot, newdata = tail(uni_admission, n = n_samp))
