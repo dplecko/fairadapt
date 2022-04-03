@@ -299,9 +299,9 @@ print.summary.fairadaptBoot <- function(x, ...) {
 #'
 #' @details The `newdata` argument should be compatible with `adapt.test`
 #' argument that was used when constructing the `fairadaptBoot` object. In
-#' particular, `newdata` should contain column names that appear in the `formula`
-#' argument that was used when calling `fairadaptBoot()` (apart from the outcome 
-#' variable on the LHS of the formula).
+#' particular, `newdata` should contain column names that appear in the
+#' `formula` argument that was used when calling `fairadaptBoot()` (apart from
+#' the outcome variable on the LHS of the formula).
 #'  
 #' @param object Object of class `fairadapt`, a result of an adaptation
 #' procedure.
@@ -323,7 +323,8 @@ print.summary.fairadaptBoot <- function(x, ...) {
 #'   train.data = head(uni_admission, n = n_samp),
 #'   adj.mat = uni_adj,
 #'   prot.attr = "gender",
-#'   n.boot = 10
+#'   n.boot = 5,
+#'   keep.object = TRUE
 #' )
 #'
 #' predict(object = uni_ada_boot, newdata = tail(uni_admission, n = n_samp))

@@ -140,7 +140,7 @@ expect_snapshot_json <- function(code, mac_only = TRUE, arch = NULL, ...) {
   expect_snapshot_value(code, style = "json2", ...)
 }
 
-expect_snapshot_code <- function(x, mac_only = TRUE, arch = NULL, ...) {
+expect_snapshot_code <- function(..., mac_only = TRUE, arch = NULL) {
 
   if (mac_only) {
     skip_on_os(c("windows", "linux", "solaris"))
@@ -150,7 +150,7 @@ expect_snapshot_code <- function(x, mac_only = TRUE, arch = NULL, ...) {
     skip_if_not_on_arch(arch)
   }
 
-  expect_snapshot({{ x }}, ...)
+  expect_snapshot(...)
 }
 
 with_seed <- function(seed, code, rng_kind = "default",
