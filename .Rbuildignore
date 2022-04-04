@@ -6,9 +6,11 @@
 ^jmlr-paper
 ^doc$
 ^Meta$
-^vignettes/jss\.(cls|bst)$
 ^\.github$
 ^LICENSE\.md$
 ^_pkgdown\.yml$
 ^docs$
 ^pkgdown$
+^\.Rproj\.user$
+^vignettes/jss\.(aux|bbl|blg|bst|cls|knit\.md|log|out|R|tex)$
+^vignettes/(jss|uom)_(cache|files)$
