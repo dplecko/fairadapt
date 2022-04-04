@@ -14,3 +14,6 @@
 /docs/
 /doc/
 /Meta/
+/vignettes/jss_cache/
+/vignettes/jss_files/
+*.pdf
