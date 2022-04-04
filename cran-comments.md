@@ -9,4 +9,4 @@ There were no ERRORs, WARNINGs or NOTEs.
 ## Update
 This is an update. In this version I have:
 
-* update some of the associated generics (non-breaking changes)
+* added new generics for uncertainty quantification (non-breaking changes)

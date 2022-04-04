@@ -600,7 +600,7 @@ The quantile methods shown in Table \ref{tab:qmethods} make calls to specific fu
 
 An important consideration in choosing values for optional arguments of specific quantile regression functions is computational speed. For example, the function `rangerQuants()` internally calls the `ranger()` function (from \pkg{ranger}) and with respect to computational speed, an important argument is `num.trees`, the number of trees used when building the quantile regression forest. Clearly, choosing a smaller number of trees will be faster, but at the same time will result in a fit with larger variance.
 
-Similarly, `mcqrnnQuants()` internally calls `mcqrnn.fit()` (from \pkg{qrnn}), which has a number of arguments that can be used for adapting the underlying neural network. In terms of computational speed, the most important arguments are `n.trials` (number of repeated initializations used to avoid local minima) and `iter.max` (maximum number of iterations of the optimization). Choosing smaller values will reduce the runtime. Lastly, function `linearQuants()` internally calls `rq()` (from \pkg{quantreg}). This function is less flexible, since the model is linear. However, its `method` argument can be used when the number of samples becomes large (using `method` equal to `"fn"` or `"pfn"` utilizes the Frisch-Newton interior point method, which might be preferable for large samples).
+Similarly, `mcqrnnQuants()` internally calls `mcqrnn.fit()` (from \pkg{qrnn}), which has a number of arguments that can be used for adapting the underlying neural network. In terms of computational speed, the most important arguments are `n.trials` (number of repeated initializations used to avoid local minima) and `iter.max` (maximum number of iterations of the optimization). Choosing smaller values will reduce the runtime. Lastly, function `linearQuants()` internally calls `rq()` (from \pkg{quantreg}). This function is less flexible, since the model is linear. However, its `method` argument can be used when the number of samples becomes large (using `method` equal to `"fn"` or `"pfn"` utilizes the Frisch-Newton interior point method, which may be preferable for large samples).
 
 #### Fit Quality
 
@@ -663,7 +663,7 @@ ft_basic <- fairTwins(basic, train.id = seq_len(n_samp))
 head(ft_basic, n = 3)
 ```
 
-In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output. Having access to explicit counterfactual instances as above might help justify fair decisions in practice or help guide the choice of the assumed causal model and resolving variables (see Section \ref{sec:extensions} for resolving variables).
+In this example, we compute the values in a *female* world. Therefore, for *female* applicants, the values remain fixed, while for *male* applicants the values are adapted, as can be seen from the output. Having access to explicit counterfactual instances as above may help justify fair decisions in practice or help guide the choice of the assumed causal model and resolving variables (see Section \ref{sec:extensions} for resolving variables).
 
 # Uncertainty Quantification {#sec:uncq}
 
@@ -1380,7 +1380,7 @@ So far we did not discuss whether it is always possible to carry out the counter
   (i) there is no bidirected path between $A$ and $\ch(A)$ and,
   (i) there is no bidirected path between $R_i$ and $\ch(R_i)$ for any resolving variable $R_i$.
 
-Based on this, the `fairadapt()` function may return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases, which are in principle identifiable, are currently not handled.
+Based on this, the `fairadapt()` function might return an error, if the specified intervention is not possible to compute. An additional limitation is that \pkg{fairadapt} currently does not support *front-door identification* \citep[Chapter~3]{pearl2009causality}, meaning that certain special cases, which are in principle identifiable, are currently not handled.
 
 ## Future Avenues to be Explored
 
@@ -1394,7 +1394,7 @@ We conclude with a brief look at the possible extensions of the \pkg{fairadapt} 
 
 1. *Selection bias*: a commonly considered problem in causal inference is that of selection bias \citep{hernan2004structural}, when inclusion of individuals into the dataset depends on the observed variables in the dataset. In fairness applications, the presence of selection bias could invalidate our conclusions about discrimination and make our fair predictions biased. Recovering from selection bias algorithmically would therefore be a desirable feature in the \pkg{fairadapt} package.
 
-1. *Non-binary attribute $A$*: one assumption used currently is that the protected attribute $A$ is binary. When considering possible protected attributes as socioeconomic status or education, this assumption might need to be relaxed. We hope to address this in future work.
+1. *Non-binary attribute $A$*: one assumption used currently is that the protected attribute $A$ is binary. When considering possible protected attributes as socioeconomic status or education, this assumption may need to be relaxed. We hope to address this in future work.
 
 ```{r session-info, include = FALSE}
 sessionInfo()
