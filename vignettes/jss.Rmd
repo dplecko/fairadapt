@@ -63,11 +63,6 @@ pkgdown:
   extension: pdf
 ---
 
-<!-- TODO: things to check in the end:
-  - orphan lines, sections
-  - instances where text width is exceeded
--->
-
 ```{r, setup, include = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 
@@ -90,6 +85,8 @@ options(
 quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
   isTRUE(as.logical(Sys.getenv("CI"))) ||
   !identical(Sys.getenv("FAIRADAPT_VIGNETTE_QUICK_BUILD"), "false")
+
+is_on_cran <- !identical(Sys.getenv("NOT_CRAN"), "true")
 ```
 
 ```{tikz, setup-graph, eval = FALSE, echo = FALSE}
@@ -302,9 +299,9 @@ The key idea is that the *relative educational achievement within the subgroup* 
 
 $$\pr(T \geq t \mid E = e, A = a') = \pr(T \geq \tilde{t} \mid E = \tilde{e}, A = a),$$
 
-where the value $\tilde{e}$ was obtained in the previous step. This step can be visualized as shown in Figure \ref{fig:rel-edu}.
+where the value $\tilde{e}$ was obtained in the previous step. This step can be visualized as shown in Figure \ref{fig:quantmap}.
 
-```{tikz, rel-edu, fig.cap = "A graphical visualization of the quantile matching procedure. Given a male with a test score corresponding to the 70\\% quantile, we would hypothesize, that if the gender was changed, the individual would have achieved a test score corresponding to the 70\\% quantile of the female distribution.", fig.ext = "png", cache = TRUE, echo = FALSE, engine.opts=list(extra.preamble = c("\\usepackage{bbm}", "\\usepackage{pgfplots}", "\\pgfplotsset{compat=newest}"))}
+```{tikz, rel-edu, fig.cap = "\\label{fig:quantmap}A graphical visualization of the quantile matching procedure. Given a male with a test score corresponding to the 70\\% quantile, we would hypothesize, that if the gender was changed, the individual would have achieved a test score corresponding to the 70\\% quantile of the female distribution.", fig.ext = "png", cache = TRUE, echo = FALSE, eval = !is_on_cran, engine.opts=list(extra.preamble = c("\\usepackage{bbm}", "\\usepackage{pgfplots}", "\\pgfplotsset{compat=newest}"))}
 
 \newcommand{\pr}{\mathbbm{P}}
 \renewcommand{\tilde}[1]{ {#1}^{(fp)}}
@@ -353,6 +350,10 @@ where the value $\tilde{e}$ was obtained in the previous step. This step can be 
 \end{tikzpicture}
 ```
 
+```{r, rel-edu-cran, fig.width = 6, fig.height = 3, fig.cap = "\\label{fig:quantmap}Rnd fig.", fig.ext = "png", eval = is_on_cran, echo=FALSE, out.width = "60%"}
+
+ggplot(mtcars, aes(x = mpg, y = cyl)) + geom_line()
+```
 In the final step, the outcome variable $Y$ needs to be adjusted. The adaptation is based on the same principle as above, using transformed values of both education and the test score. The transformed value $\tilde{y}$ of $Y = y$ is chosen to satisfy
 
 $$\pr(Y \geq y \mid E = e, T = t, A = a') = \pr(Y \geq \tilde{y} \mid E = \tilde{e}, T = \tilde{t}, A = a).$$
@@ -729,7 +730,7 @@ Such a workflow can be described as follows. We start from the training data $\m
 
 - **Finite sample uncertainty**: The first, commonly encountered source of uncertainty is the one induced by finite sample size. The training data $\mathcal{D}_{train}$ has a finite size, and for this reason inferences made using this data are imperfect. We wish to quantify the uncertainty in the predictions $\widehat{Y}^{fair}_{test}$ introduced by the finite sample size of $\mathcal{D}_{train}$. As Figure \ref{fig:workflow-tikz} shows, the training data $\mathcal{D}_{train}$ affects the resulting fair predictions in two ways. Firstly, it affects the value of the transformed test data $\widetilde{\mathcal{D}}_{test}$ (mediated by the `fairadapt` S3 object). Secondly, it affects the predictions $\widehat{Y}^{fair}_{test}$ through the predictor (since it is the input to the regressor/classifier). These finite sample uncertainties can be analyzed using *bootstrap* \citep{efron1994introduction}. This means that we repeat the procedure in Figure \ref{fig:workflow-tikz} many times, each time taking a different bootstrap sample of the training data. Below we will show how this can be done with the `fairadaptBoot()` function.
 
-- **Inherent uncertainty in the quantiles**: A second source of uncertainty arises from the uncertainty in quantile estimation and is specific to \pkg{fairadapt}. As described in Section \ref{methodology} (see also Figure \ref{fig:rel-edu}), the fairadapt procedure aims to preserve the relative quantile of the variable, when computing the $do(A=a)$ intervention. However, when we are working with variables that are not continuous, defining a quantile becomes more difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenge exists.}. Therefore, in presence of discrete variables, due to the imperfect estimation of quantiles, the fairadapt procedure has some inherent randomness. This randomness would still persist even if we had infinite training samples in $\mathcal{D}_{train}$. Importantly, to achieve fair predictions, taking an expectation over this randomness is not feasible. For a detailed discussion of why this is the case, refer to \citep[Section~5]{plecko2020fair}.
+- **Inherent uncertainty in the quantiles**: A second source of uncertainty arises from the uncertainty in quantile estimation and is specific to \pkg{fairadapt}. As described in Section \ref{methodology} (see also Figure \ref{fig:quantmap}), the fairadapt procedure aims to preserve the relative quantile of the variable, when computing the $do(A=a)$ intervention. However, when we are working with variables that are not continuous, defining a quantile becomes more difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenge exists.}. Therefore, in presence of discrete variables, due to the imperfect estimation of quantiles, the fairadapt procedure has some inherent randomness. This randomness would still persist even if we had infinite training samples in $\mathcal{D}_{train}$. Importantly, to achieve fair predictions, taking an expectation over this randomness is not feasible. For a detailed discussion of why this is the case, refer to \citep[Section~5]{plecko2020fair}.
 
 For quantifying uncertainty, we use the `fairadaptBoot()` function, where the most important arguments are:
 
@@ -815,6 +816,7 @@ n_itr <- 50L
 ```
 
 ```{r, compas-boot-finite}
+set.seed(2022)
 fa_boot_fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
                              cmp_trn, cmp_tst, rand.mode = "finsamp",
                              n.boot = n_itr)
@@ -823,6 +825,7 @@ fa_boot_fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
 Then, we re-run the bootstrap procedure, but by considering only the inherent quantile uncertainty, by setting the `rand.mode` argument to `"quant"`.
 
 ```{r, compas-boot-quant}
+set.seed(2022)
 fa_boot_quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
                                cmp_trn, cmp_tst, rand.mode = "quant",
                                n.boot = n_itr)
@@ -837,6 +840,7 @@ fit_rf <- function(x) {
 
 extract_pred <- function(x) x$predictions[, 2L]
 
+set.seed(2022)
 cmp_rf <- lapply(fa_boot_fin$boot.ind, fit_rf)
 
 pred_fin <- Map(predict, cmp_rf, adaptedData(fa_boot_fin, train = FALSE)) 
