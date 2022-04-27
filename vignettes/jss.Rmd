@@ -994,7 +994,7 @@ p3 <- ggplot(inv_df, aes(x = res, fill = mode)) +
   xlab("Normalized inversion number") +
   ylab("Density") +
   theme(
-    legend.position = c(0.7, 0.7),
+    legend.position = c(0.3, 0.7),
     legend.box.background = element_rect()
   ) +
   scale_fill_discrete(labels = c(" \"finsamp\" ", " \"quant\" "),
@@ -1042,7 +1042,7 @@ ggplot(ind_prb, aes(x = prob, group = individual,
   theme_bw() +
   xlim(0, 1) +
   theme(
-    legend.position = c(0.3, 0.7),
+    legend.position = c(0.7, 0.75),
     legend.box.background = element_rect()
   )
 ```

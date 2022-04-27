@@ -146,10 +146,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     # can the below be done without withr?
     if (!is.null(test.data)) {
       if (!tst.rnd) {
-        curr.seed <- .Random.seed
-        set.seed(test.seed)
-        res.lst[[rep]] <- predict(FA, test.data)
-        .Random.seed <- curr.seed
+        with_seed(test.seed, res.lst[[rep]] <- predict(FA, test.data))
       } else {
         res.lst[[rep]] <- predict(FA, test.data)
       }
