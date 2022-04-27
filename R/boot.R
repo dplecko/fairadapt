@@ -1,8 +1,8 @@
 #' Fairadapt Boostrap wrapper
-#' 
+#'
 #' The \code{fairadapt()} function performs data adaptation, but does so only
 #' once. Sometimes, it might be desirable to repeat this process, in order to be
-#' able to make uncertainty estimates about the data adaptation that is 
+#' able to make uncertainty estimates about the data adaptation that is
 #' performed. The wrapper function \code{fairadaptBoot()} enables the user to do
 #' so, by performing the \code{fairadapt()} procedure multiple times, and
 #' keeping in memory the important multiple data transformations. For a worked
@@ -44,9 +44,9 @@
 #' @param rand.mode A string, taking values `"finsamp"`, `"quant"` or `"both"`,
 #' corresponding to considering finite sample uncertainty, quantile
 #' uncertainty, or both.
-#' @param test.seed a seed for the randomness in breaking quantiles for the 
+#' @param test.seed a seed for the randomness in breaking quantiles for the
 #' discrete variables. This argument is only relevant when `rand.mode` equals
-#' `"quant"` or `"both"` (otherwise ignored).  
+#' `"quant"` or `"both"` (otherwise ignored).
 #' @param ... Additional arguments forwarded to the function passed as
 #' `quant.method`.
 #'
@@ -78,33 +78,33 @@
 #' Plecko, D. & Meinshausen, N. (2019).
 #' Fair Data Adaptation with Quantile Preservation
 #' @export
-fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data, 
-                          test.data = NULL, cfd.mat = NULL, top.ord = NULL, 
+fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
+                          test.data = NULL, cfd.mat = NULL, top.ord = NULL,
                           res.vars = NULL, quant.method = rangerQuants,
-                          keep.object = FALSE, n.boot = 100, 
+                          keep.object = FALSE, n.boot = 100,
                           rand.mode = c("finsamp", "quant", "both"),
                           test.seed = 2022, ...) {
 
   rand.mode <- match.arg(rand.mode)
-  
+
   trn.rnd <- rand.mode %in% c("finsamp", "both")
   tst.rnd <- rand.mode %in% c("quant", "both")
-  
+
   if (!tst.rnd & !missing(test.seed)) {
     message(paste0("A non-default value for the `seed` argument is ignored ",
                    "when `rand.mode` = \"finsamp\"."))
   }
-  
+
   res.lst <- list()
   FA.lst <- list()
   boot.lst <- list()
 
   if (!trn.rnd) {
-    FA <- fairadapt(formula, prot.attr, adj.mat, train.data, 
-                    cfd.mat = cfd.mat, top.ord = top.ord, 
+    FA <- fairadapt(formula, prot.attr, adj.mat, train.data,
+                    cfd.mat = cfd.mat, top.ord = top.ord,
                     res.vars = res.vars, quant.method = quant.method, ...)
   }
-  
+
   if (missing(adj.mat)) {
     adj.mat <- NULL
   }
@@ -114,7 +114,7 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
     boot.smp <- seq_len(nrow(train.data))
 
     if (trn.rnd) {
-      
+
       bad <- TRUE
       cnt <- 1L
 
@@ -131,32 +131,35 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
           )
         }
       }
-      
+
       boot.lst[[rep]] <- boot.smp
-      
+
       FA <- fairadapt(formula, prot.attr, adj.mat, train.data[boot.smp, ],
                       cfd.mat = cfd.mat, top.ord = top.ord, res.vars = res.vars,
                       quant.method = quant.method, ...)
-      
+
       if (keep.object) {
         FA.lst[[rep]] <- FA
       }
     }
-    
-    # fix test randomness if needed
-    if (!tst.rnd) {
-      set.seed(test.seed)
-    }
 
+    # can the below be done without withr?
     if (!is.null(test.data)) {
-      res.lst[[rep]] <- predict(FA, test.data)
+      if (!tst.rnd) {
+        curr.seed <- .Random.seed
+        set.seed(test.seed)
+        res.lst[[rep]] <- predict(FA, test.data)
+        .Random.seed <- curr.seed
+      } else {
+        res.lst[[rep]] <- predict(FA, test.data)
+      }
     }
   }
-  
+
   if (!keep.object) {
     FA.lst <- NULL
   }
-  
+
   structure(
     list(
       rand.mode = rand.mode,
@@ -180,10 +183,10 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
 
 #' @export
 print.fairadaptBoot <- function(x, ...) {
-  
-  cat("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"), 
+
+  cat("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
-  
+
   cat("Bootstrap repetitions:", x$n.boot, "\n")
 
   if (!is.null(x$adj.mat)) {
@@ -196,18 +199,18 @@ print.fairadaptBoot <- function(x, ...) {
       vars <- NULL
     }
   }
-  
+
   if (!is.null(vars)) {
     cat("\nAdapting variables:\n  ", paste0(vars, collapse = ", "), "\n",
         sep = "")
   } else {
     cat("\nNo adapted variables\n")
   }
-  
+
   cat("\nBased on protected attribute", x$prot.attr, "\n")
-  
+
   cat("\n  AND\n")
-  
+
   if (is.null(x$adj.mat)) {
 
     cat("\nBased on topological order:\n  ", x$top.ord, sep = "")
@@ -222,7 +225,7 @@ print.fairadaptBoot <- function(x, ...) {
     cat(apply(mat, 1L, paste, collapse = " "), sep = "\n")
     cat("\n")
   }
-  
+
   invisible(x)
 }
 
@@ -240,7 +243,7 @@ summary.fairadaptBoot <- function(object, ...) {
   }
 
   mod <- object$last.mod
-  
+
   structure(
     list(
       boot.call = object$boot.call,
@@ -261,16 +264,16 @@ summary.fairadaptBoot <- function(object, ...) {
 
 #' @export
 print.summary.fairadaptBoot <- function(x, ...) {
-    
+
   cat0("\nCall:\n", paste(deparse(x$boot.call), sep = "\n", collapse = "\n"),
        "\n\n")
-    
+
   cat0("Bootstrap repetitions:      ", x$n.boot, "\n")
-    
+
   cat0("Protected attribute:        ", x$prot.attr, "\n")
   cat0("Protected attribute levels: ",
        paste(sort(x$attr.lvls), collapse = ", "), "\n")
-    
+
   if (!is.null(x$adapt.vars)) {
     cat0("Adapted variables:          ",
          paste(x$adapt.vars, collapse = ", "), "\n")
@@ -302,7 +305,7 @@ print.summary.fairadaptBoot <- function(x, ...) {
 #' particular, `newdata` should contain column names that appear in the
 #' `formula` argument that was used when calling `fairadaptBoot()` (apart from
 #' the outcome variable on the LHS of the formula).
-#'  
+#'
 #' @param object Object of class `fairadapt`, a result of an adaptation
 #' procedure.
 #' @param newdata A `data.frame` containing the new data.
@@ -330,15 +333,15 @@ print.summary.fairadaptBoot <- function(x, ...) {
 #' predict(object = uni_ada_boot, newdata = tail(uni_admission, n = n_samp))
 #' @export
 predict.fairadaptBoot <- function(object, newdata, ...) {
-  
+
   assert_that(!is.null(object$fairadapt),
               msg = paste("Object cannot be used for making new predictions.",
                           "Need to run `fairadaptBoot()` with `keep.object`",
                           "= TRUE to be able to do so."))
-  
-  assert_that(all(names(object$fairadapt[[1]]$adapt.train[[1]]) %in% 
+
+  assert_that(all(names(object$fairadapt[[1]]$adapt.train[[1]]) %in%
                   names(newdata)),
               msg = "Columns missing in newdata")
-  
+
   lapply(object$fairadapt, predict, newdata = newdata, ...)
 }

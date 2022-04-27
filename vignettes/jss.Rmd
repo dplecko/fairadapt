@@ -809,8 +809,8 @@ n_itr <- 5L
 ```
 
 ```{r, compas-boot-slow, eval = !quick_build, echo = !quick_build}
-cmp_trn <- tail(cmp_dat, n = 7000L)
-cmp_tst <- head(cmp_dat, n = 100L)
+cmp_trn <- tail(cmp_dat, n = 6000L)
+cmp_tst <- head(cmp_dat, n = 1214L)
 
 n_itr <- 50L
 ```
@@ -835,7 +835,7 @@ The returned objects are of class `fairadaptBoot`. The object stores different r
 
 ```{r, compas-forest}
 fit_rf <- function(x) {
-  ranger(two_year_recid ~ ., cmp_trn[x, ], probability = TRUE)
+  ranger(factor(two_year_recid) ~ ., cmp_trn[x, ], probability = TRUE)
 }
 
 extract_pred <- function(x) x$predictions[, 2L]
