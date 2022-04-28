@@ -350,10 +350,6 @@ where the value $\tilde{e}$ was obtained in the previous step. This step can be 
 \end{tikzpicture}
 ```
 
-```{r, rel-edu-cran, fig.width = 6, fig.height = 3, fig.cap = "\\label{fig:quantmap}Rnd fig.", fig.ext = "png", eval = is_on_cran, echo=FALSE, out.width = "60%"}
-
-ggplot(mtcars, aes(x = mpg, y = cyl)) + geom_line()
-```
 In the final step, the outcome variable $Y$ needs to be adjusted. The adaptation is based on the same principle as above, using transformed values of both education and the test score. The transformed value $\tilde{y}$ of $Y = y$ is chosen to satisfy
 
 $$\pr(Y \geq y \mid E = e, T = t, A = a') = \pr(Y \geq \tilde{y} \mid E = \tilde{e}, T = \tilde{t}, A = a).$$
