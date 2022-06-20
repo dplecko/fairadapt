@@ -49,7 +49,7 @@ preamble: >
   \renewcommand{\tilde}[1]{ {#1}^{(fp)}}
   \def\ci{{\perp\!\!\!\perp}}
 vignette: >
-  %\VignetteIndexEntry{Fair Data Adaptation (Plecko et al., JSS 2021)}
+  %\VignetteIndexEntry{fairadapt: Causal Reasoning for Fair Data Pre-processing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output: >
@@ -87,6 +87,7 @@ quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
   !identical(Sys.getenv("FAIRADAPT_VIGNETTE_QUICK_BUILD"), "false")
 
 is_on_cran <- !identical(Sys.getenv("NOT_CRAN"), "true")
+run_sim <- FALSE
 ```
 
 ```{tikz, setup-graph, eval = FALSE, echo = FALSE}
@@ -513,7 +514,7 @@ linebreak <- function(..., align = c("l", "c", "r"), linebreaker = "\n") {
 
 bm_cache <- system.file("extdata", "bm_quant.rds", package = "fairadapt")
 
-if (quick_build && file.exists(bm_cache)) {
+if (!run_sim && file.exists(bm_cache)) {
 
   bmark <- readRDS(bm_cache)
 
@@ -576,7 +577,10 @@ capt <- paste(
   "of samples, $p$ number of covariates, $n_{\\text{epochs}}$ number of",
   "training epochs for the neural network. $T_{\\text{uni}}(n)$ denotes the",
   "runtime of different methods on the university admission dataset, with $n$",
-  "training and $n$ testing samples."
+  "training and $n$ testing samples. The runtimes were obtained on a system", 
+  "with Intel Core i7-8750H CPU @ 2.2GHz running MacOS Big Sur 11.6.",
+  "The version of R was 4.2.0 \"Vigorous Calisthenics\" with \\pkg{quantreg}", 
+  "version 5.93, \\pkg{ranger} version 0.13.1, and \\pkg{mcqrnn} version 2.0.5."
 )
 
 print(
@@ -622,6 +626,7 @@ A smaller empirical loss based on Equation \eqref{eq:quantloss} corresponds to b
 We compute the average empirical loss $\widehat{\ex} [\rho_{\tau} (V_i, \mu_{\tau}(\pa(V_i)))]$ for each variable $V_i$ and $\tau = 0.25, 0.5, 0.75$ (corresponding to 25\%, 50\% and 75\% quantiles). The average of these three values is reported at the end, and can be extracted from the resulting `fairadapt` object using the `quantFit()` method:
 
 ```{r, quantFit}
+set.seed(22)
 fit_qual <- fairadapt(score ~ ., train.data = uni_trn,
                       adj.mat = uni_adj, prot.attr = "gender",
                       eval.qfit = 3L)
