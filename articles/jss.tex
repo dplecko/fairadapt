@@ -173,7 +173,7 @@ focus is on demographic parity and equality of odds.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.7\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/software-1} 
+{\centering \includegraphics[width=0.7\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/software-1} 
 
 }
 
@@ -324,7 +324,7 @@ representation of how the variables affect each other is given in Figure
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/uni-adm-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/uni-adm-1} 
 
 }
 
@@ -363,16 +363,16 @@ conditional on educational achievement. That is, a male with values
 \[\mathbbm{P}(T \geq t \mid E = e, A = a') = \mathbbm{P}(T \geq  {t}^{(fp)} \mid E =  {e}^{(fp)}, A = a),\]
 
 where the value \( {e}^{(fp)}\) was obtained in the previous step. This
-step can be visualized as shown in Figure \ref{fig:rel-edu}.
+step can be visualized as shown in Figure \ref{fig:quantmap}.
 
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/rel-edu-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/rel-edu-1} 
 
 }
 
-\caption[A graphical visualization of the quantile matching procedure]{A graphical visualization of the quantile matching procedure. Given a male with a test score corresponding to the 70\% quantile, we would hypothesize, that if the gender was changed, the individual would have achieved a test score corresponding to the 70\% quantile of the female distribution.}\label{fig:rel-edu}
+\caption{\label{fig:quantmap}A graphical visualization of the quantile matching procedure. Given a male with a test score corresponding to the 70\% quantile, we would hypothesize, that if the gender was changed, the individual would have achieved a test score corresponding to the 70\% quantile of the female distribution.}\label{fig:rel-edu}
 \end{figure}
 \end{CodeChunk}
 
@@ -663,7 +663,7 @@ R> uni_graph <- graphModel(uni_adj)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/graph-plot-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/graph-plot-1} 
 
 }
 
@@ -750,11 +750,11 @@ methods is available from Table \ref{tab:qmethods}.
   \texttt{quant.method} & \code{rangerQuants} & \code{mcqrnnQuants} & \code{linearQuants} \\ 
   complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ 
   \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1 hidden layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\ 
-  $T_{\text{uni}}(200)$ & 0.5 & 46.1 & 0.3 \\ 
-  $T_{\text{uni}}(500)$ & 1 & 123.5 & 0.6 \\ 
+  $T_{\text{uni}}(200)$ & 0.4 & 37.7 & 0.2 \\ 
+  $T_{\text{uni}}(500)$ & 0.9 & 96.8 & 0.4 \\ 
    \bottomrule
 \end{tabular}
-\caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T_{\text{uni}}(n)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and $n$ testing samples.} 
+\caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T_{\text{uni}}(n)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and $n$ testing samples. The runtimes were obtained on a system with Intel Core i7-8750H CPU @ 2.2GHz running MacOS Big Sur 11.6. The version of R was 4.2.0 "Vigorous Calisthenics" with \pkg{quantreg} version 5.93, \pkg{ranger} version 0.13.1, and \pkg{mcqrnn} version 2.0.5.} 
 \label{tab:qmethods}
 \end{table}
 
@@ -791,7 +791,7 @@ Choosing smaller values will reduce the runtime. Lastly, function
 linear. However, its \texttt{method} argument can be used when the
 number of samples becomes large (using \texttt{method} equal to
 \texttt{"fn"} or \texttt{"pfn"} utilizes the Frisch-Newton interior
-point method, which might be preferable for large samples).
+point method, which may be preferable for large samples).
 
 \hypertarget{fit-quality}{%
 \paragraph{Fit Quality}\label{fit-quality}}
@@ -838,6 +838,7 @@ reported at the end, and can be extracted from the resulting
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> set.seed(22)
 R> fit_qual <- fairadapt(score ~ ., train.data = uni_trn,
 +                       adj.mat = uni_adj, prot.attr = "gender",
 +                       eval.qfit = 3L)
@@ -846,7 +847,7 @@ R> quantFit(fit_qual)
 \end{CodeInput}
 \begin{CodeOutput}
       edu      test     score 
-0.3513718 0.2493164 0.3299460 
+0.3493682 0.2495231 0.3262082 
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -963,13 +964,13 @@ R> head(ft_basic, n = 3)
 \end{CodeInput}
 \begin{CodeOutput}
   gender      score score_adapted        edu edu_adapted       test
-1      1  1.9501728     1.4392578  1.3499572  0.51083985  1.6177397
-2      0 -2.3502495    -2.3502495 -1.9779234 -1.97792341 -3.1217962
-3      1  0.6285619    -0.1297838  0.6263626 -0.03319922  0.5300347
+1      1  1.9501728     0.9672536  1.3499572   0.6099781  1.6177397
+2      0 -2.3502495    -2.3502495 -1.9779234  -1.9779234 -3.1217962
+3      1  0.6285619    -0.1297838  0.6263626  -0.2482064  0.5300347
   test_adapted
-1    0.6356845
+1    0.7072654
 2   -3.1217962
-3   -0.4886567
+3   -0.5822567
 \end{CodeOutput}
 \end{CodeChunk}
 
@@ -977,8 +978,8 @@ In this example, we compute the values in a \emph{female} world.
 Therefore, for \emph{female} applicants, the values remain fixed, while
 for \emph{male} applicants the values are adapted, as can be seen from
 the output. Having access to explicit counterfactual instances as above
-might help justify fair decisions in practice or help guide the choice
-of the assumed causal model and resolving variables (see Section
+may help justify fair decisions in practice or help guide the choice of
+the assumed causal model and resolving variables (see Section
 \ref{sec:extensions} for resolving variables).
 
 \hypertarget{sec:uncq}{%
@@ -992,7 +993,7 @@ when using \texttt{fairadapt()} (see Figure \ref{fig:workflow-tikz}).
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/workflow-tikz-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/workflow-tikz-1} 
 
 }
 
@@ -1044,7 +1045,7 @@ considered:
   \textbf{Inherent uncertainty in the quantiles}: A second source of
   uncertainty arises from the uncertainty in quantile estimation and is
   specific to \pkg{fairadapt}. As described in Section \ref{methodology}
-  (see also Figure \ref{fig:rel-edu}), the fairadapt procedure aims to
+  (see also Figure \ref{fig:quantmap}), the fairadapt procedure aims to
   preserve the relative quantile of the variable, when computing the
   \(do(A=a)\) intervention. However, when we are working with variables
   that are not continuous, defining a quantile becomes more
@@ -1149,7 +1150,7 @@ A possible causal graph for the COMPAS dataset is given in Figure
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.4\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/compas-graph-1} 
+{\centering \includegraphics[width=0.4\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/compas-graph-1} 
 
 }
 
@@ -1172,6 +1173,7 @@ R> n_itr <- 5L
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> set.seed(2022)
 R> fa_boot_fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
 +                              cmp_trn, cmp_tst, rand.mode = "finsamp",
 +                              n.boot = n_itr)
@@ -1184,6 +1186,7 @@ argument to \texttt{"quant"}.
 
 \begin{CodeChunk}
 \begin{CodeInput}
+R> set.seed(2022)
 R> fa_boot_quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
 +                                cmp_trn, cmp_tst, rand.mode = "quant",
 +                                n.boot = n_itr)
@@ -1202,11 +1205,12 @@ representing row indices of all bootstrap repetitions.
 \begin{CodeChunk}
 \begin{CodeInput}
 R> fit_rf <- function(x) {
-+   ranger(two_year_recid ~ ., cmp_trn[x, ], probability = TRUE)
++   ranger(factor(two_year_recid) ~ ., cmp_trn[x, ], probability = TRUE)
 + }
 R> 
 R> extract_pred <- function(x) x$predictions[, 2L]
 R> 
+R> set.seed(2022)
 R> cmp_rf <- lapply(fa_boot_fin$boot.ind, fit_rf)
 R> 
 R> pred_fin <- Map(predict, cmp_rf, adaptedData(fa_boot_fin, train = FALSE)) 
@@ -1339,9 +1343,12 @@ repetitions on the COMPAS dataset are shown in Figure
 \ref{fig:compas-dm}.
 
 \begin{CodeChunk}
+\begin{CodeOutput}
+Warning: Removed 11 rows containing non-finite values (stat_density).
+\end{CodeOutput}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/compas-dm-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/compas-dm-1} 
 
 }
 
@@ -1384,7 +1391,7 @@ of randomization.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/compas-indiv-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/compas-indiv-1} 
 
 }
 
@@ -1462,7 +1469,7 @@ matrix \texttt{gov\_cfd}:
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/census-tikz-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/census-tikz-1} 
 
 }
 
@@ -1495,7 +1502,7 @@ R> gov_grph <- graphModel(gov_adj, gov_cfd)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/census-graph-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/census-graph-1} 
 
 }
 
@@ -1538,7 +1545,7 @@ become smaller. This can be done by comparing distributions of variable
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/census-vis-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/census-vis-1} 
 
 }
 
@@ -1713,7 +1720,7 @@ R> uni_res <- graphModel(uni_adj, res.vars = "test")
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/res-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/res-graph-1} 
 
 }
 
@@ -1745,7 +1752,7 @@ in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/semi-markov-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/semi-markov-1} 
 
 }
 
@@ -1819,7 +1826,7 @@ R> semi <- fairadapt(score ~ ., train.data = uni_trn,
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpzDJ1Zq/filec0d1062ad36/articles/jss_files/figure-latex/semi-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmp3cKxt6/file1f8f7c7e98c7/articles/jss_files/figure-latex/semi-graph-1} 
 
 }
 
@@ -1872,8 +1879,8 @@ identifiable if one of the two following conditions are met:
   \end{enumerate}
 \end{itemize}
 
-Based on this, the \texttt{fairadapt()} function may return an error, if
-the specified intervention is not possible to compute. An additional
+Based on this, the \texttt{fairadapt()} function might return an error,
+if the specified intervention is not possible to compute. An additional
 limitation is that \pkg{fairadapt} currently does not support
 \emph{front-door identification} \citep[Chapter~3]{pearl2009causality},
 meaning that certain special cases, which are in principle identifiable,
@@ -1926,7 +1933,7 @@ We conclude with a brief look at the possible extensions of the
   \emph{Non-binary attribute \(A\)}: one assumption used currently is
   that the protected attribute \(A\) is binary. When considering
   possible protected attributes as socioeconomic status or education,
-  this assumption might need to be relaxed. We hope to address this in
+  this assumption may need to be relaxed. We hope to address this in
   future work.
 \end{enumerate}
 

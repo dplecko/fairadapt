@@ -86,33 +86,47 @@
     <dl><dt>formula</dt>
 <dd><p>Object of class <code>formula</code> describing the response and
 the covariates.</p></dd>
+
+
 <dt>prot.attr</dt>
 <dd><p>A value of class <code>character</code> describing the binary
 protected attribute. Must be one of the entries of <code>colnames(adj.mat)</code>.</p></dd>
+
+
 <dt>adj.mat</dt>
 <dd><p>Matrix of class <code>matrix</code> encoding the relationships in
 the causal graph. <code>M[i,j] == 1L</code> implies the existence of an edge from
 node i to node j. Must include all the variables appearing in the formula
 object. When the <code>adj.mat</code> argument is set to <code>NULL</code>, then the
 <code>top.ord</code> argument has to be supplied.</p></dd>
+
+
 <dt>train.data, test.data</dt>
 <dd><p>Training data &amp; testing data, both of class
 <code>data.frame</code>. Test data is by default <code>NULL</code>.</p></dd>
+
+
 <dt>cfd.mat</dt>
 <dd><p>Symmetric matrix of class <code>matrix</code> encoding the
 bidirected edges in the causal graph. <code>M[i,j] == M[j, i] == 1L</code>
 implies the existence of a bidirected edge between nodes i and j. Must
 include all the variables appearing in the formula object.</p></dd>
+
+
 <dt>top.ord</dt>
 <dd><p>A vector of class <code>character</code> describing the
 topological ordering of the causal graph. Default value is <code>NULL</code>,
 but this argument must be supplied if <code>adj.mat</code> is not specified.
 Also must include all the variables appearing in the formula object.</p></dd>
+
+
 <dt>res.vars</dt>
 <dd><p>A vector of class <code>character</code> listing all the resolving
 variables, which should not be changed by the adaption procedure. Default
 value is <code>NULL</code>, corresponding to no resolving variables. Resolving
 variables should be a subset of the descendants of the protected attribute.</p></dd>
+
+
 <dt>quant.method</dt>
 <dd><p>A function choosing the method used for quantile
 regression. Default value is <code>rangerQuants</code> (using random forest
@@ -120,22 +134,31 @@ quantile regression). Other implemented options are <code>linearQuants</code> an
 <code>mcqrnnQuants</code>. A custom function can be supplied by the user here,
 and the associated method for the S3 generic <code>computeQuants</code> needs to be
 added.</p></dd>
+
+
 <dt>visualize.graph</dt>
 <dd><p>A <code>logical</code> indicating whether the causal graph
 should be plotted upon calling the <code>fairadapt()</code> function. Default
 value is <code>FALSE</code>.</p></dd>
+
+
 <dt>eval.qfit</dt>
 <dd><p>Argument indicating whether the quality of the quantile
 regression fit should be computed using cross-validation. Default value is
 <code>NULL</code>, but whenever a positive integer value is specified, then it is
 interpreted as the number of folds used in the cross-validation procedure.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Additional arguments forwarded to the function passed as
 <code>quant.method</code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>An object of class <code>fairadapt</code>, containing the original and
+    
+
+<p>An object of class <code>fairadapt</code>, containing the original and
 adapted training and testing data, together with the causal graph and some
 additional meta-information.</p>
     </div>
@@ -213,7 +236,7 @@ Fair Data Adaptation with Quantile Preservation</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

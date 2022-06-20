@@ -87,7 +87,6 @@
 <a href="https://dplecko.github.io/fairadapt/">fairadapt</a><a class="anchor" aria-label="anchor" href="#fairadapt"></a>
 </h1></div>
 <!-- badges: start -->
-
 <p>The R package fairadapt is intended for removing bias from machine learning algorithms. In particular, it implements the pre-processing procedure described in <a href="https://arxiv.org/abs/1911.06685" class="external-link">Plecko &amp; Meinshausen, 2019</a> (all the code used for producing the figures in the paper can be found in the <code>jmlr-paper</code> folder). The main idea is to adapt the training and testing data in a way which prevents any further training procedure from learning an undesired bias. The package currently offers the pre-processing step, after which the user can use the adapted data to train any classifier. However, some caution on the training step is still advised, so for more involved applications with resolving variables, the user should refer to the original paper.</p>
 <div class="section level2">
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
@@ -99,9 +98,7 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<!-- example could be expanded to show bias before correction -->
-<!-- add plot of adj.mat? visualization of how data changed? -->
-<p>An example of how fairadapt can be used is demonstrated below on the UCI Adult dataset.</p>
+<!-- example could be expanded to show bias before correction --><!-- add plot of adj.mat? visualization of how data changed? --><p>An example of how fairadapt can be used is demonstrated below on the UCI Adult dataset.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="co"># loading the package</span>
 <span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/dplecko/fairadapt" class="external-link">fairadapt</a></span><span class="op">)</span>
@@ -176,17 +173,7 @@
 </ul>
 </div>
 
-<div class="dev-status">
-<h2 data-toc-skip>Dev status</h2>
-<ul class="list-unstyled">
-<li><a href="https://lifecycle.r-lib.org/articles/stages.html#stable" class="external-link"><img src="https://img.shields.io/badge/lifecycle-stable-brightgreen.svg" alt="Lifecycle"></a></li>
-<li><a href="https://github.com/dplecko/fairadapt/actions?query=workflow%3Abuild" class="external-link"><img src="https://github.com/dplecko/fairadapt/workflows/build/badge.svg" alt="R build status"></a></li>
-<li><a href="https://github.com/dplecko/fairadapt/actions?query=workflow%3Acheck" class="external-link"><img src="https://github.com/dplecko/fairadapt/workflows/check/badge.svg" alt="R check status"></a></li>
-<li><a href="https://github.com/dplecko/fairadapt/actions?query=workflow%3Apkgdown" class="external-link"><img src="https://github.com/dplecko/fairadapt/workflows/pkgdown/badge.svg" alt="pkgdown build status"></a></li>
-<li><a href="https://github.com/dplecko/fairadapt/actions?query=workflow%3Acoverage" class="external-link"><img src="https://github.com/dplecko/fairadapt/workflows/coverage/badge.svg" alt="covr status"></a></li>
-<li><a href="https://app.codecov.io/gh/dplecko/fairadapt" class="external-link"><img src="https://codecov.io/gh/dplecko/fairadapt/branch/main/graph/badge.svg?token=8A0EL5N4RE" alt="Codecov test coverage"></a></li>
-</ul>
-</div>
+
 
   </div>
 </div>
@@ -199,7 +186,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer>

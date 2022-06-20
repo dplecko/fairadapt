@@ -96,30 +96,49 @@ additional meta-information) and returns an object on which the
     <dl><dt>data</dt>
 <dd><p>A <code>data.frame</code> with data to be used for quantile
 regression.</p></dd>
+
+
 <dt>A.root</dt>
 <dd><p>A <code>logical(1L)</code> indicating whether the protected
 attribute <code>A</code> is a root node of the causal graph. Used for splitting the
 quantile regression.</p></dd>
+
+
 <dt>ind</dt>
 <dd><p>A <code>logical</code> vector of length <code>nrow(data)</code>, indicating
 which
 samples have the baseline value of the protected attribute.</p></dd>
+
+
 <dt>min.node.size</dt>
 <dd><p>Forwarded to <code><a href="https://rdrr.io/pkg/ranger/man/ranger.html" class="external-link">ranger::ranger()</a></code>.</p></dd>
+
+
 <dt>...</dt>
 <dd><p>Forwarded to further methods.</p></dd>
+
+
 <dt>tau</dt>
 <dd><p>Forwarded to <code><a href="https://rdrr.io/pkg/quantreg/man/rq.html" class="external-link">quantreg::rq()</a></code> or <code><a href="https://rdrr.io/pkg/qrnn/man/mcqrnn.html" class="external-link">qrnn::mcqrnn.fit()</a></code>.</p></dd>
+
+
 <dt>iter.max</dt>
 <dd><p>Forwarded to <code><a href="https://rdrr.io/pkg/qrnn/man/mcqrnn.html" class="external-link">qrnn::mcqrnn.fit()</a></code>.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>ranger</code> or a <code>rangersplit</code> S3 object, depending on the
-value of the <code>A.root</code> argument, for <code>rangerQuants()</code>.
-A <code>rqs</code> or a <code>quantregsplit</code> S3 object, depending on the
-value of the <code>A.root</code> argument, for <code>linearQuants()</code>.
-An <code> mcqrnn</code> S3 object for <code> mcqrnnQuants()</code>.</p>
+    
+
+<p>A <code>ranger</code> or a <code>rangersplit</code> S3 object, depending on the
+value of the <code>A.root</code> argument, for <code>rangerQuants()</code>.</p>
+
+
+<p>A <code>rqs</code> or a <code>quantregsplit</code> S3 object, depending on the
+value of the <code>A.root</code> argument, for <code>linearQuants()</code>.</p>
+
+
+<p>An <code> mcqrnn</code> S3 object for <code> mcqrnnQuants()</code>.</p>
     </div>
     <div id="details">
     <h2>Details</h2>
@@ -150,7 +169,7 @@ regression neural networks (<code>mcqrnn</code> package) in the Quantile Learnin
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>

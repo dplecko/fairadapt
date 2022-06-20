@@ -71,19 +71,28 @@
     <dl><dt>x</dt>
 <dd><p>Object of class <code>fairadapt</code>, a result of an adaptation
 procedure.</p></dd>
+
+
 <dt>train.id</dt>
 <dd><p>A vector of indices specifying which rows of the training
 data should be displayed.</p></dd>
+
+
 <dt>test.id</dt>
 <dd><p>A vector of indices specifying which rows of the test
 data should be displayed.</p></dd>
+
+
 <dt>cols</dt>
 <dd><p>A <code>character</code> vector, subset of <code>names(train.data)</code>,
 which specifies which subset of columns is to be displayed in the result.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
-    <p>A <code>data.frame</code>, containing the original and adapted values
+    
+
+<p>A <code>data.frame</code>, containing the original and adapted values
 of the requested individuals. Adapted columns have <code>_adapted</code> appended
 to their original name.</p>
     </div>
@@ -108,18 +117,18 @@ to their original name.</p>
 <span class="r-in"><span class="op">)</span></span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">fairTwins</span><span class="op">(</span><span class="va">uni_ada</span>, train.id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   gender      score score_adapted        edu edu_adapted         test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1  1.9501728     0.9672536  1.3499572  0.65576177  1.617739679</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0 -2.3502495    -2.3502495 -1.9779234 -1.97792341 -3.121796235</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      1  0.6285619    -0.1297838  0.6263626 -0.04401245  0.530034686</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      1  0.7064857     0.1347758  0.8142112  0.20083711  0.004573003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      1  0.3678313     0.2441122  1.8415242  0.95765053  1.193677123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   gender      score score_adapted        edu  edu_adapted         test</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1  1.9501728    0.82145441  1.3499572  0.509482542  1.617739679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0 -2.3502495   -2.35024955 -1.9779234 -1.977923412 -3.121796235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      1  0.6285619   -0.04234933  0.6263626  0.008667341  0.530034686</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      1  0.7064857    0.13379725  0.8142112 -0.037313912  0.004573003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      1  0.3678313    0.23076887  1.8415242  0.877554170  1.193677123</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   test_adapted</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.084950383</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -3.121796235</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.004056565</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.731479620</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.568883700</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1    0.8695999</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2   -3.1217962</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3   -0.1083606</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4   -0.6860686</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5    0.5688837</span>
 </code></pre></div>
     </div>
   </div>
@@ -134,7 +143,7 @@ to their original name.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.2.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
 </div>
 
       </footer></div>
