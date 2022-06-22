@@ -82,7 +82,7 @@ options(
   kableExtra.latex.load_packages = FALSE
 )
 
-quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
+quick_build <- quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
   isTRUE(as.logical(Sys.getenv("CI"))) ||
   !identical(Sys.getenv("FAIRADAPT_VIGNETTE_QUICK_BUILD"), "false")
 
@@ -804,10 +804,10 @@ The COMPAS dataset contains information on 7214 individuals from Broward County,
 After loading the dataset, we run the `fairadaptBoot()` function twice, with two different values of the `rand.mode` argument. First, we consider only the finite sample uncertainty.
 
 ```{r, compas-boot-quick, eval = quick_build, echo = quick_build}
-cmp_trn <- tail(cmp_dat, n = 700L)
+cmp_trn <- tail(cmp_dat, n = 100L)
 cmp_tst <- head(cmp_dat, n = 100L)
 
-n_itr <- 5L
+n_itr <- 3L
 ```
 
 ```{r, compas-boot-slow, eval = !quick_build, echo = !quick_build}
@@ -1189,7 +1189,7 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
 Before applying `fairadapt()`, we first log-transform the salaries. We then inspect the densities of variable `salary` by sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear shift between the two distributions, indicating that `male` employees are better compensated than `female` employees. We perform the adaptation by using `n_samp` samples for training and `n_pred` samples for testing.
 
 ```{r, log-sub-quick, eval = quick_build, echo = quick_build}
-n_samp <- 3000
+n_samp <- 750
 n_pred <- 5
 ```
 
@@ -1204,6 +1204,7 @@ gov_dat$salary <- log(gov_dat$salary)
 gov_trn <- head(gov_dat, n = n_samp)
 gov_prd <- tail(gov_dat, n = n_pred)
 
+set.seed(22)
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
                      adj.mat = gov_adj, prot.attr = prt)
 ```
@@ -1232,6 +1233,7 @@ cowplot::plot_grid(panels, legend_join, ncol = 1, rel_heights = c(1, .08))
 For adapting additional testing data, we use the base \proglang{R} S3 generic function `predict()`:
 
 ```{r, census-predict}
+set.seed(2022)
 predict(gov_ada, newdata = gov_prd)
 ```
 
