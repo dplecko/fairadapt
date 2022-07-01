@@ -548,7 +548,6 @@ if (!run_sim && file.exists(bm_cache)) {
   saveRDS(bmark, file.path("..", "inst", "extdata", "bm_quant.rds"))
 }
 
-colnames(bmark) <- c("Random forest", "Neural network", "Linear regression")
 rownames(bmark) <- paste0("$T_{\\text{uni}}(", rownames(bmark), ")$")
 
 tbl <- data.frame(
