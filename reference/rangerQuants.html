@@ -21,7 +21,7 @@ computeQuants() generic can be called."><!-- mathjax --><script src="https://cdn
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.4</span>
       </span>
     </div>
 
@@ -71,24 +71,24 @@ additional meta-information) and returns an object on which the
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">rangerQuants</span><span class="op">(</span><span class="va">data</span>, <span class="va">A.root</span>, <span class="va">ind</span>, min.node.size <span class="op">=</span> <span class="fl">20</span>, <span class="va">...</span><span class="op">)</span>
-
-<span class="fu">linearQuants</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">A.root</span>,
-  <span class="va">ind</span>,
-  tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.001</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.005</span>, <span class="fl">0.995</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>, <span class="fl">0.999</span><span class="op">)</span>,
-  <span class="va">...</span>
-<span class="op">)</span>
-
-<span class="fu">mcqrnnQuants</span><span class="op">(</span>
-  <span class="va">data</span>,
-  <span class="va">A.root</span>,
-  <span class="va">ind</span>,
-  tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.005</span>, <span class="fl">0.995</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>,
-  iter.max <span class="op">=</span> <span class="fl">500</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">rangerQuants</span><span class="op">(</span><span class="va">data</span>, <span class="va">A.root</span>, <span class="va">ind</span>, min.node.size <span class="op">=</span> <span class="fl">20</span>, <span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">linearQuants</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">A.root</span>,</span>
+<span>  <span class="va">ind</span>,</span>
+<span>  tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0.001</span>, <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.005</span>, <span class="fl">0.995</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>, <span class="fl">0.999</span><span class="op">)</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">mcqrnnQuants</span><span class="op">(</span></span>
+<span>  <span class="va">data</span>,</span>
+<span>  <span class="va">A.root</span>,</span>
+<span>  <span class="va">ind</span>,</span>
+<span>  tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq</a></span><span class="op">(</span><span class="fl">0.005</span>, <span class="fl">0.995</span>, by <span class="op">=</span> <span class="fl">0.01</span><span class="op">)</span>,</span>
+<span>  iter.max <span class="op">=</span> <span class="fl">500</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -169,7 +169,7 @@ regression neural networks (<code>mcqrnn</code> package) in the Quantile Learnin
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

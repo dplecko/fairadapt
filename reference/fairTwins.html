@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.4</span>
       </span>
     </div>
 
@@ -63,7 +63,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fairTwins</span><span class="op">(</span><span class="va">x</span>, train.id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">train</span><span class="op">)</span><span class="op">)</span>, test.id <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fairTwins</span><span class="op">(</span><span class="va">x</span>, train.id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">x</span><span class="op">$</span><span class="va">train</span><span class="op">)</span><span class="op">)</span>, test.id <span class="op">=</span> <span class="cn">NULL</span>, cols <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -99,36 +99,36 @@ to their original name.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">n_samp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
-<span class="r-in"><span class="va">uni_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="st">"gender"</span>, <span class="st">"edu"</span>, <span class="st">"test"</span>, <span class="st">"score"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">uni_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="fl">0</span>,     <span class="fl">1</span>,      <span class="fl">1</span>,       <span class="fl">0</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">1</span>,       <span class="fl">1</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">1</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">0</span><span class="op">)</span>,</span>
-<span class="r-in">                  ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>,</span>
-<span class="r-in">                  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span class="r-in">                  byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">uni_ada</span> <span class="op">&lt;-</span> <span class="fu"><a href="fairadapt.html">fairadapt</a></span><span class="op">(</span><span class="va">score</span> <span class="op">~</span> <span class="va">.</span>,</span>
-<span class="r-in">  train.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span>
-<span class="r-in">  test.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span>
-<span class="r-in">  adj.mat <span class="op">=</span> <span class="va">uni_adj</span>,</span>
-<span class="r-in">  prot.attr <span class="op">=</span> <span class="st">"gender"</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">fairTwins</span><span class="op">(</span><span class="va">uni_ada</span>, train.id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">n_samp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></span>
+<span class="r-in"><span><span class="va">uni_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="st">"gender"</span>, <span class="st">"edu"</span>, <span class="st">"test"</span>, <span class="st">"score"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">uni_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="fl">0</span>,     <span class="fl">1</span>,      <span class="fl">1</span>,       <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">1</span>,       <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">0</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">uni_ada</span> <span class="op">&lt;-</span> <span class="fu"><a href="fairadapt.html">fairadapt</a></span><span class="op">(</span><span class="va">score</span> <span class="op">~</span> <span class="va">.</span>,</span></span>
+<span class="r-in"><span>  train.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  test.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  adj.mat <span class="op">=</span> <span class="va">uni_adj</span>,</span></span>
+<span class="r-in"><span>  prot.attr <span class="op">=</span> <span class="st">"gender"</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">fairTwins</span><span class="op">(</span><span class="va">uni_ada</span>, train.id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   gender      score score_adapted        edu edu_adapted         test</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1  1.9501728    0.96725357  1.3499572  0.69504770  1.617739679</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0 -2.3502495   -2.35024955 -1.9779234 -1.97792341 -3.121796235</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3      1  0.6285619   -0.16316311  0.6263626  0.06527531  0.530034686</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4      1  0.7064857    0.05909979  0.8142112  0.09755748  0.004573003</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5      1  0.3678313    0.01747699  1.8415242  0.84408446  1.193677123</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1      1  1.9501728   1.934820828  1.3499572  0.79948061  1.617739679</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2      0 -2.3502495  -2.350249546 -1.9779234 -1.97792341 -3.121796235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3      1  0.6285619   0.001971122  0.6263626  0.01456239  0.530034686</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4      1  0.7064857   0.277094270  0.8142112 -0.03731391  0.004573003</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5      1  0.3678313   0.296845743  1.8415242  0.87755417  1.193677123</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   test_adapted</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1    0.8700770</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2   -3.1217962</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3   -0.2444584</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4   -0.7569210</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5    0.6538001</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1  1.169657867</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2 -3.121796235</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3 -0.004056565</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 -0.829381258</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5  0.544826681</span>
 </code></pre></div>
     </div>
   </div>
@@ -143,7 +143,7 @@ to their original name.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

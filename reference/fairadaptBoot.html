@@ -24,7 +24,7 @@ see the fairadapt vignette."><!-- mathjax --><script src="https://cdnjs.cloudfla
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.4</span>
       </span>
     </div>
 
@@ -77,22 +77,22 @@ see the <code>fairadapt</code> vignette.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">fairadaptBoot</span><span class="op">(</span>
-  <span class="va">formula</span>,
-  <span class="va">prot.attr</span>,
-  <span class="va">adj.mat</span>,
-  <span class="va">train.data</span>,
-  test.data <span class="op">=</span> <span class="cn">NULL</span>,
-  cfd.mat <span class="op">=</span> <span class="cn">NULL</span>,
-  top.ord <span class="op">=</span> <span class="cn">NULL</span>,
-  res.vars <span class="op">=</span> <span class="cn">NULL</span>,
-  quant.method <span class="op">=</span> <span class="va">rangerQuants</span>,
-  keep.object <span class="op">=</span> <span class="cn">FALSE</span>,
-  n.boot <span class="op">=</span> <span class="fl">100</span>,
-  rand.mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"finsamp"</span>, <span class="st">"quant"</span>, <span class="st">"both"</span><span class="op">)</span>,
-  test.seed <span class="op">=</span> <span class="fl">2022</span>,
-  <span class="va">...</span>
-<span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">fairadaptBoot</span><span class="op">(</span></span>
+<span>  <span class="va">formula</span>,</span>
+<span>  <span class="va">prot.attr</span>,</span>
+<span>  <span class="va">adj.mat</span>,</span>
+<span>  <span class="va">train.data</span>,</span>
+<span>  test.data <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  cfd.mat <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  top.ord <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  res.vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  quant.method <span class="op">=</span> <span class="va">rangerQuants</span>,</span>
+<span>  keep.object <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  n.boot <span class="op">=</span> <span class="fl">100</span>,</span>
+<span>  rand.mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"finsamp"</span>, <span class="st">"quant"</span>, <span class="st">"both"</span><span class="op">)</span>,</span>
+<span>  test.seed <span class="op">=</span> <span class="fl">2022</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -192,25 +192,25 @@ Fair Data Adaptation with Quantile Preservation</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">n_samp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
-<span class="r-in"><span class="va">uni_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="st">"gender"</span>, <span class="st">"edu"</span>, <span class="st">"test"</span>, <span class="st">"score"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">uni_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="fl">0</span>,     <span class="fl">1</span>,      <span class="fl">1</span>,       <span class="fl">0</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">1</span>,       <span class="fl">1</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">1</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">0</span><span class="op">)</span>,</span>
-<span class="r-in">                  ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>,</span>
-<span class="r-in">                  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span class="r-in">                  byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">uni_ada</span> <span class="op">&lt;-</span> <span class="fu">fairadaptBoot</span><span class="op">(</span><span class="va">score</span> <span class="op">~</span> <span class="va">.</span>,</span>
-<span class="r-in">  train.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span>
-<span class="r-in">  test.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span>
-<span class="r-in">  adj.mat <span class="op">=</span> <span class="va">uni_adj</span>,</span>
-<span class="r-in">  prot.attr <span class="op">=</span> <span class="st">"gender"</span>,</span>
-<span class="r-in">  n.boot <span class="op">=</span> <span class="fl">5</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">uni_ada</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">n_samp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></span>
+<span class="r-in"><span><span class="va">uni_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="st">"gender"</span>, <span class="st">"edu"</span>, <span class="st">"test"</span>, <span class="st">"score"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">uni_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="fl">0</span>,     <span class="fl">1</span>,      <span class="fl">1</span>,       <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">1</span>,       <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">0</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">uni_ada</span> <span class="op">&lt;-</span> <span class="fu">fairadaptBoot</span><span class="op">(</span><span class="va">score</span> <span class="op">~</span> <span class="va">.</span>,</span></span>
+<span class="r-in"><span>  train.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  test.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  adj.mat <span class="op">=</span> <span class="va">uni_adj</span>,</span></span>
+<span class="r-in"><span>  prot.attr <span class="op">=</span> <span class="st">"gender"</span>,</span></span>
+<span class="r-in"><span>  n.boot <span class="op">=</span> <span class="fl">5</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">uni_ada</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Call:</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> fairadaptBoot(formula = score ~ ., prot.attr = "gender", adj.mat = uni_adj, </span>
@@ -233,7 +233,7 @@ Fair Data Adaptation with Quantile Preservation</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> test        0   0    0     1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> score       0   0    0     0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
-<span class="r-in"></span>
+<span class="r-in"><span></span></span>
 </code></pre></div>
     </div>
   </div>
@@ -248,7 +248,7 @@ Fair Data Adaptation with Quantile Preservation</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>

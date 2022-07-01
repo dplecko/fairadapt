@@ -98,7 +98,7 @@ seeded an important debate in the machine learning community about
 fairness of algorithms and their impact on decision-making.
 
 \hypertarget{definitions-of-fairness}{%
-\subsection{Definitions of Fairness}\label{definitions-of-fairness}}
+\subsection{Definitions of fairness}\label{definitions-of-fairness}}
 
 The first step towards understanding algorithmic fairness is about
 providing a formal definition of what fairness (or discrimination)
@@ -135,7 +135,7 @@ ones include:
 \end{enumerate}
 
 \hypertarget{fairness-tasks}{%
-\subsection{Fairness Tasks}\label{fairness-tasks}}
+\subsection{Fairness tasks}\label{fairness-tasks}}
 
 Apart from choosing a notion of fairness most appropriate to the setting
 that is analyzed, it is instructive to distinguish between two somewhat
@@ -173,7 +173,7 @@ focus is on demographic parity and equality of odds.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.7\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/software-1} 
+{\centering \includegraphics[width=0.7\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/software-1} 
 
 }
 
@@ -208,7 +208,7 @@ is \emph{causally aware}. This means that the bias removal performed by
 that generated the discrimination in the first place.
 
 \hypertarget{a-causal-approach}{%
-\subsection{A Causal Approach}\label{a-causal-approach}}
+\subsection{A causal approach}\label{a-causal-approach}}
 
 The discussion on algorithmic fairness is, however, not restricted to
 the machine learning domain. There are many legal and philosophical
@@ -308,8 +308,8 @@ introduction of \emph{resolving variables} are discussed in Section
 \ref{sec:extensions}.
 
 \hypertarget{university-admission-example}{%
-\subsection{University Admission
-Example}\label{university-admission-example}}
+\subsection{University admission
+example}\label{university-admission-example}}
 
 Consider for example a dataset about students applying for university
 admission. Let variable \(A\), gender, be the protected attribute
@@ -324,7 +324,7 @@ representation of how the variables affect each other is given in Figure
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/uni-adm-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/uni-adm-1} 
 
 }
 
@@ -368,7 +368,7 @@ step can be visualized as shown in Figure \ref{fig:quantmap}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/rel-edu-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/rel-edu-1} 
 
 }
 
@@ -390,7 +390,7 @@ satisfied with the intuitive notion provided by the above example is
 encouraged to go straight to Section \ref{implementation}.
 
 \hypertarget{structural-causal-models}{%
-\subsection{Structural Causal Models}\label{structural-causal-models}}
+\subsection{Structural causal models}\label{structural-causal-models}}
 
 In order to describe the causal mechanisms of a system, a
 \emph{structural causal model} (SCM) can be hypothesized, which fully
@@ -439,7 +439,7 @@ Semi-Markovian case, where variables \(U_i\) are allowed to share
 information, see Section \ref{sec:extensions}).
 
 \hypertarget{markovian-scm-formulation}{%
-\subsection{Markovian SCM Formulation}\label{markovian-scm-formulation}}
+\subsection{Markovian SCM formulation}\label{markovian-scm-formulation}}
 
 Let \(Y\) be the outcome of interest, taking values in \(\mathbbm{R}\).
 Let \(A\) be the binary protected attribute taking two values \(a, a'\).
@@ -642,8 +642,8 @@ written in our notation as
 respectively.
 
 \hypertarget{specifying-the-graphical-model}{%
-\subsection{Specifying the Graphical
-Model}\label{specifying-the-graphical-model}}
+\subsection{Specifying the graphical
+model}\label{specifying-the-graphical-model}}
 
 The algorithm used for fair data adaption in \texttt{fairadapt()} is
 based on graphical causal model \(\mathcal{G}\) (see Algorithm
@@ -664,7 +664,7 @@ R> uni_graph <- graphModel(uni_adj)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/graph-plot-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/graph-plot-1} 
 
 }
 
@@ -681,7 +681,7 @@ observable variables \(V\), and specify it as a \texttt{character}
 vector, using the \texttt{top.ord} argument.
 
 \hypertarget{quantile-learning-step}{%
-\subsection{Quantile Learning Step}\label{quantile-learning-step}}
+\subsection{Quantile learning step}\label{quantile-learning-step}}
 
 The most common and recommended usage of \texttt{fairadapt()} follows a
 typical machine learning framework. We start by calling the
@@ -711,7 +711,7 @@ intention that \texttt{test.data} is specified as an input to the
 \texttt{predict()} function at a later stage.
 
 \hypertarget{quantile-methods}{%
-\subsubsection{Quantile Methods}\label{quantile-methods}}
+\subsubsection{Quantile methods}\label{quantile-methods}}
 
 The quantile learning step of Algorithm \ref{algo:fairadapt} can in
 principle be carried out by several methods, three of which are
@@ -745,22 +745,22 @@ methods is available from Table \ref{tab:qmethods}.
 \centering
 \begin{tabular}{llll}
   \toprule
- & Random Forests & Neural Networks & Linear Regression \\ 
+ & Random forest & Neural network & Linear regression \\ 
   \midrule
 \proglang{R}-package & \pkg{ranger} & \pkg{qrnn} & \pkg{quantreg} \\ 
   \texttt{quant.method} & \code{rangerQuants} & \code{mcqrnnQuants} & \code{linearQuants} \\ 
-  complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ 
-  \makecell[l]{default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1 hidden layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\ 
+  Complexity & $O(np\log n)$ & $O(npn_{\text{epochs}})$ & $O(p^2n)$ \\ 
+  \makecell[l]{Default\\parameters} & \makecell[l]{$ntrees = 500$\\$mtry = \sqrt{p}$} & \makecell[l]{1 hidden layer\\fully connected\\feed-forward\\network} & \makecell[l]{\code{"br"} method of\\Barrodale and\\Roberts used for\\fitting} \\ 
   $T_{\text{uni}}(200)$ & 0.4 & 37.7 & 0.2 \\ 
   $T_{\text{uni}}(500)$ & 0.9 & 96.8 & 0.4 \\ 
    \bottomrule
 \end{tabular}
-\caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T_{\text{uni}}(n)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and $n$ testing samples. The runtimes were obtained on a system with Intel Core i7-8750H CPU @ 2.2GHz running MacOS Big Sur 11.6. The version of R was 4.2.0 "Vigorous Calisthenics" with \pkg{quantreg} version 5.93, \pkg{ranger} version 0.13.1, and \pkg{mcqrnn} version 2.0.5.} 
+\caption{Summary table of different quantile regression methods. $n$ is the number of samples, $p$ number of covariates, $n_{\text{epochs}}$ number of training epochs for the neural network. $T_{\text{uni}}(n)$ denotes the runtime of different methods on the university admission dataset, with $n$ training and $n$ testing samples. The runtimes were obtained on a system with Intel Core i7-8750H CPU @ 2.2GHz running MacOS Big Sur 11.6. The version of \proglang{R} was 4.2.0 "Vigorous Calisthenics" with \pkg{quantreg} version 5.93, \pkg{ranger} version 0.13.1, and \pkg{mcqrnn} version 2.0.5.} 
 \label{tab:qmethods}
 \end{table}
 
 \hypertarget{influencing-the-fit}{%
-\subsubsection{Influencing the Fit}\label{influencing-the-fit}}
+\subsubsection{Influencing the fit}\label{influencing-the-fit}}
 
 The quantile methods shown in Table \ref{tab:qmethods} make calls to
 specific functions that perform quantile regression. These functions
@@ -769,7 +769,7 @@ forwards arguments passed as \texttt{...} to the function specified as
 \texttt{quant.method}.
 
 \hypertarget{computational-speed}{%
-\paragraph{Computational Speed}\label{computational-speed}}
+\paragraph{Computational speed}\label{computational-speed}}
 
 An important consideration in choosing values for optional arguments of
 specific quantile regression functions is computational speed. For
@@ -795,7 +795,7 @@ number of samples becomes large (using \texttt{method} equal to
 point method, which may be preferable for large samples).
 
 \hypertarget{fit-quality}{%
-\paragraph{Fit Quality}\label{fit-quality}}
+\paragraph{Fit quality}\label{fit-quality}}
 
 Both \texttt{rangerQuants()} and \texttt{mcqrnnQuants()} expose flexible
 machine learning tools with several parameters that impact fit quality.
@@ -822,7 +822,7 @@ function whose minimizer is the \(\tau\)-quantile. The function
                     \end{cases}
 \]
 
-A smaller empirical loss based on Equation \eqref{eq:quantloss}
+A smaller empirical loss based on Equation \ref{eq:quantloss}
 corresponds to better fit quality. For hyperparameter tuning we can
 perform cross-validation (fitting the quantile regression on separate
 folds), which is directly available within the \texttt{fairadapt()}
@@ -879,8 +879,8 @@ should therefore be of interest mostly to advanced users (and hence we
 do not perform parameter tuning here explicitly).
 
 \hypertarget{extending-to-custom-methods}{%
-\subsubsection{Extending to Custom
-Methods}\label{extending-to-custom-methods}}
+\subsubsection{Extending to custom
+methods}\label{extending-to-custom-methods}}
 
 The above-mentioned set of methods is not exhaustive. Further options
 are conceivable and therefore \pkg{fairadapt} provides an extension
@@ -943,7 +943,7 @@ For an example, see the \texttt{computeQuants.ranger()} method for a
 \texttt{computeQuants()} generic.
 
 \hypertarget{fair-twin-inspection}{%
-\subsection{Fair-Twin Inspection}\label{fair-twin-inspection}}
+\subsection{Fair-twin inspection}\label{fair-twin-inspection}}
 
 We now turn to a useful property of \pkg{fairadapt}, which allows the
 user to explore counterfactual instances for different individuals in
@@ -984,7 +984,7 @@ the assumed causal model and resolving variables (see Section
 \ref{sec:extensions} for resolving variables).
 
 \hypertarget{sec:uncq}{%
-\section{Uncertainty Quantification}\label{sec:uncq}}
+\section{Uncertainty quantification}\label{sec:uncq}}
 
 The user might naturally be interested in uncertainty quantification of
 the procedure performed in \texttt{fairadapt()}. In order to explain how
@@ -994,7 +994,7 @@ when using \texttt{fairadapt()} (see Figure \ref{fig:workflow-tikz}).
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/workflow-tikz-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/workflow-tikz-1} 
 
 }
 
@@ -1046,18 +1046,19 @@ considered:
   \textbf{Inherent uncertainty in the quantiles}: A second source of
   uncertainty arises from the uncertainty in quantile estimation and is
   specific to \pkg{fairadapt}. As described in Section \ref{methodology}
-  (see also Figure \ref{fig:quantmap}), the fairadapt procedure aims to
-  preserve the relative quantile of the variable, when computing the
-  \(do(A=a)\) intervention. However, when we are working with variables
-  that are not continuous, defining a quantile becomes more
+  (see also Figure \ref{fig:quantmap}), the \texttt{fairadapt()}
+  procedure aims to preserve the relative quantile of the variable, when
+  computing the \(do(A=a)\) intervention. However, when we are working
+  with variables that are not continuous, defining a quantile becomes
+  more
   difficult\footnote{For example in the case where we have a binary $X \in \lbrace 0, 1 \rbrace$, it is impossible to define what a 70\% quantile is, as opposed to the continuous case (of a Gaussian variable $X$ for example), where no such challenge exists.}.
   Therefore, in presence of discrete variables, due to the imperfect
-  estimation of quantiles, the fairadapt procedure has some inherent
-  randomness. This randomness would still persist even if we had
-  infinite training samples in \(\mathcal{D}_{train}\). Importantly, to
-  achieve fair predictions, taking an expectation over this randomness
-  is not feasible. For a detailed discussion of why this is the case,
-  refer to \citep[Section~5]{plecko2020fair}.
+  estimation of quantiles, the \texttt{fairadapt()} procedure has some
+  inherent randomness. This randomness would still persist even if we
+  had infinite training samples in \(\mathcal{D}_{train}\). Importantly,
+  to achieve fair predictions, taking an expectation over this
+  randomness is not feasible. For a detailed discussion of why this is
+  the case, refer to \citep[Section~5]{plecko2020fair}.
 \end{itemize}
 
 For quantifying uncertainty, we use the \texttt{fairadaptBoot()}
@@ -1151,7 +1152,7 @@ A possible causal graph for the COMPAS dataset is given in Figure
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.4\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/compas-graph-1} 
+{\centering \includegraphics[width=0.4\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/compas-graph-1} 
 
 }
 
@@ -1223,14 +1224,14 @@ R> pred_quant <- do.call(cbind, lapply(pred_quant, extract_pred))
 \end{CodeChunk}
 
 \hypertarget{analyzing-the-uncertainty}{%
-\subsection{Analyzing the Uncertainty}\label{analyzing-the-uncertainty}}
+\subsection{Analyzing the uncertainty}\label{analyzing-the-uncertainty}}
 
 In order to analyze the different sets of predictions
 \(\widehat{Y}^{fair}_{test}\), two slightly different perspectives can
 be taken, and we elaborate on both in the following sections.
 
 \hypertarget{decision-maker-analysis}{%
-\subsubsection{Decision-maker Analysis}\label{decision-maker-analysis}}
+\subsubsection{Decision-maker analysis}\label{decision-maker-analysis}}
 
 The first way to analyze the uncertainty of the predictions is from the
 viewpoint of the decision-maker. By decision-maker, in this context we
@@ -1355,7 +1356,7 @@ Warning: Removed 75 rows containing non-finite values (stat_density).
 \end{CodeOutput}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/compas-dm-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/compas-dm-1} 
 
 }
 
@@ -1364,7 +1365,7 @@ Warning: Removed 75 rows containing non-finite values (stat_density).
 \end{CodeChunk}
 
 \hypertarget{individual-analysis}{%
-\subsubsection{Individual Analysis}\label{individual-analysis}}
+\subsubsection{Individual analysis}\label{individual-analysis}}
 
 The other point of view we can take in quantifying uncertainty is that
 of the individual experiencing fair decisions. In this case, we are not
@@ -1398,7 +1399,7 @@ of randomization.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/compas-indiv-1} 
+{\centering \includegraphics[width=1\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/compas-indiv-1} 
 
 }
 
@@ -1476,7 +1477,7 @@ matrix \texttt{gov\_cfd}:
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/census-tikz-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/census-tikz-1} 
 
 }
 
@@ -1509,7 +1510,7 @@ R> gov_grph <- graphModel(gov_adj, gov_cfd)
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/census-graph-1} 
+{\centering \includegraphics[width=0.9\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/census-graph-1} 
 
 }
 
@@ -1553,7 +1554,7 @@ become smaller. This can be done by comparing distributions of variable
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/census-vis-1} 
+{\centering \includegraphics{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/census-vis-1} 
 
 }
 
@@ -1648,7 +1649,7 @@ Section \ref{markovian-scm-formulation} exist, and these and are
 outlined in the following sections.
 
 \hypertarget{sec:resolvers}{%
-\subsection{Adding Resolving Variables}\label{sec:resolvers}}
+\subsection{Adding resolving variables}\label{sec:resolvers}}
 
 As we mentioned earlier, in some situations the protected attribute
 \(A\) might affect other variables in a non-discriminatory way. For
@@ -1729,7 +1730,7 @@ R> uni_res <- graphModel(uni_adj, res.vars = "test")
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/res-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/res-graph-1} 
 
 }
 
@@ -1743,8 +1744,8 @@ A visualization of the corresponding graph is available from Figure
 same.
 
 \hypertarget{semi-markovian-and-topological-ordering-variant}{%
-\subsection{Semi-Markovian and Topological Ordering
-Variant}\label{semi-markovian-and-topological-ordering-variant}}
+\subsection{Semi-Markovian and topological ordering
+variant}\label{semi-markovian-and-topological-ordering-variant}}
 
 In Section \ref{methodology} we focused on the Markovian case, which
 assumes that all exogenous variables \(U_i\) are mutually independent.
@@ -1761,7 +1762,7 @@ in Figures \ref{fig:semi-markov} and \ref{fig:semi-graph}.
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/semi-markov-1} 
+{\centering \includegraphics[width=0.5\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/semi-markov-1} 
 
 }
 
@@ -1835,7 +1836,7 @@ R> semi <- fairadapt(score ~ ., train.data = uni_trn,
 \begin{CodeChunk}
 \begin{figure}
 
-{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/RtmpwLETnH/filedb456828715/articles/jss_files/figure-latex/semi-graph-1} 
+{\centering \includegraphics[width=0.6\linewidth]{/private/var/folders/24/8k48jl6d249_n_qfxwsl6xvm0000gn/T/Rtmpx3uzW1/file8761fcea62d/articles/jss_files/figure-latex/semi-graph-1} 
 
 }
 
@@ -1857,7 +1858,7 @@ will in principle have better performance.
 
 \hypertarget{questions-of-identifiability}{%
 \subsection{Questions of
-Identifiability}\label{questions-of-identifiability}}
+identifiability}\label{questions-of-identifiability}}
 
 So far we did not discuss whether it is always possible to carry out the
 counterfactual inference described in Section \ref{methodology}. In the
@@ -1896,8 +1897,8 @@ meaning that certain special cases, which are in principle identifiable,
 are currently not handled.
 
 \hypertarget{future-avenues-to-be-explored}{%
-\subsection{Future Avenues to be
-Explored}\label{future-avenues-to-be-explored}}
+\subsection{Future avenues to be
+explored}\label{future-avenues-to-be-explored}}
 
 We conclude with a brief look at the possible extensions of the
 \pkg{fairadapt} package, which we hope to consider in future work:

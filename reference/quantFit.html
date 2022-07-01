@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">Fair Data Adaptation</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.2.4</span>
       </span>
     </div>
 
@@ -63,7 +63,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">quantFit</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">quantFit</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -87,27 +87,27 @@ the 25%, 50% and 75% quantile loss functions, for each variable.</p>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="va">n_samp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span>
-<span class="r-in"><span class="va">uni_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="st">"gender"</span>, <span class="st">"edu"</span>, <span class="st">"test"</span>, <span class="st">"score"</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">uni_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="fl">0</span>,     <span class="fl">1</span>,      <span class="fl">1</span>,       <span class="fl">0</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">1</span>,       <span class="fl">1</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">1</span>,</span>
-<span class="r-in">                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">0</span><span class="op">)</span>,</span>
-<span class="r-in">                  ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>,</span>
-<span class="r-in">                  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span>
-<span class="r-in">                  byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="va">uni_ada</span> <span class="op">&lt;-</span> <span class="fu"><a href="fairadapt.html">fairadapt</a></span><span class="op">(</span><span class="va">score</span> <span class="op">~</span> <span class="va">.</span>,</span>
-<span class="r-in">  train.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span>
-<span class="r-in">  test.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span>
-<span class="r-in">  adj.mat <span class="op">=</span> <span class="va">uni_adj</span>,</span>
-<span class="r-in">  prot.attr <span class="op">=</span> <span class="st">"gender"</span>,</span>
-<span class="r-in">  eval.qfit <span class="op">=</span> <span class="fl">3L</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">quantFit</span><span class="op">(</span><span class="va">uni_ada</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">n_samp</span> <span class="op">&lt;-</span> <span class="fl">200</span></span></span>
+<span class="r-in"><span><span class="va">uni_dim</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="st">"gender"</span>, <span class="st">"edu"</span>, <span class="st">"test"</span>, <span class="st">"score"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">uni_adj</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/matrix.html" class="external-link">matrix</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span>       <span class="fl">0</span>,     <span class="fl">1</span>,      <span class="fl">1</span>,       <span class="fl">0</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">1</span>,       <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">1</span>,</span></span>
+<span class="r-in"><span>                           <span class="fl">0</span>,     <span class="fl">0</span>,      <span class="fl">0</span>,       <span class="fl">0</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  ncol <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/length.html" class="external-link">length</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  dimnames <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/rep.html" class="external-link">rep</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="va">uni_dim</span><span class="op">)</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                  byrow <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="va">uni_ada</span> <span class="op">&lt;-</span> <span class="fu"><a href="fairadapt.html">fairadapt</a></span><span class="op">(</span><span class="va">score</span> <span class="op">~</span> <span class="va">.</span>,</span></span>
+<span class="r-in"><span>  train.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  test.data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">tail</a></span><span class="op">(</span><span class="va">uni_admission</span>, n <span class="op">=</span> <span class="va">n_samp</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  adj.mat <span class="op">=</span> <span class="va">uni_adj</span>,</span></span>
+<span class="r-in"><span>  prot.attr <span class="op">=</span> <span class="st">"gender"</span>,</span></span>
+<span class="r-in"><span>  eval.qfit <span class="op">=</span> <span class="fl">3L</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">quantFit</span><span class="op">(</span><span class="va">uni_ada</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>       edu      test     score </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 0.3439715 0.2618339 0.3284067 </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 0.3463112 0.2601742 0.3283719 </span>
 </code></pre></div>
     </div>
   </div>
@@ -122,7 +122,7 @@ the 25%, 50% and 75% quantile loss functions, for each variable.</p>
 </div>
 
 <div class="pkgdown">
-  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.4.</p>
+  <p></p><p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
 </div>
 
       </footer></div>
