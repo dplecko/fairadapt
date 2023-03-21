@@ -9,4 +9,4 @@ There were no ERRORs, WARNINGs or NOTEs.
 ## Update
 This is an update. In this version I have:
 
-* fixed the vignette typesetting
+* fixed the ggplot2 related warnings that appeared on CRAN
