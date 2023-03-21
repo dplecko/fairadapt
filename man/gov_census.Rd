@@ -5,7 +5,7 @@
 \alias{gov_census}
 \title{Census information of US government employees.}
 \format{
-A data frame with 204,309 rows and 10 variables:
+A data frame with 204,309 rows and 17 variables:
 \describe{
 \item{sex}{gender of the employee}
 \item{age}{employee age in years}

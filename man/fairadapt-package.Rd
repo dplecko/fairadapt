@@ -6,7 +6,7 @@
 \alias{_PACKAGE}
 \title{fairadapt: Fair Data Adaptation with Quantile Preservation}
 \description{
-An implementation of the fair data adaptation with quantile preservation described in Plecko & Meinshausen (2019) <arXiv:1911.06685>. The adaptation procedure uses the specified causal graph to pre-process the given training and testing data in such a way to remove the bias caused by the protected attribute. The procedure uses tree ensembles for quantile regression.
+An implementation of the fair data adaptation with quantile preservation described in Plecko & Meinshausen (2019) \href{https://arxiv.org/abs/1911.06685}{arXiv:1911.06685}. The adaptation procedure uses the specified causal graph to pre-process the given training and testing data in such a way to remove the bias caused by the protected attribute. The procedure uses tree ensembles for quantile regression.
 }
 \seealso{
 Useful links:

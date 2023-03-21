@@ -1,3 +1,7 @@
+# fairadapt 0.2.5
+Non-breaking changes:
+- remove reliance on deprecated ggplot2 functionality
+
 # fairadapt 0.2.2
 Non-breaking changes:
 -Addition of `fairadaptBoot()` functionality, which allows for bootstrap repetitions of the adaptation

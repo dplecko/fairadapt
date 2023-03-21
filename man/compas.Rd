@@ -5,7 +5,7 @@
 \alias{compas}
 \title{COMPAS dataset.}
 \format{
-A data frame with 1,000 rows and 4 variables:
+A data frame with 1,000 rows and 9 variables:
 \describe{
 \item{sex}{sex of the individual}
 \item{age}{age, measured in years}

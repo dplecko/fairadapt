@@ -1,12 +1,10 @@
-#' @importFrom ggplot2 autoplot ggplot aes geom_density ggtitle
+#' @importFrom ggplot2 autoplot ggplot aes geom_density ggtitle after_stat
 #' @importFrom ggplot2 scale_fill_discrete xlab scale_y_continuous
 #' @importFrom ggplot2 geom_bar geom_text theme_minimal position_fill
 #' @importFrom cowplot plot_grid
 #' @importFrom scales percent
 #' @export
-autoplot.fairadapt <- function(x, when = "after", ...) {
-
-  ..x.. <- ..count.. <- NULL
+autoplot.fairadapt <- function(object, when = "after", ...) {
 
   plt <- list()
 
@@ -14,17 +12,17 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
 
     whn <- switch(tgt, train = "before", adapt.train = "after")
 
-    vals <- x[[tgt]][[1L]]
-    protected <- x[["train"]][[x$prot.attr]]
+    vals <- object[[tgt]][[1L]]
+    protected <- object[["train"]][[object$prot.attr]]
     df <- data.frame(vals, protected)
 
     if (length(unique(vals)) > 2L) {
 
       plt[[tgt]] <- ggplot(df, aes(x = vals, fill = protected)) +
         geom_density(alpha = 0.4) +
-        scale_fill_discrete(name = x$prot.attr) +
+        scale_fill_discrete(name = object$prot.attr) +
         ggtitle(paste("Densities", whn , "adaptation")) +
-        xlab(names(x$train)[1L]) +
+        xlab(names(object$train)[1L]) +
         theme_minimal()
 
     } else {
@@ -34,31 +32,32 @@ autoplot.fairadapt <- function(x, when = "after", ...) {
         geom_text(
           aes(
             label = percent(
-              round(..count.. / tapply(..count.., ..x.. , sum)[..x..], 4)
+              round(after_stat(count) / tapply(after_stat(count), after_stat(x) ,
+                                               sum)[after_stat(x)], 4)
             )
           ), stat = "count", position = position_fill(0.5)
         ) +
         scale_y_continuous(labels = percent) +
-        scale_fill_discrete(name = names(x$train)[1L]) +
+        scale_fill_discrete(name = names(object$train)[1L]) +
         ggtitle(paste("Outcome proportions", whn, "adaptation")) +
-        xlab(x$prot.attr) +
+        xlab(object$prot.attr) +
         theme_minimal()
     }
   }
 
   switch(when,
-    before = plt[["train"]],
-    after = plt[["adapt.train"]],
-    plot_grid(plotlist = plt, ncol = 2L)
+         before = plt[["train"]],
+         after = plt[["adapt.train"]],
+         plot_grid(plotlist = plt, ncol = 2L)
   )
 }
 
 #' @export
 print.fairadapt <- function(x, ...) {
 
-  cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"), 
+  cat("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"),
       "\n\n", sep = "")
-  
+
   if (!is.null(x$adj.mat)) {
     vars <- setdiff(getDescendants(x$prot.attr, x$adj.mat), x$res.vars)
   } else {
@@ -76,7 +75,7 @@ print.fairadapt <- function(x, ...) {
   } else {
     cat("\nNo adapted variables\n")
   }
-  
+
   cat("\nBased on protected attribute", x$prot.attr, "\n")
 
   cat("\n  AND\n")
@@ -101,21 +100,21 @@ print.fairadapt <- function(x, ...) {
 
 #' @export
 summary.fairadapt <- function(object, ...) {
-  
+
   seq_row <- seq_len(nrow(object$train))
-  
+
   tv.start <- mean(object$train[[1L]][object$base.ind[seq_row]]) -
     mean(object$train[[1L]][!object$base.ind[seq_row]])
-  
+
   tv.end <- mean(object$adapt.train[[1L]][object$base.ind[seq_row]]) -
     mean(object$adapt.train[[1L]][!object$base.ind[seq_row]])
-  
+
   # FIXME: determine from top.ord?
   adapt.vars <- setdiff(
     getDescendants(object$prot.attr, object$adj.mat),
     object$res.vars
   )
-  
+
   structure(
     list(
       formula = object$formula,
@@ -137,7 +136,7 @@ summary.fairadapt <- function(object, ...) {
 print.summary.fairadapt <- function(x,
                                     digits = max(3L, getOption("digits") - 3L),
                                     ...) {
-  
+
   cat0("\nCall:\n", paste(deparse(x$adapt.call), sep = "\n", collapse = "\n"),
        "\n\n")
 
@@ -168,7 +167,7 @@ print.summary.fairadapt <- function(x,
 
   cat0("Total variation (after adaptation):  ",
        format(x$tv.end, digits = digits), "\n")
-    
+
   invisible(x)
 }
 
@@ -252,14 +251,14 @@ visualizeGraph.fairadapt <- function(x, ...) plot(x$graph, ...)
 
 #' Convenience function for returning adapted data
 #'
-#' @param x Object of class `fairadapt` or `fairadaptBoot`, a result of an 
+#' @param x Object of class `fairadapt` or `fairadaptBoot`, a result of an
 #' adaptation procedure.
 #' @param train A logical indicating whether train data should be returned.
 #' Defaults to `TRUE`. If `FALSE`, test data is returned.
 #' @return Either a `data.frame` when called on an `fairadapt` object, or a `list`
 #' of `data.frame`s with the adapted data of length `n.boot`, when called on a
 #' `fairadaptBoot` object.
-#' 
+#'
 #' @export
 adaptedData <- function(x, train = TRUE) {
   UseMethod("adaptedData", x)
@@ -275,7 +274,7 @@ adaptedData.fairadapt <- function(x, train = TRUE) {
 #' @rdname adaptedData
 #' @export
 adaptedData.fairadaptBoot <- function(x, train = TRUE) {
-  
+
   if (train && !x$keep.object) {
     stop("Adapted training data not available when `keep.object` = FALSE.")
   } else if (train && x$keep.object) {
@@ -322,7 +321,7 @@ fairTwins <- function(x, train.id = seq_len(nrow(x$train)), test.id = NULL,
 }
 
 #' @export
-fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)), 
+fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)),
                                 test.id = NULL, cols = NULL) {
 
   if (!is.null(cols) && !is.element(x$prot.attr, cols)) {
@@ -330,7 +329,7 @@ fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)),
   }
 
   if (!is.null(train.id)) {
-    
+
     if (!is.null(test.id)) {
       cat(
         "Both `train.id` and `test.id` specified. Using `train.id` argument.\n"
@@ -377,9 +376,9 @@ fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)),
 #' @details The `newdata` argument should be compatible with `adapt.test`
 #' argument that was used when constructing the `fairadapt` object. In
 #' particular, `newdata` should contain column names that appear in the `formula`
-#' argument that was used when calling `fairadapt()` (apart from the outcome 
+#' argument that was used when calling `fairadapt()` (apart from the outcome
 #' variable on the LHS of the formula).
-#' 
+#'
 #' @param object Object of class `fairadapt`, a result of an adaptation
 #' procedure.
 #' @param newdata A `data.frame` containing the new data.
@@ -437,7 +436,7 @@ predict.fairadapt <- function(object, newdata, ...) {
           is.integer(engine[[var]][["discrete"]]),
         msg = paste0("New, unseen values of variable ", var, ". Disallowed.")
       )
-      
+
       if (is.logical(engine[[var]][["discrete"]])) {
         newdata[, var] <- factor(newdata[, var],
                                  levels = engine[[var]][["unique.values"]])
@@ -462,7 +461,7 @@ predict.fairadapt <- function(object, newdata, ...) {
 
     # iii) decode discrete
     if (engine[[var]][["discrete"]]) {
-      
+
       if (is.integer(engine[[var]][["discrete"]])) {
         newdata[, var] <- as.integer(round(newdata[, var]))
         adapt[, var] <- as.integer(round(adapt[, var]))
@@ -474,7 +473,7 @@ predict.fairadapt <- function(object, newdata, ...) {
           decodeDiscrete(adapt[, var], engine[[var]][["unique.values"]],
                          engine[[var]][["type"]], length(adapt[, var]))
       }
-      
+
     }
   }
 
@@ -487,7 +486,7 @@ predict.fairadapt <- function(object, newdata, ...) {
 #' procedure.
 #' @param ... Ignored in this case.
 #' @return A `numeric` vector, containing the average empirical loss for
-#' the 25%, 50% and 75% quantile loss functions, for each variable. 
+#' the 25%, 50% and 75% quantile loss functions, for each variable.
 #' @examples
 #' n_samp <- 200
 #' uni_dim <- c(       "gender", "edu", "test", "score")
@@ -515,7 +514,7 @@ quantFit <- function(x, ...) {
 
 #' @export
 quantFit.fairadapt <- function(x, ...) {
-  
+
   qfit <- lapply(x$q.engine, `[[`, "qfit.score")
 
   assert_that(

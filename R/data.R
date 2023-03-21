@@ -16,7 +16,7 @@
 #' A real dataset from Broward County, Florida. Contains information on individuals
 #' released on parole, and whether they reoffended within two years.
 #'
-#' @format A data frame with 1,000 rows and 4 variables:
+#' @format A data frame with 1,000 rows and 9 variables:
 #' \describe{
 #'   \item{sex}{sex of the individual}
 #'   \item{age}{age, measured in years}
@@ -36,7 +36,7 @@
 #' of the employees of the US government. The data is taken from the 2018
 #' US Census data.
 #'
-#' @format A data frame with 204,309 rows and 10 variables:
+#' @format A data frame with 204,309 rows and 17 variables:
 #' \describe{
 #'     \item{sex}{gender of the employee}
 #'     \item{age}{employee age in years}
