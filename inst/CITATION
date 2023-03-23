@@ -1,16 +1,15 @@
 citHeader("To cite fairadapt in publications please use:")
 
-citEntry(entry = "Article",
+bibentry(
+  bibtype      = "Article",
   title        = "Fair data adaptation with quantile preservation",
-  author       = personList(as.person("Drago Plecko"),
-                   as.person("Nicolai Meinshausen")),
+  author       = c("Drago Plecko", "Nicolai Meinshausen"),
   journal      = "Journal of Machine Learning Research",
   year         = "2020",
   volume       = "21",
   number       = "242",
   pages        = "1--44",
   url          = "https://www.jmlr.org/papers/v21/19-966.html",
-
   textVersion  =
   paste("Drago Plecko, Nicolai Meinshausen (2020).",
         "Fair data adaptation with quantile preservation",
