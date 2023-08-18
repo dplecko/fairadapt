@@ -20,9 +20,9 @@ test_that("fairadapt", {
   adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
                     byrow = TRUE, dimnames = list(vars, vars))
 
-  fa.nms <- c("adapt.train", "adapt.test", "train", "test", "base.lvl", 
-              "attr.lvls", "base.ind", "formula", "res.vars", "prot.attr", 
-              "graph", "quant.method", "adapt.call", "adj.mat", "cfd.mat", 
+  fa.nms <- c("adapt.train", "adapt.test", "train", "test", "base.lvl",
+              "attr.lvls", "base.ind", "formula", "res.vars", "prot.attr",
+              "graph", "quant.method", "adapt.call", "adj.mat", "cfd.mat",
               "top.ord", "q.engine")
 
   # random forest
@@ -70,7 +70,7 @@ test_that("fairadapt", {
       names(which(adj.mat[, i] == 1L))
     )
   }
-  
+
   # quantFit()
   expect_error(quantFit(ran), regexp = "eval.qfit")
 
@@ -170,6 +170,9 @@ test_that("fairadapt", {
   expect_type(rto, "list")
   expect_named(rto, fa.nms, ignore.order = TRUE)
   expect_s3_class(rto, "fairadapt")
+  rto.sum <- summary(rto)
+  expect_s3_class(rto.sum, "summary.fairadapt")
+  expect_output(print(rto.sum), regexp = "Call:")
 
   # for (i in setdiff(vars, "a")) {
   #   expect_identical(
@@ -232,7 +235,7 @@ test_that("fairadapt", {
     fairadapt(two_year_recid ~ ., train.data = train, test.data = test,
               adj.mat = adj.mat, prot.attr = "race", seed = 203)
   )
-  
+
   expect_output(print(mod), regexp = "Call:")
   mod.sum <- summary(mod)
   expect_s3_class(mod.sum, "summary.fairadapt")

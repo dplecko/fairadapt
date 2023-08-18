@@ -75,13 +75,33 @@ adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
 adult <- readRDS(
   system.file("extdata", "uci_adult.rds", package = "fairadapt")
 )
-
 n <- nrow(adult) / 2
 
-mod <- fairadapt(income ~ ., train.data = head(adult, n = n),
-                 test.data = tail(adult, n = n), prot.attr = "sex",
-                 adj.mat = adj.mat, res.vars = "hours_per_week")
+mod <- fairadapt(income ~ ., 
+                 train.data = head(adult[, vars], n = n),
+                 test.data = tail(adult[, vars], n = n), 
+                 prot.attr = "sex", adj.mat = adj.mat, 
+                 res.vars = "hours_per_week")
 
-adapt.train <- mod[["adapt.train"]]
-adapt.test  <- mod[["adapt.test"]]
+adapt.train <- adaptedData(mod)
+adapt.test  <- adaptedData(mod, train = FALSE)
+
+summary(mod)
+#> 
+#> Call:
+#> fairadapt(formula = income ~ ., prot.attr = "sex", adj.mat = adj.mat, 
+#>     train.data = head(adult[, vars], n = n), test.data = tail(adult[, 
+#>         vars], n = n), res.vars = "hours_per_week")
+#> 
+#> Protected attribute:                 sex
+#> Protected attribute levels:          Female, Male
+#> Adapted variables:                   marital_status, education_num, workclass, occupation, income
+#> Resolving variables:                 hours_per_week, age, native_country
+#> 
+#> Number of training samples:          1000
+#> Number of test samples:              1000
+#> Quantile method:                     rangerQuants
+#> 
+#> Total variation (before adaptation): -0.2014
+#> Total variation (after adaptation):  -0.01676
 ```

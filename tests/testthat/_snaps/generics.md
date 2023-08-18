@@ -28,26 +28,22 @@
 
     Code
       summary(ad.rf)
-    Warning <simpleWarning>
-      argument is not numeric or logical: returning NA
-      argument is not numeric or logical: returning NA
-      argument is not numeric or logical: returning NA
-      argument is not numeric or logical: returning NA
     Output
       
       Call:
-      NULL
+      fairadapt(formula = y ~ ., prot.attr = "a", adj.mat = adj.mat, 
+          train.data = train, test.data = test)
       
       Protected attribute:                 a
       Protected attribute levels:          0, 1
-      Adapted variables:                   y, x
+      Adapted variables:                   x, y
       
       Number of training samples:          100
       Number of test samples:              100
       Quantile method:                     rangerQuants
       
-      Total variation (before adaptation): NA
-      Total variation (after adaptation):  NA
+      Total variation (before adaptation): -0.0153
+      Total variation (after adaptation):  -0.07085
 
 # generics, linear
 
@@ -79,26 +75,22 @@
 
     Code
       summary(ad.lin)
-    Warning <simpleWarning>
-      argument is not numeric or logical: returning NA
-      argument is not numeric or logical: returning NA
-      argument is not numeric or logical: returning NA
-      argument is not numeric or logical: returning NA
     Output
       
       Call:
-      NULL
+      fairadapt(formula = y ~ ., prot.attr = "a", adj.mat = adj.mat, 
+          train.data = train, test.data = test, quant.method = linearQuants)
       
       Protected attribute:                 a
       Protected attribute levels:          0, 1
-      Adapted variables:                   y, x
+      Adapted variables:                   x, y
       
       Number of training samples:          100
       Number of test samples:              100
       Quantile method:                     linearQuants
       
-      Total variation (before adaptation): NA
-      Total variation (after adaptation):  NA
+      Total variation (before adaptation): -0.0153
+      Total variation (after adaptation):  -0.05233
 
 # generics, cts
 
@@ -133,11 +125,12 @@
     Output
       
       Call:
-      NULL
+      fairadapt(formula = y ~ ., prot.attr = "a", adj.mat = adj.mat, 
+          train.data = cts, test.data = cts)
       
       Protected attribute:                 a
       Protected attribute levels:          0, 1
-      Adapted variables:                   y, x
+      Adapted variables:                   x, y
       
       Number of training samples:          100
       Number of test samples:              100
@@ -179,11 +172,12 @@
     Output
       
       Call:
-      NULL
+      fairadapt(formula = y ~ ., prot.attr = "a", adj.mat = adj.mat, 
+          train.data = cts, test.data = NULL)
       
       Protected attribute:                 a
       Protected attribute levels:          0, 1
-      Adapted variables:                   y, x
+      Adapted variables:                   x, y
       
       Number of training samples:          100
       Number of test samples:              0

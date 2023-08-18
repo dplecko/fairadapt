@@ -1,3 +1,7 @@
+# fairadapt 0.2.6
+Non-breaking changes:
+- update of the printing methods
+
 # fairadapt 0.2.5
 Non-breaking changes:
 - remove reliance on deprecated ggplot2 functionality

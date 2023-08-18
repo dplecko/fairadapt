@@ -2,10 +2,12 @@
 root <- rprojroot::find_root(rprojroot::has_file("fairadapt.Rproj"))
 require(readr)
 
-adult1 <- read_csv(file.path(root, "tests", "adult", "adult-data", "adult.data"),
+adult1 <- read_csv(file.path(root, "jmlr-paper", "real-data", "adult",
+                             "adult-data", "adult.data"),
                    col_names = FALSE)
 
-adult2 <- read_csv(file.path(root, "tests", "adult", "adult-data", "adult.test"),
+adult2 <- read_csv(file.path(root, "jmlr-paper", "real-data", "adult",
+                             "adult-data", "adult.test"),
                    col_names = FALSE)
 
 adult <- rbind(adult1, adult2)
@@ -107,14 +109,20 @@ plot_grid(plot_grid(p1 + theme(legend.position = "none"),
     get_legend(p1), nrow = 2L, rel_heights = c(1, 0.1))
 
 ggsave(paste0(file.path(root, "..", "Article", "UCIplot"), ".png"),
-  device = "png", width = 8, height = 4)
+       device = "png", width = 8, height = 4)
+
+# save external data example
+adult_save <- adult[sample(nrow(adult), 2000), ]
+names(adult_save)[names(adult_save) == "educatoin_num"] <- "education_num"
+saveRDS(adult_save, file = file.path(root, "inst", "extdata", "uci_adult.rds"))
 
 # subsampling to remove the bias
 adult <- adult[adult$race == "White", ]
 
 set.seed(12345)
 subset <- NULL
-for(i in sort(unique(adult$age))){
+for(i in sort(unique(adult$age))) {
+
   fem <- which(adult$age == i & adult$sex == "Female")
   m <- length(fem)
   if(length(which(adult$age == i & adult$sex == "Male")) < m) next

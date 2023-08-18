@@ -82,7 +82,8 @@ print.fairadapt <- function(x, ...) {
 
   if (is.null(x$adj.mat)) {
 
-    cat("\nBased on topological order:\n  ", x$top.ord, sep = "")
+    cat("\nBased on topological order:\n  ", paste(x$top.ord, collapse = " - "),
+        sep = "")
 
   } else {
 
@@ -103,17 +104,26 @@ summary.fairadapt <- function(object, ...) {
 
   seq_row <- seq_len(nrow(object$train))
 
-  tv.start <- mean(object$train[[1L]][object$base.ind[seq_row]]) -
-    mean(object$train[[1L]][!object$base.ind[seq_row]])
+  tv.start <- mean(as.numeric(object$train[[1L]][object$base.ind[seq_row]])) -
+    mean(as.numeric(object$train[[1L]][!object$base.ind[seq_row]]))
 
-  tv.end <- mean(object$adapt.train[[1L]][object$base.ind[seq_row]]) -
-    mean(object$adapt.train[[1L]][!object$base.ind[seq_row]])
+  tv.end <- mean(as.numeric(object$adapt.train[[1L]][object$base.ind[seq_row]])) -
+    mean(as.numeric(object$adapt.train[[1L]][!object$base.ind[seq_row]]))
 
   # FIXME: determine from top.ord?
-  adapt.vars <- setdiff(
-    getDescendants(object$prot.attr, object$adj.mat),
-    object$res.vars
-  )
+  if (!is.null(object$top.ord)) {
+
+    adapt.vars <- setdiff(
+      getDescendants(object$prot.attr, adj.mat = NULL, top.ord = object$top.ord),
+      object$res.vars
+    )
+  } else {
+
+    adapt.vars <- setdiff(
+      getDescendants(object$prot.attr, object$adj.mat),
+      object$res.vars
+    )
+  }
 
   structure(
     list(
@@ -126,6 +136,7 @@ summary.fairadapt <- function(object, ...) {
       adapt.vars = adapt.vars,
       tv.start = tv.start,
       tv.end = tv.end,
+      adapt.call = object$adapt.call,
       quant.method = object$quant.method
     ),
     class = "summary.fairadapt"

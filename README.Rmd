@@ -70,13 +70,16 @@ adj.mat <- matrix(adj.mat, nrow = length(vars), ncol = length(vars),
 adult <- readRDS(
   system.file("extdata", "uci_adult.rds", package = "fairadapt")
 )
-
 n <- nrow(adult) / 2
 
-mod <- fairadapt(income ~ ., train.data = head(adult, n = n),
-                 test.data = tail(adult, n = n), prot.attr = "sex",
-                 adj.mat = adj.mat, res.vars = "hours_per_week")
+mod <- fairadapt(income ~ ., 
+                 train.data = head(adult[, vars], n = n),
+                 test.data = tail(adult[, vars], n = n), 
+                 prot.attr = "sex", adj.mat = adj.mat, 
+                 res.vars = "hours_per_week")
 
-adapt.train <- mod[["adapt.train"]]
-adapt.test  <- mod[["adapt.test"]]
+adapt.train <- adaptedData(mod)
+adapt.test  <- adaptedData(mod, train = FALSE)
+
+summary(mod)
 ```

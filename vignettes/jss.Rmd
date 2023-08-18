@@ -82,7 +82,7 @@ options(
   kableExtra.latex.load_packages = FALSE
 )
 
-quick_build <- quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
+quick_build <- !identical(Sys.getenv("NOT_CRAN"), "true") ||
   isTRUE(as.logical(Sys.getenv("CI"))) ||
   !identical(Sys.getenv("FAIRADAPT_VIGNETTE_QUICK_BUILD"), "false")
 
@@ -144,7 +144,7 @@ Intuitively, this means that the protected attribute $A$ does not offer addition
 
 ## Fairness tasks
 
-Apart from choosing a notion of fairness most appropriate to the setting that is analyzed, it is instructive to distinguish between two somewhat different tasks in fairness analysis. The first, usually simpler task is that of *bias quantification*, or bias measurement. In this case, we are interested in computing metrics from our dataset, in order to verify whether a definition is satisfied or not. Concretely, suppose we have a dataset in which $\widehat{Y}$ is the predicted salary of an employee and $A$ is sex. If we are interested in demographic parity, $\widehat{Y} \ci A$, we can compute the average difference in salary between the male/female groups, that is $$\ex[\widehat{Y} \mid A = \text{male}] - \ex[\widehat{Y} \mid A = \text{female}].$$. Based on this quantity (which is known as total variation, or TV for short), we might decide that either there is a disparity between sexes, or perhaps not. For other definitions of fairness, different metrics would be appropriate.
+Apart from choosing a notion of fairness most appropriate to the setting that is analyzed, it is instructive to distinguish between two somewhat different tasks in fairness analysis. The first, usually simpler task is that of *bias quantification*, or bias measurement. In this case, we are interested in computing metrics from our dataset, in order to verify whether a definition is satisfied or not. Concretely, suppose we have a dataset in which $\widehat{Y}$ is the predicted salary of an employee and $A$ is sex. If we are interested in demographic parity, $\widehat{Y} \ci A$, we can compute the average difference in salary between the male/female groups, that is $$\ex[\widehat{Y} \mid A = \text{male}] - \ex[\widehat{Y} \mid A = \text{female}].$$ Based on this quantity (which is known as total variation, or TV for short), we might decide that either there is a disparity between sexes, or perhaps not. For other definitions of fairness, different metrics would be appropriate.
 
 Sometimes performing the first step of bias measurement is not the end goal. Suppose that we found a large salary gap between sexes in the example above, raising issues about possible discrimination. We then might be interested in correcting this bias, by computing new, more fair predictions (in which, say, the salary gap is lower). This second task is that of *bias removal*, or bias mitigation, in which we want to remove the undesired bias from our predictions.
 
@@ -213,14 +213,14 @@ Different software tools can be used to perform the two fairness tasks described
     \node [s1] () at (8*\sx, 4.625*\sy) {fairlearn};
     \node [s1] () at (8*\sx, 5.125*\sy) {ethicML};
     
-
-    \node[rotate=0, font = \it] () at (3*\sx, 2.875*\sy) {missing};
+    \node [s1] () at (3*\sx, 2.875*\sy) {fairml};
     \node [s1] () at (3*\sx, 0.666*\sy) {fairness};
     \node [s1] () at (3*\sx, 1.333*\sy) {fairmodels};
 
 
-    \node [s1] () at (2*\sx, 4.3125*\sy) {fairmodels};
-    \node [s1] () at (2*\sx, 4.9375*\sy) {fairadapt};
+    \node [s1] () at (2*\sx, 4.125*\sy) {fairmodels};
+    \node [s1] () at (2*\sx, 4.625*\sy) {fairml};
+    \node [s1] () at (2*\sx, 5.125*\sy) {fairadapt};
     
     \node [s1] () at (4*\sx, 4.125*\sy) {fairmodels};
     \node [s1] () at (4*\sx, 4.625*\sy) {fairml};
@@ -366,7 +366,7 @@ In order to describe the causal mechanisms of a system, a *structural causal mod
 * $\mathcal{F} = \lbrace f_1, \ldots, f_n \rbrace$ is the set of functions determining $V$, $v_i \gets f_i(\pa(v_i), u_i)$, where $\pa(V_i) \subset V, U_i \subset U$ are the functional arguments of $f_i$ and $\pa(V_i)$ denotes the parent vertices of $V_i$.
 * $\pr(u)$ is a distribution over the exogenous variables $U$.
 
-Any particular SCM is accompanied by a graphical model $\mathcal{G}$ (a directed acyclic graph), which summarizes which functional arguments are necessary for computing the values of each $V_i$ and therefore, how variables affect one another. We assume throughout, without loss of generality, that
+Any particular SCM is accompanied by a graphical model $\mathcal{G}$ (a directed acyclic graph, DAG). The set of variables that are inputs of the mechanism $f_{V_i}$ are the parents of $V_i$ denoted by $\pa(V_i)$. Therefore, the graph encodes how variables affect one another. Furthermore, we also write $\ch(V_i), \de(V_i), \an(V_i)$ for the children, descendants, and ancestors of $V_i$ in the graph $\mathcal{G}$. We assume throughout, without loss of generality, that
 
 (i) $f_i(\pa(v_i), u_i)$ is increasing in $u_i$ for every fixed $\pa(v_i)$.
 (i) Exogenous variables $U_i$ are uniformly distributed on $[0, 1]$.
@@ -415,13 +415,13 @@ The following sections describe the intended use of `fairadapt()`, together with
 It is worth clarifying the possible data types that can be used in the `train.data` argument. We note the following:
 
 (i) *Attribute $A$*: the protected attribute is assumed to be binary. The \code{prot.attr} column in \code{train.data} can be of any data type coercible to a \code{factor}, but can only take two distinct values. Otherwise an error is thrown.
-(i) *Outcome $Y$*: the dependent variable specified on the left hand side of the \code{formula} argument can be either a \code{numeric}, \code{integer}, \code{logical}, or an ordered \code{factor}. Unordered \code{factor} or \code{character} inputs for the outcome variable will result in an error.
+(i) *Outcome $Y$*: the dependent variable specified on the left hand side of the \code{formula} argument can be either a \code{numeric}, \code{logical}, \code{integer} (treated the same as an ordered factor), \code{factor}, or a \code{character}\footnote{Care needs to be taken when supplying unordered \code{factor} or \code{character} inputs since the adaptation procedure depends on the order of the levels of the outcome variable. For such inputs, the order of the levels will be chosen automatically, so using an ordered \code{factor} for the outcome variable is the recommended option.}.
 (i) *Remaining covariates $X$*: all other variables do not have limitations. Unordered \code{factor} or \code{character} inputs can also be used as covariates $X$.
 
-As an example, we perform fair data adaption on the university admission dataset described in Section \ref{methodology}. We load the `uni_admission` dataset provided by \pkg{fairadapt}, consisting of synthetic university admission data of `r nrow(uni_admission)` students. We subset the data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$, corresponding to the causal graph from Figure \ref{fig:uni-adm}. We set `gender` as the protected attribute.
+As an example, we perform fair data adaption on the university admission dataset described in Section \ref{methodology}. We load the `uni_admission` dataset provided by \pkg{fairadapt} (inspired by the Berkeley admissions dataset \citep{bickel1975sex}), consisting of synthetic university admission data of `r nrow(uni_admission)` students. We subset the data, using the first `n_samp` rows as training data (`uni_trn`) and the following `n_samp` rows as testing data (`uni_tst`). Furthermore, we construct an adjacency matrix `uni_adj` with edges $\texttt{gender} \to \texttt{edu}$, $\texttt{gender} \to \texttt{test}$, $\texttt{edu} \to \texttt{test}$, $\texttt{edu} \to \texttt{score}$, and $\texttt{test} \to \texttt{score}$, corresponding to the causal graph from Figure \ref{fig:uni-adm}. We set `gender` as the protected attribute.
 
 ```{r, basic}
-n_samp <- 200
+n_samp <- 500
 
 uni_dat <- data("uni_admission", package = "fairadapt")
 uni_dat <- uni_admission[seq_len(2 * n_samp), ]
@@ -448,10 +448,20 @@ basic <- fairadapt(score ~ ., train.data = uni_trn,
 basic
 ```
 
-The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called. This information includes the number of variables, the protected attribute and also the total variation before and after adaptation, written in our notation as
+The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called. This information includes the variables that were adapted, the protected attribute, and the causal graph used for the adaptation (printed as an adjacency matrix). By additionally calling the `summary()` function, we can inspect the number of training an test samples, and the total variation before and after adaptation, written in our notation as
 
 $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$
-respectively. 
+respectively, shown below:
+
+```{r fairadapt-summary}
+summary(basic)
+```
+
+The adapted train and test data can be obtained using the `adaptedData()` function and passing the argument `train = TRUE` for the training data, and `train = FALSE` for the test data:
+
+```{r adapted-data-example}
+head(adaptedData(basic, train = FALSE))
+```
 
 ## Specifying the graphical model
 
@@ -497,7 +507,7 @@ The quantile learning step of Algorithm \ref{algo:fairadapt} can in principle be
 * Non-Crossing Quantile Neural Networks \citep{cannon2018non, cannon2015package}.
 * Linear Quantile Regression \citep{koenker2001qr, koenker2018package}.
 
-Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is used, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach can also demonstrate competitive performance. A quick summary outlining some differences between the three natively supported methods is available from Table \ref{tab:qmethods}.
+Using linear quantile regression is the most efficient option in terms of runtime, while for non-parametric models and mixed data, the random forest approach is well-suited, at the expense of a slight increase in runtime. The neural network approach is substantially slower when compared to linear and random forest estimators and consequently does not scale well to large sample sizes. As default, the random forest based approach is used, due to its non-parametric nature and computational speed. However, for smaller sample sizes, the neural network approach can also demonstrate competitive performance. In Table \ref{tab:qmethods} we provide a quick summary outlining some differences between the three natively supported methods, and also report runtimes on the `uni_admission` dataset with different sample sizes.
 
 ```{r benchmark-quant-methods, echo = FALSE, results = "asis"}
 
@@ -646,7 +656,7 @@ The quantile methods included in \pkg{fairadapt} have reasonable default values,
 
 The above-mentioned set of methods is not exhaustive. Further options are conceivable and therefore \pkg{fairadapt} provides an extension mechanism to allow for custom quantile method specified by the user. The `fairadapt()` argument `quant.method` expects a function to be passed, a call to which will be constructed with three unnamed arguments:
 
-1. A `data.frame` containing data to be used for quantile regression. This will either be the `data.frame` passed as `train.data`, or depending on whether `test.data` was specified, a row-bound version of train and test datasets.
+1. A `data.frame` containing data to be used for quantile regression. This will either be the `data.frame` passed as `train.data`, or if `test.data` was specified, a concatenated, row-bound version of `train.data` and `test.data`.
 1. A logical flag, indicating whether the protected attribute is the root node of the causal graph. If the attribute $A$ is a root node, we know that $$\pr(X \mid \text{do}(A = a)) = \pr(X \mid A = a).$$ Therefore, the interventional and conditional distributions are in this case the same, and we can leverage this knowledge in the quantile learning procedure, by splitting the data into $A = 0$ and $A = 1$ groups.
 1. A `logical` vector of length `nrow(data)`, indicating which rows in the `data.frame` passed as `data` correspond to samples with baseline values of the protected attribute.
 
@@ -794,7 +804,7 @@ The COMPAS dataset contains information on 7214 individuals from Broward County,
 	 	\path[->] (a) edge[bend left = 0] (y);
 	 	\path[->] (m) edge[bend right = 25] (r);
 	 	\path[->] (m) edge[bend right = 30] (y);
-	 	\path[->] (r) edge[bend right = 20] (y);
+	 	\path[->] (l) edge[bend right = 25] (y);
 		\path[<->,dashed] (a) edge[bend left = 10](c);
   \end{scope}
 
@@ -808,6 +818,11 @@ cmp_trn <- tail(cmp_dat, n = 100L)
 cmp_tst <- head(cmp_dat, n = 100L)
 
 n_itr <- 3L
+
+set.seed(2022)
+fa_boot_fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
+                             cmp_trn, cmp_tst, rand.mode = "finsamp",
+                             n.boot = n_itr)
 ```
 
 ```{r, compas-boot-slow, eval = !quick_build, echo = !quick_build}
@@ -815,9 +830,7 @@ cmp_trn <- tail(cmp_dat, n = 6000L)
 cmp_tst <- head(cmp_dat, n = 1214L)
 
 n_itr <- 50L
-```
 
-```{r, compas-boot-finite}
 set.seed(2022)
 fa_boot_fin <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
                              cmp_trn, cmp_tst, rand.mode = "finsamp",
@@ -833,7 +846,7 @@ fa_boot_quant <- fairadaptBoot(two_year_recid ~ ., "race", cmp_mat,
                                n.boot = n_itr)
 ```
 
-The returned objects are of class `fairadaptBoot`. The object stores different replicates of the adapted test data (`n.boot` copies, the number of bootstrap repetitions) and some metadata. To obtain predictions, we train a random forest classifier on different bootstrap samples of `train.data`, and apply it to the transformed data bootstrap replicates. In doing so, we make use of the `boot.ind` list, contained in `fairadaptBoot` object, representing row indices of all bootstrap repetitions.
+The returned objects are of class `fairadaptBoot`. The object stores different replicates of the adapted test data (`n.boot` copies, the number of bootstrap repetitions) and some metadata. To obtain predictions, we train a random forest classifier on different bootstrap samples of `train.data`, and apply it to the transformed data bootstrap replicates. In doing so, we make use of the `boot.ind` list, contained in the `fairadaptBoot` object, representing row indices of all bootstrap repetitions.
 
 ```{r, compas-forest}
 fit_rf <- function(x) {
@@ -863,7 +876,7 @@ The first way to analyze the uncertainty of the predictions is from the viewpoin
 ```{=latex}
 \begin{enumerate}
 
-\item For each threshold $t \in [0, 1]$, we compute the decision sets $D_A$, $D_B$, which are obtained by selecting all individuals for whom the value of $p_A \geq t$ (and $p_B$ respectively). We can then compute the Jaccard similarity of decision sets $D_A$, $D_B$, for each threshold $t$. By comparing many pairs of bootstrap repetitions in this way, we can estimate what the average Jaccard similarity for each threshold $t$ is.
+\item For each threshold $t \in [0, 1]$, we compute the decision sets $D_A$, $D_B$, which are obtained by selecting all individuals for whom the value of $p_A \geq t$ (and $p_B$ respectively). We can then compute the Jaccard similarity of decision sets $D_A$, $D_B$, for each threshold $t$. By comparing many pairs of bootstrap repetitions in this way, we can estimate what the average Jaccard similarity for each threshold $t$ is. In practice, we may consider values of $t$ within a subset of $[0, 1]$, i.e., between the 5\% and 95\% quantiles of the predicted probabilities in the repetition corresponding to full data:
 ```
 
 ```{r, decision-maker-1}
@@ -1051,15 +1064,13 @@ ggplot(ind_prb, aes(x = prob, group = individual,
 
 # Illustration
 
-As a hypothetical real-world use of \pkg{fairadapt}, suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all female employees, that is the salaries that female employees would obtain, had they been male.
+As a hypothetical real-world use of \pkg{fairadapt}, suppose that after a legislative change the US government has decided to adjust the salary of all of its female employees in order to remove both disparate treatment and disparate impact effects. To this end, the government wants to compute the counterfactual salary values of all male employees, that is the salaries that male employees would obtain, had they been female (i.e., the female group serves as the baseline).
 
-To do this, the government is using data from the 2018 American Community Survey by the US Census Bureau. This dataset is also available in pre-processed form as a package dataset from \pkg{fairadapt}. Columns are grouped into demographic (`dem`), familial (`fam`), educational (`edu`) and occupational (`occ`) categories and finally, salary is selected as response (`res`) and sex as the protected attribute (`prt`):
+To do this, the government is using data from the 2018 American Community Survey by the US Census Bureau. This dataset is also available in pre-processed form as a package dataset from \pkg{fairadapt}. Columns are grouped into demographic (`dem`, including age, race, origin, citizenship, and economic region), familial (`fam`, including marital status, size of the family, and number of children), educational (`edu`, including number of years spent in schooling and the level of English proficiency) and occupational (`occ`, including the hours and week worked every year, occupation category, and industry of employment) categories and finally, salary is selected as response (`res`) and sex as the protected attribute (`prt`):
 
 ```{r, load-census}
 gov_dat <- data("gov_census", package = "fairadapt")
 gov_dat <- get(gov_dat)
-
-head(gov_dat)
 
 dem <- c("age", "race", "hispanic_origin", "citizenship",
          "nativity", "economic_region")
@@ -1102,7 +1113,7 @@ The hypothesized causal graph for the dataset is given in Figure \ref{fig:census
     \path[->] (a) edge[bend left = 0] (y);
     \path[->] (m) edge[bend right = 20] (r);
     \path[->] (m) edge[bend right = 30] (y);
-    \path[->] (r) edge[bend right = 20] (y);
+    \path[->] (l) edge[bend right = 20] (y);
     \path[<->, dashed] (a) edge[bend left = 10] (c);
   \end{scope}
 
@@ -1129,6 +1140,7 @@ gov_cfd[dem, prt] <- 1
 gov_grph <- graphModel(gov_adj, gov_cfd)
 ```
 
+A visualization of the full graph using \pkg{igraph} is shown in Figure \ref{fig:census-graph}.
 ```{r, census-graph, echo = FALSE, fig.height = 9, fig.width = 9, fig.cap = "Full causal graph for the government census dataset, expanding the grouped view presented in Figure \\ref{fig:census-tikz}. \\textit{Demographic} features include age (\\textbf{ag}), race (\\textbf{ra}), whether an employee is of Hispanic origin (\\textbf{hi}), is US citizen (\\textbf{ci}), whether the citizenship is native (\\textbf{na}), alongside the corresponding economic region (\\textbf{ec}). \\textit{Familial} features are marital status (\\textbf{ma}), family size (\\textbf{fa}) and number of children (\\textbf{ch}), \\textit{educational} features include education (\\textbf{ed}) and English language levels (\\textbf{en}), and \\textit{occupational} features, weekly working hours (\\textbf{ho}), yearly working weeks (\\textbf{we}), job (\\textbf{oc}) and industry identifiers (\\textbf{in}). Finally, the yearly salary (\\textbf{sa}) is used as the \\textit{response} variable and employee sex (\\textbf{se}) as the \\textit{protected} attribute variable.", out.width = "90%"}
 set.seed(11)
 gov_tmp <- graphModel(
@@ -1186,7 +1198,7 @@ ggraph(gov_tmp, "igraph", algorithm = "fr") +
   coord_cartesian(clip = "off")
 ```
 
-Before applying `fairadapt()`, we first log-transform the salaries. We then inspect the densities of variable `salary` by sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear shift between the two distributions, indicating that `male` employees are better compensated than `female` employees. We perform the adaptation by using `n_samp` samples for training and `n_pred` samples for testing.
+Before applying `fairadapt()`, we first log-transform the salaries to avoid dealing with a possibly heavy-tailed distribution for which quantile estimation may be more difficult. We then inspect the densities of variable `salary` by sex group, as shown in Figure \ref{fig:census-vis}A. There is a clear shift between the two distributions, indicating that `male` employees are better compensated than `female` employees. We perform the adaptation by using `n_samp` samples for training and `n_pred` samples for testing.
 
 ```{r, log-sub-quick, eval = quick_build, echo = quick_build}
 n_samp <- 750
@@ -1206,7 +1218,8 @@ gov_prd <- tail(gov_dat, n = n_pred)
 
 set.seed(22)
 gov_ada <- fairadapt(salary ~ ., train.data = gov_trn,
-                     adj.mat = gov_adj, prot.attr = prt)
+                     adj.mat = gov_adj, cfd.mat = gov_cfd,
+                     prot.attr = prt)
 ```
 
 After adapting the data, we investigate whether the salary gap has become smaller. This can be done by comparing distributions of variable `salary` using the \pkg{ggplot2}-exported S3 generic function `autoplot()` (Figure \ref{fig:census-vis}B).
@@ -1230,18 +1243,19 @@ panels <- cowplot::plot_grid(
 )
 cowplot::plot_grid(panels, legend_join, ncol = 1, rel_heights = c(1, .08))
 ```
-For adapting additional testing data, we use the base \proglang{R} S3 generic function `predict()`:
+For adapting additional testing data, we use the base \proglang{R} S3 generic function `predict()` and output a selection of columns:
 
 ```{r, census-predict}
 set.seed(2022)
-predict(gov_ada, newdata = gov_prd)
+gov_prd_ada <- predict(gov_ada, newdata = gov_prd)
+gov_prd_ada[, c("sex", "age", "education_level", "salary")]
 ```
 
-Finally, we can do fair-twin inspection using the `fairTwins()` function of \pkg{fairadapt}, to retrieve counterfactual feature values for different individuals:
+Finally, we can do fair-twin inspection using the `fairTwins()` function of \pkg{fairadapt}, to retrieve counterfactual values of some features for different individuals:
 
 ```{r, census-twins}
 fairTwins(gov_ada, train.id = 1:5,
-          cols = c("sex", "age", "education_level", "salary"))
+          cols = c("sex", "age", "salary"))
 ```
 
 Note that values remain unchanged for female individuals (as *female* was used as baseline level). Variable `age`, which is not a descendant of the protected attribute `sex` (see Figure \ref{fig:census-graph}), also remains unchanged. However, variables `education_level` and `salary` do change for males, since these variables are descendants of the protected attribute `sex`.
@@ -1250,7 +1264,7 @@ We conclude the section with a remark. Notice that the variable `hours_worked` i
 
 # Extensions {#sec:extensions}
 
-Several extensions to the basic Markovian SCM formulation introduced in Section \ref{markovian-scm-formulation} exist, and these and are outlined in the following sections.
+Several extensions to the basic Markovian SCM formulation introduced in Section \ref{markovian-scm-formulation} exist, and these are outlined in the following sections.
 
 ## Adding resolving variables {#sec:resolvers}
 
@@ -1262,8 +1276,10 @@ As we mentioned earlier, in some situations the protected attribute $A$ might af
 In presence of resolving variables, computation of the counterfactual is carried out under the more involved intervention do$(A = a, R = R(a'))$. The potential outcome value $V(A = a, R = R(a'))$ is obtained by setting $A = a$ and computing the counterfactual while keeping the values of resolving variables to those they *attained naturally*. This is a nested counterfactual and the difference in Algorithm \ref{algo:fairadapt} is simply that resolving variables $R$ are skipped in the for-loop. In order to perform fair data adaptation with the variable `test` being resolving in the `uni_admission` dataset used in Section \ref{implementation}, the string `"test"` can be passed as `res.vars` to `fairadapt()`.
 
 ```{r, res-uni}
-fairadapt(score ~ ., train.data = uni_trn, test.data = uni_tst,
-          adj.mat = uni_adj, prot.attr = "gender", res.vars = "test")
+res_basic <- fairadapt(score ~ ., train.data = uni_trn, 
+                       test.data = uni_tst, adj.mat = uni_adj, 
+                       prot.attr = "gender", res.vars = "test")
+summary(res_basic)
 ```
 
 As can be seen from the respective model summary outputs, the total variation after adaptation, in this case, is larger than in the example from Section \ref{implementation}, with no resolving variables. The intuitive reasoning here is that resolving variables allow for some discrimination, so we expect to see a larger total variation between the groups.
@@ -1344,8 +1360,8 @@ uni_cfd["test", "score"] <- 1
 uni_cfd["score", "test"] <- 1
 
 semi <- fairadapt(score ~ ., train.data = uni_trn,
-                  test.data = uni_tst, adj.mat = uni_adj,
-                  cfd.mat = uni_cfd, prot.attr = "gender")
+                   test.data = uni_tst, adj.mat = uni_adj,
+                   cfd.mat = uni_cfd, prot.attr = "gender")
 ```
 
 ```{r, semi-graph, echo = FALSE, fig.width = 6, fig.height = 3, fig.cap = "Visualization of the causal graphical model also shown in Figure \\ref{fig:semi-markov}, obtained when passing a confounding matrix indicating a bidirected edge between vertices \\texttt{test} and \\texttt{score} to \\texttt{fairadapt()}. The resulting Semi-Markovian model can also be handled by \\texttt{fairadapt()}, extending the basic Markovian formulation introduced in Section \\ref{markovian-scm-formulation}.", out.width = "60%"}
@@ -1377,7 +1393,18 @@ ggraph(semi$graph, "igraph", algorithm = "fr") +
   coord_cartesian(clip = "off")
 ```
 
-Alternatively, instead of using the extended parent set $\Pa(V_i)$, we could also use the entire set of ancestors $\an(V_i)$. This approach is implemented as well, and available by specifying a topological ordering. This is achieved by passing a `character` vector, containing the correct ordering of the names appearing in `names(train.data)` as `top.ord` argument to `fairadapt()`. The benefit of using this option is that the specific edges of the causal model $\mathcal{G}$ need not be specified. However, in the linear case, specifying the edges of the graph, so that the quantiles are inferred using only the set of parents, will in principle have better performance.
+Alternatively, instead of using the extended parent set $\Pa(V_i)$, we could also use the entire set of ancestors $\an(V_i)$. This approach is implemented as well, and available by specifying a topological ordering. This is achieved by passing a `character` vector, containing the correct ordering of the names appearing in `names(train.data)` as `top.ord` argument to `fairadapt()`. The benefit of using this option is that the specific edges of the causal model $\mathcal{G}$ need not be specified. However, in the linear case, specifying the edges of the graph, so that the quantiles are inferred using only the set of parents, will in principle have better performance. The topological variant can be invoked as follows:
+
+```{r top-ord}
+set.seed(2022)
+top_ord <- fairadapt(score ~ ., train.data = uni_trn, test.data = uni_tst, 
+                      top.ord = c("gender", "edu", "test", "score"),
+                      prot.attr = "gender")
+
+summary(top_ord)
+```
+
+Note that the topological variant for the university admissions dataset is the same as supplying the adjacency matrix, since the causal graph has no missing edges.
 
 ## Questions of identifiability
 
