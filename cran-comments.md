@@ -9,4 +9,4 @@ There were no ERRORs, WARNINGs or NOTEs.
 ## Update
 This is an update. In this version I have:
 
-* updated the printing methods for the S3 classes
+* fixed the CRAN issue for vignette building

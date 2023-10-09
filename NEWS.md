@@ -1,3 +1,7 @@
+# fairadapt 0.2.7
+Non-breaking changes:
+- fix vignette compile issues on Debian
+
 # fairadapt 0.2.6
 Non-breaking changes:
 - update of the printing methods

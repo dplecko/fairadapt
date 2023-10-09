@@ -53,7 +53,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output: >
-  if (packageVersion("rticles") < 0.5 || rmarkdown::pandoc_version() >= 2)
+  if (packageVersion("rticles") < "0.5" || rmarkdown::pandoc_version() >= "2")
     rticles::jss_article else rmarkdown::html_vignette
 documentclass: jss
 classoption: nojss
@@ -448,7 +448,7 @@ basic <- fairadapt(score ~ ., train.data = uni_trn,
 basic
 ```
 
-The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called. This information includes the variables that were adapted, the protected attribute, and the causal graph used for the adaptation (printed as an adjacency matrix). By additionally calling the `summary()` function, we can inspect the number of training an test samples, and the total variation before and after adaptation, written in our notation as
+The implicitly called `print()` method in the previous code block displays some information about how `fairadapt()` was called. This information includes the variables that were adapted, the protected attribute, and the causal graph used for the adaptation (printed as an adjacency matrix). By additionally calling the `summary()` function, we can inspect the number of training and test samples, and the total variation before and after adaptation, written in our notation as
 
 $$\ex [Y \mid A = a] - \ex [Y \mid A = a'] \text{ and } \ex [\tilde{Y} \mid A = a] - \ex [\tilde{Y} \mid A = a'],$$
 respectively, shown below:
