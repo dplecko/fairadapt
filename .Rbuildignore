@@ -16,3 +16,4 @@
 ^vignettes/jss\.(aux|bbl|blg|bst|cls|knit\.md|log|out|R|tex)$
 ^vignettes/(jss|uom)_(cache|files)$
 ^CRAN-SUBMISSION$
+^vignettes/jsslogo.jpg

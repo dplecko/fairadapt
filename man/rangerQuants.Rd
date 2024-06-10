@@ -4,7 +4,7 @@
 \alias{rangerQuants}
 \alias{linearQuants}
 \alias{mcqrnnQuants}
-\title{Quantile Engine Constructor for the Quantile Learning step.}
+\title{Quantile engine constructor for the quantile learning step}
 \usage{
 rangerQuants(data, A.root, ind, min.node.size = 20, ...)
 

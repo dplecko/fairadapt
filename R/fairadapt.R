@@ -5,10 +5,10 @@
 #' @aliases fairadapt-package
 "_PACKAGE"
 
-#' Fairadapt
+#' Fair data adaptation (fairadapt)
 #'
 #' Implementation of fair data adaptation with quantile preservation
-#' (Plecko & Meinshausen 2019). Uses only plain `R`.
+#' (Plecko & Meinshausen, 2020). Uses only plain `R`.
 #'
 #' The procedure takes the training and testing data as an input, together with
 #' the causal graph given by an adjacency matrix and the list of resolving
@@ -53,7 +53,7 @@
 #' should be plotted upon calling the `fairadapt()` function. Default
 #' value is `FALSE`.
 #' @param eval.qfit Argument indicating whether the quality of the quantile
-#' regression fit should be computed using cross-validation. Default value is 
+#' regression fit should be computed using cross-validation. Default value is
 #' `NULL`, but whenever a positive integer value is specified, then it is
 #' interpreted as the number of folds used in the cross-validation procedure.
 #' @param ... Additional arguments forwarded to the function passed as
@@ -83,8 +83,9 @@
 #' uni_ada
 #'
 #' @references
-#' Plecko, D. & Meinshausen, N. (2019).
-#' Fair Data Adaptation with Quantile Preservation
+#' Plecko, D. & Meinshausen, N. (2020).
+#' Fair Data Adaptation with Quantile Preservation.
+#' Journal of Machine Learning Research, 21(242), 1-44.
 #' @export
 fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
   cfd.mat = NULL, top.ord = NULL, res.vars = NULL, quant.method = rangerQuants,
@@ -245,27 +246,27 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
 
     adapt.data[!base.ind & row.idx, curr.var] <-
       computeQuants(object, qr.data, cf.parents, base.ind[row.idx])
-    
+
     if (!is.null(eval.qfit)) {
       eval.qfit <- as.integer(eval.qfit)
-      assert_that(eval.qfit > 1L, 
+      assert_that(eval.qfit > 1L,
                   msg = "`eval.qfit` argument must be a positive integer.")
       # split into folds
       folds <- as.integer(cut(seq_row(qr.data), breaks = eval.qfit))
       q.fold <- c()
       for (fold in seq_len(eval.qfit)) {
         fold.ind <- folds == fold
-        obj <- quant.method(qr.data[!fold.ind, ], A.root = FALSE, ind = NULL, 
+        obj <- quant.method(qr.data[!fold.ind, ], A.root = FALSE, ind = NULL,
                             ...)
 
         q.fold <- rbind(
-          q.fold, computeQuants(obj, qr.data[fold.ind, ], newdata = NULL, 
+          q.fold, computeQuants(obj, qr.data[fold.ind, ], newdata = NULL,
                                 ind = NULL, test = TRUE, emp.only = TRUE)
         )
-        
+
       }
-      
-      q.engine[[curr.var]][["qfit.score"]] <- qfitScore(qr.data[[curr.var]], 
+
+      q.engine[[curr.var]][["qfit.score"]] <- qfitScore(qr.data[[curr.var]],
                                                         q.fold)
     }
 
@@ -278,15 +279,15 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
       adapt.data[row.idx, curr.var] <-
         marginalMatching(adapt.data[row.idx, curr.var], base.ind[row.idx])
     }
-    
+
     # if discrete, recode back to discrete or factor
     if (discrete) {
 
       if (is.integer(discrete)) {
-        
+
         adapt.data[, curr.var] <- as.integer(round(adapt.data[, curr.var]))
         org.data[, curr.var] <- as.integer((round(org.data[, curr.var])))
-        
+
       } else {
         adapt.data[, curr.var] <-
           decodeDiscrete(adapt.data[row.idx, curr.var], unique.values, type,
@@ -295,7 +296,7 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
           decodeDiscrete(org.data[row.idx, curr.var], unique.values, type,
                          full.len)
       }
-      
+
     }
 
   }
@@ -322,5 +323,4 @@ fairadapt <- function(formula, prot.attr, adj.mat, train.data, test.data = NULL,
     ),
     class = "fairadapt"
   )
-
 }

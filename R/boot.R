@@ -1,4 +1,4 @@
-#' Fairadapt Boostrap wrapper
+#' Fairadapt boostrap wrapper
 #'
 #' The \code{fairadapt()} function performs data adaptation, but does so only
 #' once. Sometimes, it might be desirable to repeat this process, in order to be
@@ -75,8 +75,9 @@
 #' uni_ada
 #'
 #' @references
-#' Plecko, D. & Meinshausen, N. (2019).
-#' Fair Data Adaptation with Quantile Preservation
+#' Plecko, D. & Meinshausen, N. (2020).
+#' Fair Data Adaptation with Quantile Preservation.
+#' Journal of Machine Learning Research, 21(242), 1-44.
 #' @export
 fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
                           test.data = NULL, cfd.mat = NULL, top.ord = NULL,
@@ -178,6 +179,8 @@ fairadaptBoot <- function(formula, prot.attr, adj.mat, train.data,
   )
 }
 
+#' @rdname fairadaptBoot
+#' @param x Object of class `"fairadaptBoot"`.
 #' @export
 print.fairadaptBoot <- function(x, ...) {
 
@@ -226,10 +229,20 @@ print.fairadaptBoot <- function(x, ...) {
   invisible(x)
 }
 
+#' Summarizing fairadaptBoot fit
+#'
+#' `summary` method for class `"fairadaptBoot"`.
+#' @param object An object of class `"fairadaptBoot"`.
+#' @param ... In this case ignored.
+#'
+#' @return Summary of the bootstrap wrapper call, protected attribute,
+#' attribute levels,
+#' resolving variables, number of training and test samples, adapted variables,
+#' number of bootstrap repetitions, indicator if the quantileFit objects were
+#' saved, randomness mode, and the quantile method that was used.
 #' @export
 summary.fairadaptBoot <- function(object, ...) {
 
-  # FIXME: determine from top.ord?
   if (is.null(object$adj.mat)) {
     adapt.vars <- NULL
   } else {
@@ -259,6 +272,8 @@ summary.fairadaptBoot <- function(object, ...) {
   )
 }
 
+#' @rdname summary.fairadaptBoot
+#' @param x Object of class `"summary.fairadaptBoot"`.
 #' @export
 print.summary.fairadaptBoot <- function(x, ...) {
 
@@ -295,7 +310,7 @@ print.summary.fairadaptBoot <- function(x, ...) {
   invisible(x)
 }
 
-#' Prediction function for new data from a saved `fairadaptBoot` object.
+#' Prediction function for new data from a saved `fairadaptBoot` object
 #'
 #' @details The `newdata` argument should be compatible with `adapt.test`
 #' argument that was used when constructing the `fairadaptBoot` object. In

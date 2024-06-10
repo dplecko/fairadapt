@@ -3,7 +3,7 @@
 \docType{data}
 \name{uni_admission}
 \alias{uni_admission}
-\title{University admission data of 1,000 students.}
+\title{University admission data of 1,000 students}
 \format{
 A data frame with 1,000 rows and 4 variables:
 \describe{

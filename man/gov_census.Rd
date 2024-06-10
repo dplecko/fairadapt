@@ -3,7 +3,7 @@
 \docType{data}
 \name{gov_census}
 \alias{gov_census}
-\title{Census information of US government employees.}
+\title{Census information of US government employees}
 \format{
 A data frame with 204,309 rows and 17 variables:
 \describe{

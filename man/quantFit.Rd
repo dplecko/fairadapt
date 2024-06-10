@@ -2,7 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{quantFit}
 \alias{quantFit}
-\title{Quality of quantile fit statistics.}
+\title{Quality of quantile fit statistics}
 \usage{
 quantFit(x, ...)
 }
@@ -17,7 +17,7 @@ A \code{numeric} vector, containing the average empirical loss for
 the 25\%, 50\% and 75\% quantile loss functions, for each variable.
 }
 \description{
-Quality of quantile fit statistics.
+Quality of quantile fit statistics
 }
 \examples{
 n_samp <- 200

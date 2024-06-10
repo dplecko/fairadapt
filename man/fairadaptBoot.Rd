@@ -2,7 +2,8 @@
 % Please edit documentation in R/boot.R
 \name{fairadaptBoot}
 \alias{fairadaptBoot}
-\title{Fairadapt Boostrap wrapper}
+\alias{print.fairadaptBoot}
+\title{Fairadapt boostrap wrapper}
 \usage{
 fairadaptBoot(
   formula,
@@ -20,6 +21,8 @@ fairadaptBoot(
   test.seed = 2022,
   ...
 )
+
+\method{print}{fairadaptBoot}(x, ...)
 }
 \arguments{
 \item{formula}{Object of class \code{formula} describing the response and
@@ -74,6 +77,8 @@ discrete variables. This argument is only relevant when \code{rand.mode} equals
 
 \item{...}{Additional arguments forwarded to the function passed as
 \code{quant.method}.}
+
+\item{x}{Object of class \code{"fairadaptBoot"}.}
 }
 \value{
 An object of class \code{fairadaptBoot}, containing the original and
@@ -113,6 +118,7 @@ uni_ada
 
 }
 \references{
-Plecko, D. & Meinshausen, N. (2019).
-Fair Data Adaptation with Quantile Preservation
+Plecko, D. & Meinshausen, N. (2020).
+Fair Data Adaptation with Quantile Preservation.
+Journal of Machine Learning Research, 21(242), 1-44.
 }

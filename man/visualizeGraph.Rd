@@ -2,7 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{visualizeGraph}
 \alias{visualizeGraph}
-\title{Visualize Graphical Causal Model}
+\title{Visualize graphical causal model}
 \usage{
 visualizeGraph(x, ...)
 }
@@ -13,5 +13,5 @@ procedure.}
 \item{...}{Additional arguments passed to the graph plotting function.}
 }
 \description{
-Visualize Graphical Causal Model
+Visualize graphical causal model
 }

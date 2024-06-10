@@ -2,7 +2,7 @@
 % Please edit documentation in R/boot.R
 \name{predict.fairadaptBoot}
 \alias{predict.fairadaptBoot}
-\title{Prediction function for new data from a saved \code{fairadaptBoot} object.}
+\title{Prediction function for new data from a saved \code{fairadaptBoot} object}
 \usage{
 \method{predict}{fairadaptBoot}(object, newdata, ...)
 }
@@ -18,7 +18,7 @@ procedure.}
 A \code{data.frame} containing the adapted version of the new data.
 }
 \description{
-Prediction function for new data from a saved \code{fairadaptBoot} object.
+Prediction function for new data from a saved \code{fairadaptBoot} object
 }
 \details{
 The \code{newdata} argument should be compatible with \code{adapt.test}

@@ -3,7 +3,7 @@
 \docType{data}
 \name{compas}
 \alias{compas}
-\title{COMPAS dataset.}
+\title{COMPAS dataset}
 \format{
 A data frame with 1,000 rows and 9 variables:
 \describe{

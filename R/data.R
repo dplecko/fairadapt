@@ -1,4 +1,4 @@
-#' University admission data of 1,000 students.
+#' University admission data of 1,000 students
 #'
 #' A simulated dataset containing the evaluation of students' abilities.
 #'
@@ -11,7 +11,7 @@
 #' }
 "uni_admission"
 
-#' COMPAS dataset.
+#' COMPAS dataset
 #'
 #' A real dataset from Broward County, Florida. Contains information on individuals
 #' released on parole, and whether they reoffended within two years.
@@ -30,7 +30,7 @@
 #' }
 "compas"
 
-#' Census information of US government employees.
+#' Census information of US government employees
 #'
 #' The dataset contains various demographic, education and work information
 #' of the employees of the US government. The data is taken from the 2018

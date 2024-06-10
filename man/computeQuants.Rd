@@ -2,7 +2,7 @@
 % Please edit documentation in R/quants.R
 \name{computeQuants}
 \alias{computeQuants}
-\title{Compute Quantiles generic for the Quantile Learning step.}
+\title{Compute quantiles generic for the quantile learning step}
 \usage{
 computeQuants(x, data, newdata, ind, ...)
 }
@@ -26,5 +26,5 @@ functions.}
 A vector of counterfactual values corresponding to \code{newdata}.
 }
 \description{
-Compute Quantiles generic for the Quantile Learning step.
+Compute quantiles generic for the quantile learning step
 }

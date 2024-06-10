@@ -1,8 +1,19 @@
+#' Plotting data before and after adaptation
+#'
+#' @param object An object of class `"fairadapt"`.
+#' @param when A `character(1L)` indicating whether data before or after adaptation
+#' is visualized. Default value is `"after"`, but can also take values `"before"`
+#' and `"both"` (in which case both visualizations are provided).
+#' @param ... In this case ignored.
+#'
+#' @return A `ggplot` for visualizing the distribution of the outcome before/after
+#' the adaptation procedure.
 #' @importFrom ggplot2 autoplot ggplot aes geom_density ggtitle after_stat
 #' @importFrom ggplot2 scale_fill_discrete xlab scale_y_continuous
 #' @importFrom ggplot2 geom_bar geom_text theme_minimal position_fill
 #' @importFrom cowplot plot_grid
 #' @importFrom scales percent
+#'
 #' @export
 autoplot.fairadapt <- function(object, when = "after", ...) {
 
@@ -52,6 +63,8 @@ autoplot.fairadapt <- function(object, when = "after", ...) {
   )
 }
 
+#' @rdname fairadapt
+#' @param x Object of class `"fairadapt"`.
 #' @export
 print.fairadapt <- function(x, ...) {
 
@@ -99,6 +112,16 @@ print.fairadapt <- function(x, ...) {
   invisible(x)
 }
 
+#' Summarizing fairadapt fit
+#'
+#' `summary` method for class `"fairadapt"`.
+#' @param object An object of class `"fairadapt"`.
+#' @param ... In this case ignored.
+#'
+#' @return Summary of the object formula, protected attribute, attribute levels,
+#' resolving variables, number of training and test samples, adapted variables,
+#' TV measure before adaptation, TV measure after adaptation, and the quantile
+#' method that was used.
 #' @export
 summary.fairadapt <- function(object, ...) {
 
@@ -110,7 +133,6 @@ summary.fairadapt <- function(object, ...) {
   tv.end <- mean(as.numeric(object$adapt.train[[1L]][object$base.ind[seq_row]])) -
     mean(as.numeric(object$adapt.train[[1L]][!object$base.ind[seq_row]]))
 
-  # FIXME: determine from top.ord?
   if (!is.null(object$top.ord)) {
 
     adapt.vars <- setdiff(
@@ -143,6 +165,9 @@ summary.fairadapt <- function(object, ...) {
   )
 }
 
+#' @rdname summary.fairadapt
+#' @param x Object of class `"summary.fairadapt"`.
+#' @param digits Number of digits appearing in the output.
 #' @export
 print.summary.fairadapt <- function(x,
                                     digits = max(3L, getOption("digits") - 3L),
@@ -182,8 +207,20 @@ print.summary.fairadapt <- function(x,
   invisible(x)
 }
 
+#' Plotting data before and after adaptation
+#'
+#' @param x An object of class `"fairadapt"`.
+#' @param when A `character(1L)` indicating whether data before or after adaptation
+#' is visualized. Default value is `"after"`, but can also take values `"before"`
+#' and `"both"` (in which case both visualizations are provided).
+#' @param ... In this case ignored.
+#'
+#' @return A base R plot for visualizing the distribution of the outcome
+#' before/after the adaptation procedure.
+#'
 #' @importFrom graphics lines plot polygon
 #' @importFrom graphics barplot text
+#'
 #' @export
 plot.fairadapt <- function(x, when = "after", ...) {
 
@@ -247,7 +284,7 @@ plot.fairadapt <- function(x, when = "after", ...) {
 
 }
 
-#' Visualize Graphical Causal Model
+#' Visualize graphical causal model
 #'
 #' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.
@@ -293,7 +330,7 @@ adaptedData.fairadaptBoot <- function(x, train = TRUE) {
   } else x[["adapt.test"]]
 }
 
-#' Fair Twin Inspection convenience function.
+#' Fair twin inspection convenience function
 #'
 #' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.
@@ -382,7 +419,7 @@ fairTwins.fairadapt <- function(x, train.id = seq_len(nrow(x$train)),
 }
 
 
-#' Prediction function for new data from a saved `fairadapt` object.
+#' Prediction function for new data from a saved `fairadapt` object
 #'
 #' @details The `newdata` argument should be compatible with `adapt.test`
 #' argument that was used when constructing the `fairadapt` object. In
@@ -491,7 +528,7 @@ predict.fairadapt <- function(object, newdata, ...) {
   adapt
 }
 
-#' Quality of quantile fit statistics.
+#' Quality of quantile fit statistics
 #'
 #' @param x Object of class `fairadapt`, a result of an adaptation
 #' procedure.

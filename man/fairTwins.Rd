@@ -2,7 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{fairTwins}
 \alias{fairTwins}
-\title{Fair Twin Inspection convenience function.}
+\title{Fair twin inspection convenience function}
 \usage{
 fairTwins(x, train.id = seq_len(nrow(x$train)), test.id = NULL, cols = NULL)
 }
@@ -25,7 +25,7 @@ of the requested individuals. Adapted columns have \verb{_adapted} appended
 to their original name.
 }
 \description{
-Fair Twin Inspection convenience function.
+Fair twin inspection convenience function
 }
 \examples{
 n_samp <- 200

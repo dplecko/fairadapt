@@ -2,7 +2,7 @@
 % Please edit documentation in R/generics.R
 \name{predict.fairadapt}
 \alias{predict.fairadapt}
-\title{Prediction function for new data from a saved \code{fairadapt} object.}
+\title{Prediction function for new data from a saved \code{fairadapt} object}
 \usage{
 \method{predict}{fairadapt}(object, newdata, ...)
 }
@@ -18,7 +18,7 @@ procedure.}
 A \code{data.frame} containing the adapted version of the new data.
 }
 \description{
-Prediction function for new data from a saved \code{fairadapt} object.
+Prediction function for new data from a saved \code{fairadapt} object
 }
 \details{
 The \code{newdata} argument should be compatible with \code{adapt.test}
