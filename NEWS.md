@@ -1,3 +1,7 @@
+# fairadapt 1.0.0
+Non-breaking changes:
+- vignette updates follows the release of the article in Journal of Statistical Software
+
 # fairadapt 0.2.7
 Non-breaking changes:
 - fix vignette compile issues on Debian

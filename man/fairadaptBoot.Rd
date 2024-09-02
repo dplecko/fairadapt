@@ -121,4 +121,9 @@ uni_ada
 Plecko, D. & Meinshausen, N. (2020).
 Fair Data Adaptation with Quantile Preservation.
 Journal of Machine Learning Research, 21(242), 1-44.
+
+Plecko, D. & Bennett, N. & Meinshausen, N. (2024).
+fairadapt: Causal reasoning for fair data pre-processing.
+Journal of Statistical Software, 110(4).
+\doi{10.18637/jss.v110.i04}.
 }

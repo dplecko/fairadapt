@@ -1,5 +1,5 @@
 ## Test environments
-* local OS X install, R 4.1.0
+* local OS X install, R 4.3.2
 * win-builder (devel and release)
 * Github Actions: macOS-latest (release), windows-latest (release), windows-latest (3.6), ubuntu-18.04 (oldrel), ubuntu-18.04 (3.5), ubuntu-20.04 (release), ubuntu-20.04 (devel)
 
@@ -9,4 +9,4 @@ There were no ERRORs, WARNINGs or NOTEs.
 ## Update
 This is an update. In this version I have:
 
-* fixed the CRAN issue for vignette building
+* updated the vignette according to the JSS publication updates.

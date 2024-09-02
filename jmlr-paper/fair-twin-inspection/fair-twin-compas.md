@@ -6,7 +6,7 @@
 **fairadapt** is a package intended to remove bias from machine learning
 algorithms. In particular, it implements the pre-processing procedure
 described in [Plecko &
-Meinshausen, 2019](https://arxiv.org/abs/1911.06685) which transforms
+Meinshausen, 2020](https://jmlr.csail.mit.edu/papers/v21/19-966.html) which transforms
 the data into its fair version, based on the causal graph of the data.
 One very useful property of **fairadapt** is the so called *fair-twin
 inspection*. In particular, for each instance (individual) in the

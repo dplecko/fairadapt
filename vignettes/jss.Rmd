@@ -1,7 +1,7 @@
 ---
 title:
-  plain: "fairadapt: Causal Reasoning for Fair Data Pre-processing"
-  formatted: "\\pkg{fairadapt}: Causal Reasoning for Fair Data Pre-processing"
+  plain: "fairadapt: Causal Reasoning for Fair Data Preprocessing"
+  formatted: "\\pkg{fairadapt}: Causal Reasoning for Fair Data Preprocessing"
   short: "\\pkg{fairadapt}: Fair Data Adaptation"
 author:
   - name: Drago Plečko
@@ -26,7 +26,7 @@ author:
       CH-8092 Zurich
     email: \email{meinshausen@stat.math.ethz.ch}
 abstract: >
-  Machine learning algorithms are useful for various predictions tasks, but they can also learn how to discriminate, based on gender, race or other sensitive attributes. This realization gave rise to the field of fair machine learning, which aims to recognize, quantify and ultimately mitigate such algorithmic bias. This manuscript describes the \proglang{R}-package \pkg{fairadapt}, which implements a causal inference pre-processing method. By making use of a causal graphical model alongside the observed data, the method can be used to address hypothetical questions of the form "What would my salary have been, had I been of a different gender/race?". Such individual level counterfactual reasoning can help eliminate discrimination and help justify fair decisions. We also discuss appropriate relaxations which assume that certain causal pathways from the sensitive attribute to the outcome are not discriminatory.
+  Machine learning algorithms are useful for various predictions tasks, but they can also learn how to discriminate, based on gender, race or other sensitive attributes. This realization gave rise to the field of fair machine learning, which aims to recognize, quantify and ultimately mitigate such algorithmic bias. This manuscript describes the \proglang{R}-package \pkg{fairadapt}, which implements a causal inference preprocessing method. By making use of a causal graphical model alongside the observed data, the method can be used to address hypothetical questions of the form "What would my salary have been, had I been of a different gender/race?". Such individual level counterfactual reasoning can help eliminate discrimination and help justify fair decisions. We also discuss appropriate relaxations which assume that certain causal pathways from the sensitive attribute to the outcome are not discriminatory. This vignette can also be found in a standalone journal version \citep{plecko2024fairadapt}.
 keywords:
   formatted: [algorithmic fairness, causal inference, machine learning]
   plain: [algorithmic fairness, causal inference, machine learning]
@@ -48,14 +48,21 @@ preamble: >
   \newcommand{\ex}{\mathbbm{E}}
   \renewcommand{\tilde}[1]{ {#1}^{(fp)}}
   \def\ci{{\perp\!\!\!\perp}}
+  \Volume{110}
+  \Issue{4}
+  \Month{August}
+  \Year{2024}
+  \DOI{10.18637/jss.v110.i04}
 vignette: >
-  %\VignetteIndexEntry{fairadapt: Causal Reasoning for Fair Data Pre-processing}
+  %\VignetteIndexEntry{fairadapt: Causal Reasoning for Fair Data Preprocessing}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 output: >
   if (packageVersion("rticles") < "0.5" || rmarkdown::pandoc_version() >= "2")
     rticles::jss_article else rmarkdown::html_vignette
 documentclass: jss
+classoption: nojss
+doi: "10.18637/jss.v110.i04"
 bibliography: jss.bib
 pkgdown:
   as_is: true
@@ -374,7 +381,7 @@ Equipped with the notion of an SCM and the assumptions (i)-(ii), we can describe
 
 ## Markovian SCM formulation
 
-Let $Y$ be the outcome of interest, taking values in $\mathbbm{R}$. Let $A$ be the binary protected attribute taking two values $a, a'$. Denote by $X$ the remaining covariates, and let $V = (A, X, Y)$ denote the observed variables. Our goal is to describe a pre-processing method which transforms the observed variables $V$ into their fair version $\tilde{V}$. This is achieved by computing the counterfactual values $V(A = a)$, which would have been observed if the protected attribute was fixed to a baseline value $A = a$ for the entire sample.
+Let $Y$ be the outcome of interest, taking values in $\mathbbm{R}$. Let $A$ be the binary protected attribute taking two values $a, a'$. Denote by $X$ the remaining covariates, and let $V = (A, X, Y)$ denote the observed variables. Our goal is to describe a preprocessing method which transforms the observed variables $V$ into their fair version $\tilde{V}$. This is achieved by computing the counterfactual values $V(A = a)$, which would have been observed if the protected attribute was fixed to a baseline value $A = a$ for the entire sample.
 
 More formally, going back to the *university admission* example above, we want to align the distributions
 
@@ -681,7 +688,7 @@ In this example, we compute the values in a *female* world. Therefore, for *fema
 
 The user might naturally be interested in uncertainty quantification of the procedure performed in `fairadapt()`. In order to explain how this can be achieved, we give a visualization of the typical workflow when using `fairadapt()` (see Figure \ref{fig:workflow-tikz}).
 
-```{tikz, workflow-tikz, fig.cap = "The typical workflow when using \\pkg{fairadapt}. The shaded region represents the fair pre-processing which happens within the \\pkg{fairadapt} package. Often, this is followed by applying a regressor or a classifier to the transformed data, in order to obtain fair predictions. The latter part is up to the user and not included in \\pkg{fairadapt}.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
+```{tikz, workflow-tikz, fig.cap = "The typical workflow when using \\pkg{fairadapt}. The shaded region represents the fair preprocessing which happens within the \\pkg{fairadapt} package. Often, this is followed by applying a regressor or a classifier to the transformed data, in order to obtain fair predictions. The latter part is up to the user and not included in \\pkg{fairadapt}.", fig.ext = "png", cache = TRUE, echo = FALSE, out.width = "100%"}
 
 <<setup-graph>>
 
