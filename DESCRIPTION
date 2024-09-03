@@ -12,7 +12,7 @@ Authors@R: c(
     person(given = "Drago",
            family = "Plecko",
            role = c("aut", "cre"),
-           email = "drago.plecko@stat.math.ethz.ch"),
+           email = "www.plecko@gmail.com"),
     person(given = "Nicolas",
            family = "Bennett",
            role = "aut",
@@ -45,7 +45,8 @@ Suggests:
     ggraph,
     pdftools,
     microbenchmark,
-    xtable
+    xtable,
+    spelling
 RoxygenNote: 7.3.1
 Roxygen: list(markdown = TRUE)
 VignetteBuilder: knitr

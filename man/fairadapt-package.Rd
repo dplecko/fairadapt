@@ -16,7 +16,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Drago Plecko \email{drago.plecko@stat.math.ethz.ch}
+\strong{Maintainer}: Drago Plecko \email{www.plecko@gmail.com}
 
 Authors:
 \itemize{
