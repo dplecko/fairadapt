@@ -20,6 +20,7 @@ Useful links:
 
 Authors:
 \itemize{
+  \item Drago Plecko \email{www.plecko@gmail.com}
   \item Nicolas Bennett \email{nicolas.bennett@stat.math.ethz.ch}
 }
 

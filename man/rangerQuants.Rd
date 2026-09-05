@@ -41,9 +41,9 @@ samples have the baseline value of the protected attribute.}
 
 \item{...}{Forwarded to further methods.}
 
-\item{tau}{Forwarded to \code{\link[quantreg:rq]{quantreg::rq()}} or \code{\link[qrnn:mcqrnn]{qrnn::mcqrnn.fit()}}.}
+\item{tau}{Forwarded to \code{\link[quantreg:rq]{quantreg::rq()}} or \code{\link[qrnn:mcqrnn.fit]{qrnn::mcqrnn.fit()}}.}
 
-\item{iter.max}{Forwarded to \code{\link[qrnn:mcqrnn]{qrnn::mcqrnn.fit()}}.}
+\item{iter.max}{Forwarded to \code{\link[qrnn:mcqrnn.fit]{qrnn::mcqrnn.fit()}}.}
 }
 \value{
 A \code{ranger} or a \code{rangersplit} S3 object, depending on the
