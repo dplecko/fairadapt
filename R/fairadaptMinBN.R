@@ -384,117 +384,103 @@ fairadaptAgent <- function(formula, prot.attr, adj.mat, train.data,
     bn.set <- character(0L)
   }
   
-  # Use the original graph when spurious effects are retained.
-  if (!remove.SE) {
-    
-    if (bn.type == "min") {
-      fit <- fairadaptMinBN(
-        formula = formula, prot.attr = prot.attr, adj.mat = adj.mat,
-        train.data = train.data, test.data = test.data, cfd.mat = cfd.mat,
-        top.ord = top.ord, bn.set = bn.set, quant.method = quant.method,
-        visualize.graph = visualize.graph, eval.qfit = eval.qfit, ...
-      )
-    } else {
-      fit <- fairadapt(
-        formula = formula, prot.attr = prot.attr, adj.mat = adj.mat,
-        train.data = train.data, test.data = test.data, cfd.mat = cfd.mat,
-        top.ord = top.ord, res.vars = bn.set, quant.method = quant.method,
-        visualize.graph = visualize.graph, eval.qfit = eval.qfit, ...
-      )
-    }
-    
-    fit$bn.type <- bn.type
-    fit$bn.set <- bn.set
-    fit$remove.SE <- FALSE
-    fit$z.vars <- character(0L)
-    fit$agent.call <- match.call()
-    class(fit) <- c("fairadaptAgent", class(fit))
-    return(fit)
+  # Start from the original graph.
+  adj.work <- adj.mat
+  cfd.work <- cfd.mat
+  top.work <- top.ord
+  z.vars <- character(0L)
+  
+  # Reorient the protected confounded component when removing spurious effects.
+  if (remove.SE) {
+    reor <- reorientSpurious(adj.mat, cfd.mat, prot.attr, top.ord)
+    adj.work <- reor$adj.mat
+    cfd.work <- reor$cfd.mat
+    top.work <- reor$top.ord
+    z.vars <- reor$z.vars
   }
   
-  # Reorient the protected confounded component into a forward complete DAG.
-  reor <- reorientSpurious(adj.mat, cfd.mat, prot.attr, top.ord)
-  adj.se <- reor$adj.mat
-  cfd.se <- reor$cfd.mat
-  top.se <- reor$top.ord
-  z.vars <- reor$z.vars
-  
-  # Skip the SE stage when the protected attribute has no bidirected component.
+  # Without spurious variables, run the requested BN adaptation directly.
   if (length(z.vars) == 0L) {
+    
     if (bn.type == "min") {
       fit <- fairadaptMinBN(
-        formula = formula, prot.attr = prot.attr, adj.mat = adj.se,
-        train.data = train.data, test.data = test.data, cfd.mat = cfd.se,
-        bn.set = bn.set, quant.method = quant.method,
+        formula = formula, prot.attr = prot.attr, adj.mat = adj.work,
+        train.data = train.data, test.data = test.data, cfd.mat = cfd.work,
+        top.ord = top.work, bn.set = bn.set, quant.method = quant.method,
         visualize.graph = visualize.graph, eval.qfit = eval.qfit, ...
       )
     } else {
       fit <- fairadapt(
-        formula = formula, prot.attr = prot.attr, adj.mat = adj.se,
-        train.data = train.data, test.data = test.data, cfd.mat = cfd.se,
-        res.vars = bn.set, quant.method = quant.method,
+        formula = formula, prot.attr = prot.attr, adj.mat = adj.work,
+        train.data = train.data, test.data = test.data, cfd.mat = cfd.work,
+        top.ord = top.work, res.vars = bn.set, quant.method = quant.method,
         visualize.graph = visualize.graph, eval.qfit = eval.qfit, ...
       )
     }
     
     fit$bn.type <- bn.type
     fit$bn.set <- bn.set
-    fit$remove.SE <- TRUE
+    fit$remove.SE <- remove.SE
     fit$z.vars <- z.vars
     fit$agent.call <- match.call()
     class(fit) <- c("fairadaptAgent", class(fit))
+    
     return(fit)
   }
   
-  # Min-BN removes spurious and non-BN causal paths in a single pass.
+  # Min-BN removes spurious and non-BN causal paths in one pass.
   if (bn.type == "min") {
+    
     fit <- fairadaptMinBN(
-      formula = formula, prot.attr = prot.attr, adj.mat = adj.se,
-      train.data = train.data, test.data = test.data, cfd.mat = cfd.se,
-      bn.set = setdiff(bn.set, z.vars),
+      formula = formula, prot.attr = prot.attr, adj.mat = adj.work,
+      train.data = train.data, test.data = test.data, cfd.mat = cfd.work,
+      top.ord = top.work, bn.set = setdiff(bn.set, z.vars),
       quant.method = quant.method, visualize.graph = visualize.graph,
       eval.qfit = eval.qfit, ...
     )
     
     fit$bn.type <- bn.type
+    fit$bn.set <- bn.set
     fit$remove.SE <- TRUE
     fit$z.vars <- z.vars
     fit$agent.call <- match.call()
     class(fit) <- c("fairadaptAgent", class(fit))
+    
     return(fit)
   }
   
-  # Make every reoriented descendant except Z business-necessary in stage one.
-  bn.se <- setdiff(getDescendants(prot.attr, adj.se), z.vars)
+  # Keep every reoriented descendant except Z in stage-one min-BN.
+  bn.se <- setdiff(getDescendants(prot.attr, adj.work), z.vars)
   
   # Remove all variation transmitted through the reoriented Z variables.
   se.fit <- fairadaptMinBN(
-    formula = formula, prot.attr = prot.attr, adj.mat = adj.se,
-    train.data = train.data, test.data = test.data, cfd.mat = cfd.se,
-    bn.set = bn.se, quant.method = quant.method,
+    formula = formula, prot.attr = prot.attr, adj.mat = adj.work,
+    train.data = train.data, test.data = test.data, cfd.mat = cfd.work,
+    top.ord = top.work, bn.set = bn.se, quant.method = quant.method,
     visualize.graph = visualize.graph, eval.qfit = eval.qfit, ...
   )
   
-  # Restore the factual protected attribute before the second-stage adaptation.
+  # Restore the factual protected attribute before stage two.
   stage.train <- se.fit$adapt.train
   stage.train[, prot.attr] <- se.fit$train[, prot.attr]
   
+  # Restore the factual protected attribute in the test data as well.
   stage.test <- NULL
   if (!is.null(test.data)) {
     stage.test <- se.fit$adapt.test
     stage.test[, prot.attr] <- se.fit$test[, prot.attr]
   }
   
-  # Treat the cleaned Z variables as resolvers in the max-BN second stage.
+  # Run max-BN with the cleaned Z variables treated as resolvers.
   fit <- fairadapt(
-    formula = formula, prot.attr = prot.attr, adj.mat = adj.se,
-    train.data = stage.train, test.data = stage.test, cfd.mat = cfd.se,
-    res.vars = union(z.vars, bn.set),
+    formula = formula, prot.attr = prot.attr, adj.mat = adj.work,
+    train.data = stage.train, test.data = stage.test, cfd.mat = cfd.work,
+    top.ord = top.work, res.vars = union(z.vars, bn.set),
     quant.method = quant.method, visualize.graph = visualize.graph,
     eval.qfit = eval.qfit, ...
   )
   
-  # Store the agent-level metadata without changing the original fairadapt code.
+  # Store the agent-level metadata and the intermediate SE adaptation.
   fit$bn.type <- bn.type
   fit$bn.set <- bn.set
   fit$remove.SE <- TRUE
